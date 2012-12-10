@@ -1,0 +1,34 @@
+{
+  "name": "hapi-log",
+  "description": "hapi process monitoring",
+  "version": "0.0.1",
+  "author": "Van Nguyen <the.gol.effect@gmail.com>",
+  "contributors":[
+    "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
+    "Wyatt Preul <wpreul@gmail.com>"
+  ],
+  "repository": "git://github.com/walmartlabs/log",
+  "main": "index",
+  "keywords": [
+    "process",
+    "monitor"
+  ],
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": "1.x.x",
+    "chai": "1.0.x"
+  },
+  "scripts": {
+    "test": "make test && make unit"
+  },
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "http://github.com/walmartlabs/log/raw/master/LICENSE"
+    }
+  ]
+}

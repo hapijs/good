@@ -1,4 +1,0 @@
-log
-===
-
-Hapi process monitoring
