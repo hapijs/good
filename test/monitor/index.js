@@ -118,6 +118,31 @@ describe('Monitor', function () {
         done();
     });
 
+    it('uses the passed in broadcastInterval and sets the event queue correctly', function (done) {
+
+        var subscribers = {
+            console: ['request', 'log'],
+            'http://localhost/logs': ['log']
+        };
+
+        var settings = {
+            monitor: {
+                opsInterval: 200,
+                subscribers: subscribers,
+                requestsEvent: 'response',
+                broadcastInterval: 5
+            }
+        };
+
+        var monitor = new Helpers.Server(settings)._monitor;
+
+        expect(monitor._subscriberQueues.console).to.exist;
+        expect(monitor._eventQueues.request).to.exist;
+        expect(monitor._eventQueues.log).to.exist;
+        done();
+    });
+
+
     describe('#_broadcast', function () {
 
         it('doesn\'t do anything if there are no subscribers', function (done) {
@@ -139,6 +164,7 @@ describe('Monitor', function () {
             done();
         });
     });
+
 
     describe('#_ops', function () {
 
@@ -165,7 +191,7 @@ describe('Monitor', function () {
             };
 
             var server = new Helpers.Server(settings);
-            var monitor = new Helpers.Monitor(server);
+            var monitor = server._monitor;
 
             expect(monitor._subscriberQueues.console).to.exist;
             expect(monitor._eventQueues.ops).to.exist;
@@ -180,9 +206,17 @@ describe('Monitor', function () {
         });
     });
 
-    describe('#_initOps', function () {
 
-        it('logs errors when they occur', function (done) {
+    describe('#_handle', function () {
+
+        it('dispatches immediately when broadcastInterval is 0', function (done) {
+
+            var results = {
+                osload: 1,
+                osmem: 20,
+                osdisk: 30,
+                osup: 50
+            };
 
             var subscribers = {
                 console: ['ops']
@@ -190,58 +224,29 @@ describe('Monitor', function () {
 
             var settings = {
                 monitor: {
-                    opsInterval: 100,
+                    opsInterval: 10000,
                     subscribers: subscribers,
                     requestsEvent: 'response',
-                    broadcastInterval: 5
+                    broadcastInterval: 0
                 }
             };
 
             var server = new Helpers.Server(settings);
-            var monitor = new Helpers.Monitor(server);
+            var monitor = server._monitor;
+            var handler = monitor._handle('ops');
 
-            monitor._initOps();
+            monitor._broadcast = function () {
 
-            monitor._os = {
-                cpu: function (cb) {
+                return function () {
 
-                    cb(new Error(), 1);
-                },
-                disk: function (cb) {
-
-                    cb(null, { total: 100, free: 10 });
-                },
-                loadavg: function (cb) {
-
-                    cb();
-                },
-                mem: function (cb) {
-
-                    cb();
-                },
-                uptime: function (cb) {
-
-                    cb(null, 1000);
-                }
-            };
-            monitor._process = {
-                uptime: function (cb) {
-
-                    cb(null, 1000);
-                },
-                memory: function (cb) {
-
-                    cb();
-                },
-                cpu: function (cb) {
-
-                    cb();
-                }
+                    done();
+                };
             };
 
-            done();
+            handler(results);
         });
     });
+
 
     describe('#_request', function () {
 
@@ -318,13 +323,141 @@ describe('Monitor', function () {
                 server: server,
                 _log: 'test'
             };
-            var monitor = new Helpers.Monitor(server);
 
+            var monitor = new Helpers.Monitor(server);
             var event = monitor._request()(request);
 
             expect(event.event).to.equal('request');
             expect(event.source.userAgent).to.equal('test');
             expect(event.log).to.equal('test');
+            done();
+        });
+    });
+
+    describe('#_initOps', function () {
+
+        it('emits an ops event when everything succeeds', function (done) {
+
+            var subscribers = {
+                console: ['ops']
+            };
+
+            var settings = {
+                monitor: {
+                    opsInterval: 100,
+                    subscribers: subscribers,
+                    requestsEvent: 'response',
+                    broadcastInterval: 5
+                }
+            };
+
+            var server = new Helpers.Server(settings);
+
+            server._monitor._initOps();
+            server.removeAllListeners('ops');
+
+            server.once('ops', function (event) {
+
+                expect(event.osdisk.total).to.equal(100);
+                expect(event.osup).to.equal(1000);
+                done();
+            });
+
+            server._monitor._os = {
+                cpu: function (cb) {
+
+                    cb(null, 1);
+                },
+                disk: function (cb) {
+
+                    cb(null, { total: 100, free: 10 });
+                },
+                loadavg: function (cb) {
+
+                    cb();
+                },
+                mem: function (cb) {
+
+                    cb();
+                },
+                uptime: function (cb) {
+
+                    cb(null, 1000);
+                }
+            };
+            server._monitor._process = {
+                uptime: function (cb) {
+
+                    cb(null, 1000);
+                },
+                memory: function (cb) {
+
+                    cb();
+                },
+                cpu: function (cb) {
+
+                    cb();
+                }
+            };
+        });
+
+        it('logs errors when they occur', function (done) {
+
+            var subscribers = {
+                console: ['ops']
+            };
+
+            var settings = {
+                monitor: {
+                    opsInterval: 100,
+                    subscribers: subscribers,
+                    requestsEvent: 'response',
+                    broadcastInterval: 5
+                }
+            };
+
+            var server = new Helpers.Server(settings);
+
+            server._monitor._initOps();
+            server.removeAllListeners('ops');
+
+            server._monitor._os = {
+                cpu: function (cb) {
+
+                    cb(new Error(), 1);
+                },
+                disk: function (cb) {
+
+                    cb(null, { total: 100, free: 10 });
+                },
+                loadavg: function (cb) {
+
+                    cb();
+                },
+                mem: function (cb) {
+
+                    cb();
+                },
+                uptime: function (cb) {
+
+                    cb(null, 1000);
+                }
+            };
+            server._monitor._process = {
+                uptime: function (cb) {
+
+                    cb(null, 1000);
+                },
+                memory: function (cb) {
+
+                    cb();
+                },
+                cpu: function (cb) {
+
+                    cb();
+                }
+            };
+
             done();
         });
     });
@@ -345,7 +478,7 @@ describe('Monitor', function () {
             };
 
             var server = new Helpers.Server(settings);
-            var monitor = new Helpers.Monitor(server);
+            var monitor = server._monitor;
 
             var data = {
                 events: [{
@@ -382,7 +515,7 @@ describe('Monitor', function () {
             };
 
             var server = new Helpers.Server(settings);
-            var monitor = new Helpers.Monitor(server);
+            var monitor = server._monitor;
 
             var data = {
                 events: [{
@@ -399,6 +532,32 @@ describe('Monitor', function () {
             });
 
             monitor._display(data);
+        });
+    });
+
+    describe('#_log', function () {
+
+        it('returns wrapped events', function (done) {
+
+            var settings = {
+                monitor: {
+                    opsInterval: 10000,
+                    subscribers: {
+                        console: ['ops']
+                    },
+                    requestsEvent: 'response',
+                    broadcastInterval: 5
+                }
+            };
+            var event = {};
+
+            var server = new Helpers.Server(settings);
+            var monitor = server._monitor;
+
+            event = monitor._log()(event);
+
+            expect(event.event).to.equal('log');
+            done();
         });
     });
 });
