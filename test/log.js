@@ -33,13 +33,14 @@ describe('Log', function () {
 
         it('outputs to stdout if no listeners exist', function (done) {
 
+            var tags = ['hello'];
             Helpers._TEST.once('log', function (output) {
 
                 expect(output).to.contain('hello');
                 done();
             });
 
-            Helpers.log.event(['hello'], null, Date.now());
+            Helpers.log.event(tags, null, Date.now());
         });
     });
 
