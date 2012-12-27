@@ -72,39 +72,24 @@ describe('System Monitor', function () {
             });
         });
 
-        it('returns cpu usage from stat file', function (done) {
-
-            var contents = 'cpu0  171386021 1565 28586977 1765610273 1928350 7722 4662154 2232299 0            ';
-
-            var readFileStub = Sinon.stub(Fs, 'readFile', function (fileName, callback) {
-
-                readFileStub.restore();
-                callback(null, contents);
-            });
+        it('returns cpu usage', function (done) {
 
             var monitor = new SystemMonitor.Monitor();
 
             monitor.poll_cpu('cpu0', function (err, stats) {
 
-                expect(stats.idle).to.equal(1765610273);
-                expect(stats.total).to.equal(1974415361);
+                expect(err).to.not.exist;
+                expect(stats.idle).to.exist;
+                expect(stats.total).to.exist;
                 done();
             });
         });
 
         it('returns error when cpu target not found', function (done) {
 
-            var contents = 'cpu0  171386021 1565 28586977 1765610273 1928350 7722 4662154 2232299 0            ';
-
-            var readFileStub = Sinon.stub(Fs, 'readFile', function (fileName, callback) {
-
-                readFileStub.restore();
-                callback(null, contents);
-            });
-
             var monitor = new SystemMonitor.Monitor();
 
-            monitor.poll_cpu('cpu1', function (err, stats) {
+            monitor.poll_cpu('cpu22', function (err, stats) {
 
                 expect(err).to.be.instanceOf(Error);
                 expect(stats).not.to.exist;
