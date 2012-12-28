@@ -133,15 +133,10 @@ describe('System Monitor', function () {
                     total: 1994415361
                 });
             });
-            pollStub.withArgs('test1');
 
-            var platform = process.platform;
-            process.platform = 'linux';
-
-            monitor.cpu('test1', function (err, stats) {
+            monitor.cpu(function (err, stats) {
 
                 pollStub.restore();
-                process.platform = platform;
                 expect(stats).to.equal('99.98');
                 expect(err).to.not.exist;
                 done();
