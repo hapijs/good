@@ -72,6 +72,19 @@ describe('System Monitor', function () {
             });
         });
 
+        it('returns cpu usage totals for all cores', function (done) {
+
+            var monitor = new SystemMonitor.Monitor();
+
+            monitor.poll_cpu('cpu', function (err, stats) {
+
+                expect(err).to.not.exist;
+                expect(stats.idle).to.exist;
+                expect(stats.total).to.exist;
+                done();
+            });
+        });
+
         it('returns cpu usage', function (done) {
 
             var monitor = new SystemMonitor.Monitor();
@@ -100,19 +113,7 @@ describe('System Monitor', function () {
 
     describe('#cpu', function () {
 
-        it('doesn\'t pass an error to the callback', function (done) {
-
-            var monitor = new SystemMonitor.Monitor();
-
-            monitor.cpu(function (err, result) {
-
-                expect(err).to.not.exist;
-                expect(result).to.exist;
-                done();
-            });
-        });
-
-        it('returns cpu usage delta from stat file', function (done) {
+        it('returns cpu usage delta', function (done) {
 
             var firstRun = true;
             var monitor = new SystemMonitor.Monitor();
@@ -142,6 +143,7 @@ describe('System Monitor', function () {
                 pollStub.restore();
                 process.platform = platform;
                 expect(stats).to.equal('99.98');
+                expect(err).to.not.exist;
                 done();
             });
         });
