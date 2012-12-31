@@ -196,7 +196,7 @@ describe('Monitor', function () {
             expect(monitor._subscriberQueues.console).to.exist;
             expect(monitor._eventQueues.ops).to.exist;
 
-            var event = monitor._ops(results);
+            var event = monitor._ops()(results);
 
             expect(event.os.load).to.equal(1);
             expect(event.os.mem).to.equal(20);
@@ -553,7 +553,7 @@ describe('Monitor', function () {
             var server = new Helpers.Server(settings);
             var monitor = server._monitor;
 
-            event = monitor._log(event);
+            event = monitor._log()(event);
 
             expect(event.event).to.equal('log');
             done();
