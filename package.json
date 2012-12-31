@@ -17,9 +17,9 @@
     "node": ">=0.8.0"
   },
   "dependencies": {
-      "hoek": "0.0.x",
-      "request": "2.11.x",
-      "async": "0.1.x"
+    "hoek": "0.0.x",
+    "request": "2.11.x",
+    "async": "0.1.x"
   },
   "devDependencies": {
     "mocha": "1.x.x",
