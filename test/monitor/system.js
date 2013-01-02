@@ -72,39 +72,37 @@ describe('System Monitor', function () {
             });
         });
 
-        it('returns cpu usage from stat file', function (done) {
+        it('returns cpu usage totals for all cores', function (done) {
 
-            var contents = 'cpu0  171386021 1565 28586977 1765610273 1928350 7722 4662154 2232299 0            ';
+            var monitor = new SystemMonitor.Monitor();
 
-            var readFileStub = Sinon.stub(Fs, 'readFile', function (fileName, callback) {
+            monitor.poll_cpu('cpu', function (err, stats) {
 
-                readFileStub.restore();
-                callback(null, contents);
+                expect(err).to.not.exist;
+                expect(stats.idle).to.exist;
+                expect(stats.total).to.exist;
+                done();
             });
+        });
+
+        it('returns cpu usage', function (done) {
 
             var monitor = new SystemMonitor.Monitor();
 
             monitor.poll_cpu('cpu0', function (err, stats) {
 
-                expect(stats.idle).to.equal(1765610273);
-                expect(stats.total).to.equal(1974415361);
+                expect(err).to.not.exist;
+                expect(stats.idle).to.exist;
+                expect(stats.total).to.exist;
                 done();
             });
         });
 
         it('returns error when cpu target not found', function (done) {
 
-            var contents = 'cpu0  171386021 1565 28586977 1765610273 1928350 7722 4662154 2232299 0            ';
-
-            var readFileStub = Sinon.stub(Fs, 'readFile', function (fileName, callback) {
-
-                readFileStub.restore();
-                callback(null, contents);
-            });
-
             var monitor = new SystemMonitor.Monitor();
 
-            monitor.poll_cpu('cpu1', function (err, stats) {
+            monitor.poll_cpu('cpu22', function (err, stats) {
 
                 expect(err).to.be.instanceOf(Error);
                 expect(stats).not.to.exist;
@@ -115,19 +113,7 @@ describe('System Monitor', function () {
 
     describe('#cpu', function () {
 
-        it('doesn\'t pass an error to the callback', function (done) {
-
-            var monitor = new SystemMonitor.Monitor();
-
-            monitor.cpu(function (err, result) {
-
-                expect(err).to.not.exist;
-                expect(result).to.exist;
-                done();
-            });
-        });
-
-        it('returns cpu usage delta from stat file', function (done) {
+        it('returns cpu usage delta', function (done) {
 
             var firstRun = true;
             var monitor = new SystemMonitor.Monitor();
@@ -147,16 +133,12 @@ describe('System Monitor', function () {
                     total: 1994415361
                 });
             });
-            pollStub.withArgs('test1');
 
-            var platform = process.platform;
-            process.platform = 'linux';
-
-            monitor.cpu('test1', function (err, stats) {
+            monitor.cpu(function (err, stats) {
 
                 pollStub.restore();
-                process.platform = platform;
                 expect(stats).to.equal('99.98');
+                expect(err).to.not.exist;
                 done();
             });
         });
