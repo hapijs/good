@@ -34,6 +34,7 @@ describe('Log', function () {
         it('outputs to stdout if no listeners exist', function (done) {
 
             var tags = ['hello'];
+            Helpers.log.removeAllListeners('log');
             Helpers._TEST.once('log', function (output) {
 
                 expect(output).to.contain('hello');
