@@ -244,6 +244,40 @@ describe('Monitor', function () {
             var handler = monitor._handle('ops');
             handler(results);
         });
+
+        it('throws an error when eventName is invalid', function (done) {
+
+            var results = {
+                osload: 1,
+                osmem: 20,
+                osdisk: 30,
+                osup: 50
+            };
+
+            var subscribers = {
+                console: ['ops']
+            };
+
+            var settings = {
+                monitor: {
+                    opsInterval: 10000,
+                    subscribers: subscribers,
+                    requestsEvent: 'response',
+                    broadcastInterval: 0
+                }
+            };
+
+            var server = new Helpers.Server(settings);
+            var monitor = server._monitor;
+
+            try {
+                var handler = monitor._handle('notFound');
+            }
+            catch (error) {
+                expect(error).to.exist;
+                done();
+            }
+        });
     });
 
 
