@@ -1,7 +1,7 @@
 {
   "name": "hapi-log",
   "description": "hapi process monitoring",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "author": "Van Nguyen <the.gol.effect@gmail.com>",
   "contributors":[
     "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
@@ -17,9 +17,9 @@
     "node": ">=0.8.0"
   },
   "dependencies": {
-      "hoek": "0.0.x",
-      "request": "2.11.x",
-      "async": "0.1.x"
+    "hoek": "0.0.x",
+    "request": "2.11.x",
+    "async": "0.1.x"
   },
   "devDependencies": {
     "mocha": "1.x.x",
