@@ -163,6 +163,101 @@ describe('Monitor', function () {
             expect(broadcast()).to.not.exist;
             done();
         });
+
+        it('filters out events that don\'t contain the subscribers tag', function (done) {
+
+            var subscribers = {
+                'console': { tags: ['ERROR', 'WARNING'], eventTypes: ['log'] }
+            };
+
+            var settings = {
+                monitor: {
+                    opsInterval: 200,
+                    subscribers: subscribers,
+                    requestsEvent: 'response',
+                    broadcastInterval: 5
+                }
+            };
+
+            var monitor = new Helpers.Server(settings)._monitor;
+
+            expect(monitor._subscriberQueues.console).to.exist;
+            expect(monitor._eventQueues.log).to.exist;
+
+            var broadcast = monitor._broadcast();
+
+            Helpers._TEST.removeAllListeners('log');
+            Helpers._TEST.once('log', function (data) {
+
+                expect(data).to.not.exist;
+            });
+            broadcast();
+            done();
+        });
+
+        it('shows events that the subscriber tags match', function (done) {
+
+            var subscribers = {
+                'console': { tags: ['config'], eventTypes: ['log'] }
+            };
+
+            var settings = {
+                monitor: {
+                    opsInterval: 200,
+                    subscribers: subscribers,
+                    requestsEvent: 'response',
+                    broadcastInterval: 5
+                }
+            };
+
+            var monitor = new Helpers.Server(settings)._monitor;
+
+            expect(monitor._subscriberQueues.console).to.exist;
+            expect(monitor._eventQueues.log).to.exist;
+
+            var broadcast = monitor._broadcast();
+
+            Helpers._TEST.removeAllListeners('log');
+            Helpers._TEST.once('log', function (data) {
+
+                expect(data).to.exist;
+                expect(data).to.contain('Log monitoring enabled');
+                done();
+            });
+            broadcast();
+        });
+
+        it('broadcasts all events when no tags are provided', function (done) {
+
+            var subscribers = {
+                'console': ['log']
+            };
+
+            var settings = {
+                monitor: {
+                    opsInterval: 200,
+                    subscribers: subscribers,
+                    requestsEvent: 'response',
+                    broadcastInterval: 5
+                }
+            };
+
+            var monitor = new Helpers.Server(settings)._monitor;
+
+            expect(monitor._subscriberQueues.console).to.exist;
+            expect(monitor._eventQueues.log).to.exist;
+
+            var broadcast = monitor._broadcast();
+
+            Helpers._TEST.removeAllListeners('log');
+            Helpers._TEST.once('log', function (data) {
+
+                expect(data).to.exist;
+                expect(data).to.contain('Log monitoring enabled');
+                done();
+            });
+            broadcast();
+        });
     });
 
 
