@@ -192,6 +192,7 @@ describe('Monitor', function () {
                 expect(data).to.not.exist;
             });
             broadcast();
+            Helpers._TEST.removeAllListeners('log');
             done();
         });
 
@@ -210,7 +211,8 @@ describe('Monitor', function () {
                 }
             };
 
-            var monitor = new Helpers.Server(settings)._monitor;
+            var server = new Helpers.Server(settings);
+            var monitor = new Helpers.Monitor(server);
 
             expect(monitor._subscriberQueues.console).to.exist;
             expect(monitor._eventQueues.log).to.exist;
