@@ -167,7 +167,7 @@ describe('Monitor', function () {
         it('filters out events that don\'t contain the subscribers tag', function (done) {
 
             var subscribers = {
-                'console': { tags: ['ERROR', 'WARNING'], eventTypes: ['log'] }
+                'console': { tags: ['ERROR', 'WARNING'], events: ['log'] }
             };
 
             var settings = {
@@ -199,7 +199,7 @@ describe('Monitor', function () {
         it('shows events that the subscriber tags match', function (done) {
 
             var subscribers = {
-                'console': { tags: ['config'], eventTypes: ['log'] }
+                'console': { tags: ['config'], events: ['log'] }
             };
 
             var settings = {
