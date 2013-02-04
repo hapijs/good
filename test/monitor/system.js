@@ -102,7 +102,7 @@ describe('System Monitor', function () {
 
             var monitor = new SystemMonitor.Monitor();
 
-            monitor.poll_cpu('cpu22', function (err, stats) {
+            monitor.poll_cpu('notfound', function (err, stats) {
 
                 expect(err).to.be.instanceOf(Error);
                 expect(stats).not.to.exist;
