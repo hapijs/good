@@ -1,5 +1,5 @@
 {
-  "name": "hapi-log",
+  "name": "good",
   "description": "hapi process monitoring",
   "version": "0.1.0",
   "author": "Van Nguyen <the.gol.effect@gmail.com>",
@@ -7,7 +7,7 @@
     "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
     "Wyatt Preul <wpreul@gmail.com>"
   ],
-  "repository": "git://github.com/walmartlabs/log",
+  "repository": "git://github.com/walmartlabs/good",
   "main": "index",
   "keywords": [
     "process",
@@ -32,7 +32,7 @@
   "licenses": [
     {
       "type": "BSD",
-      "url": "http://github.com/walmartlabs/log/raw/master/LICENSE"
+      "url": "http://github.com/walmartlabs/good/raw/master/LICENSE"
     }
   ]
 }
