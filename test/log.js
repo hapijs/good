@@ -14,7 +14,7 @@ var internals = {};
 var expect = Chai.expect;
 
 
-describe('Log', function () {
+describe('Good', function () {
 
     describe('#event', function () {
 

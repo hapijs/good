@@ -2,7 +2,7 @@
 
 var NodeUtil = require('util');
 var Events = require('events');
-var HapiLog = process.env.TEST_COV ? require('../lib-cov') : require('../lib');
+var Good = process.env.TEST_COV ? require('../lib-cov') : require('../lib');
 var ProcessMonitor = process.env.TEST_COV ? require('../lib-cov/monitor/process') : require('../lib/monitor/process');
 var SystemMonitor = process.env.TEST_COV ? require('../lib-cov/monitor/system') : require('../lib/monitor/system');
 
@@ -12,7 +12,7 @@ var SystemMonitor = process.env.TEST_COV ? require('../lib-cov/monitor/system') 
 var internals = {};
 
 
-module.exports = HapiLog;
+module.exports = Good;
 module.exports.SystemMonitor = SystemMonitor;
 module.exports.ProcessMonitor = ProcessMonitor;
 
@@ -30,7 +30,7 @@ module.exports._TEST = internals.logger = new internals.Logger();
 
 // Override Log's console method
 
-HapiLog.log.console = function (message) {
+Good.log.console = function (message) {
 
     internals.logger.emit('log', message);
 };
@@ -39,7 +39,7 @@ HapiLog.log.console = function (message) {
 module.exports.Server = function (settings) {
 
     var server = new internals.FakeServer(settings);
-    server._monitor = new HapiLog.Monitor(server);
+    server._monitor = new Good.Monitor(server);
 
     return server;
 };
