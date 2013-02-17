@@ -1,7 +1,7 @@
 {
   "name": "good",
   "description": "hapi process monitoring",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Van Nguyen <the.gol.effect@gmail.com>",
   "contributors":[
     "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
@@ -11,10 +11,12 @@
   "main": "index",
   "keywords": [
     "process",
-    "monitor"
+    "monitor",
+    "log",
+    "report"
   ],
   "engines": {
-    "node": ">=0.8.0"
+    "node": "0.8.x"
   },
   "dependencies": {
     "hoek": "0.4.x",
@@ -22,12 +24,16 @@
     "async": "0.1.x"
   },
   "devDependencies": {
+    "sinon": "1.x.x",
     "mocha": "1.x.x",
-    "chai": "1.0.x",
-    "sinon": "1.x.x"
+    "chai": "1.x.x",
+    "blanket": "1.0.x",
+    "travis-cov": "0.2.x"
   },
   "scripts": {
-    "test": "make test && make unit"
+    "test": "make test && make test-cov",
+    "blanket": { "pattern": "//^((?!\/node_modules\/)(?!\/test\/).)*$/ig", "onlyCwd": true, "data-cover-flags": { "branchTracking": true } },
+    "travis-cov": { "threshold": 100 }
   },
   "licenses": [
     {

@@ -2,9 +2,9 @@
 
 var NodeUtil = require('util');
 var Events = require('events');
-var Good = process.env.TEST_COV ? require('../lib-cov') : require('../lib');
-var ProcessMonitor = process.env.TEST_COV ? require('../lib-cov/monitor/process') : require('../lib/monitor/process');
-var SystemMonitor = process.env.TEST_COV ? require('../lib-cov/monitor/system') : require('../lib/monitor/system');
+var Good = require('../lib');
+var ProcessMonitor = require('../lib/monitor/process');
+var SystemMonitor = require('../lib/monitor/system');
 
 
 // Declare internals
