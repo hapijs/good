@@ -1,7 +1,7 @@
 {
   "name": "good",
-  "description": "hapi process monitoring",
-  "version": "0.0.2",
+  "description": "Server and process monitoring plugin",
+  "version": "0.1.0",
   "author": "Van Nguyen <the.gol.effect@gmail.com>",
   "contributors":[
     "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
@@ -13,7 +13,9 @@
     "process",
     "monitor",
     "log",
-    "report"
+    "report",
+    "hapi",
+    "plugin"
   ],
   "engines": {
     "node": "0.8.x"
@@ -23,7 +25,11 @@
     "request": "2.11.x",
     "async": "0.1.x"
   },
+  "peerDependencies": {
+    "hapi": "0.15.x"
+  },
   "devDependencies": {
+    "hapi": "0.15.x",
     "sinon": "1.x.x",
     "mocha": "1.x.x",
     "chai": "1.x.x",

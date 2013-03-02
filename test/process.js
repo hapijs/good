@@ -3,7 +3,7 @@
 var Chai = require('chai');
 var ChildProcess = require('child_process');
 var Sinon = require('sinon');
-var Helpers = require('../helpers');
+var ProcessMonitor = require('../lib/process');
 
 
 // Declare internals
@@ -14,10 +14,9 @@ var internals = {};
 // Test shortcuts
 
 var expect = Chai.expect;
-var ProcessMonitor = Helpers.ProcessMonitor;
 
 
-    describe('Process Monitor', function () {
+describe('Process Monitor', function () {
 
     it('throws an error when constructed without new', function (done) {
 

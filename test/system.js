@@ -4,7 +4,7 @@ var Chai = require('chai');
 var ChildProcess = require('child_process');
 var Fs = require('fs');
 var Sinon = require('sinon');
-var Helpers = require('../helpers');
+var SystemMonitor = require('../lib/system');
 
 
 // Declare internals
@@ -15,7 +15,6 @@ var internals = {};
 // Test shortcuts
 
 var expect = Chai.expect;
-var SystemMonitor = Helpers.SystemMonitor;
 
 
 describe('System Monitor', function () {
