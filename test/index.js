@@ -26,7 +26,7 @@ describe('Plugin', function () {
             alwaysMeasureOps: true
         };
 
-        server.plugin().require('..', options, function (err) {
+        server.plugin.require('..', options, function (err) {
 
             expect(err).to.not.exist;
 

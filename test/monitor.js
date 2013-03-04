@@ -33,7 +33,7 @@ describe('Monitor', function () {
         };
 
         var server = new Hapi.Server();
-        server.plugin().register(plugin, function (err) {
+        server.plugin.register(plugin, function (err) {
 
             expect(err).to.not.exist;
             expect(holder).to.exist;
@@ -394,7 +394,7 @@ describe('Monitor', function () {
                             }
                         }
                     },
-                    _analytics: {},
+                    analytics: {},
                     server: server
                 };
 
@@ -424,7 +424,7 @@ describe('Monitor', function () {
                             }
                         }
                     },
-                    _analytics: {},
+                    analytics: {},
                     server: server,
                     _log: 'test'
                 };
