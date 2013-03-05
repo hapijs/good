@@ -361,7 +361,7 @@ describe('Monitor', function () {
                     };
                 };
 
-                monitor._handle('log')({ ets: Date.now(), tags: ['test'], data: 'test' });
+                monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
             });
         });
 
