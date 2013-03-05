@@ -416,6 +416,8 @@ describe('Monitor', function () {
 
             makePack(function (pack, server) {
 
+                var item = { ts: Date.now(), tags: ['a', 'b'], tag: { a: true, b: true }, data: 'hello!' };
+
                 var request = {
                     raw: {
                         req: {
@@ -426,7 +428,10 @@ describe('Monitor', function () {
                     },
                     analytics: {},
                     server: server,
-                    _log: 'test'
+                    getLog: function () {
+
+                        return [item];
+                    }
                 };
 
                 var monitor = new Monitor(pack, options);
@@ -435,7 +440,10 @@ describe('Monitor', function () {
 
                 expect(event.event).to.equal('request');
                 expect(event.source.userAgent).to.equal('test');
-                expect(event.log).to.equal('test');
+
+                var itemLight = Hoek.clone(item);
+                delete itemLight.tag;
+                expect(event.log).to.deep.equal([itemLight]);
                 done();
             });
         });
