@@ -8,14 +8,13 @@
 The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
 
 
-**hapi** comes with a built-in process monitor for three types of events:
+**good** is a process monitor for three types of events:
 - System and process performance (ops) - CPU, memory, disk, and other metrics.
 - Requests logging (request) - framework and application generated logs generated during the lifecycle of each incoming request.
 - General events (log) - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Described in [General Events Logging](#general-events-logging).
 
-The monitor is _off_ by default and can be turned on using the `monitor` server option. To use the default settings, simply set the value to _true_.
-Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination as general events (log)
-are a process-wide facility and will result in duplicated log events. To override some or all of the defaults, set `monitor` to an object with the following
+Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination as general events
+are a process-wide facility and will result in duplicated log events. To override some or all of the defaults, set `options` to an object with the following
 optional settings:
 - `broadcastInterval` - the interval in milliseconds to send collected events to subscribers. _0_ means send immediately. Defaults to _0_.
 - `opsInterval` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
@@ -28,23 +27,26 @@ optional settings:
 For example:
 ```javascript
 var options = {
-    monitor: {
-        subscribers: {
-            console: ['ops', 'request', 'log'],
-            'http://localhost/logs': ['log']
-        }
+    subscribers: {
+        console: ['ops', 'request', 'log'],
+        'http://localhost/logs': ['log']
     }
 };
+
+hapi.plugin.require('good', options, function (err) {
+    
+    if (!err) {
+        // Plugin loaded successfully
+    }
+});
 ```
 
-Disabling hapi console output:
+Disabling console output:
 ```javascript
 var options = {
-    monitor: {
-        subscribers: {
-            console: [],
-            'http://localhost/logs': ['log']
-        }
+    subscribers: {
+        console: [],
+        'http://localhost/logs': ['log']
     }
 };
 ```
@@ -52,10 +54,8 @@ var options = {
 Log messages are created with tags.  Usually a log will include a tag to indicate if it is related to an error or info along with where the message originates.  If, for example, the console should only output error's that were logged you can use the following configuration:
 ```javascript
 var options = {
-    monitor: {
-        subscribers: {
-            console: { tags: ['error'], events: ['log'] }
-        }
+    subscribers: {
+        console: { tags: ['error'], events: ['log'] }
     }
 };
 ```
