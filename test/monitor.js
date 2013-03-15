@@ -1,6 +1,6 @@
 // Load modules
 
-var Chai = require('chai');
+var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
 var Monitor = require('../lib/monitor');
@@ -13,7 +13,11 @@ var internals = {};
 
 // Test shortcuts
 
-var expect = Chai.expect;
+var expect = Lab.expect;
+var before = Lab.before;
+var after = Lab.after;
+var describe = Lab.experiment;
+var it = Lab.test;
 
 
 describe('Monitor', function () {
@@ -403,6 +407,34 @@ describe('Monitor', function () {
 
                 expect(event.event).to.equal('request');
                 expect(event.source.userAgent).to.equal('test');
+                done();
+            });
+        });
+
+        it('sets the event with the request remote connection address', function (done) {
+
+            makePack(function (pack, server) {
+
+                var request = {
+                    raw: {
+                        req: {
+                            headers: {
+                                'user-agent': 'test'
+                            },
+                            connection: {
+                                remoteAddress: 'hapi.com'
+                            }
+                        }
+                    },
+                    analytics: {},
+                    server: server
+                };
+
+                var monitor = new Monitor(pack, { subscribers: {} });
+                var event = monitor._request()(request);
+
+                expect(event.event).to.equal('request');
+                expect(event.source.remoteAddress).to.equal('hapi.com');
                 done();
             });
         });
