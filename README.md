@@ -64,9 +64,9 @@ var options = {
 
 When **good** broadcasts data to a remote endpoint it sends json that has the following properties:
 
-    - `schema` - the value of 'schemaName' in the settings.  Default is 'good.v1'
-    - `host` - the operating system [hostname](http://nodejs.org/api/os.html#os_os_hostname)
-    - `appVer` - the version of **good**
-    - `timestamp` - the current time of the server
-    - `events` - an array of the events that are subscribed to
+- `schema` - the value of 'schemaName' in the settings.  Default is 'good.v1'
+- `host` - the operating system [hostname](http://nodejs.org/api/os.html#os_os_hostname)
+- `appVer` - the version of **good**
+- `timestamp` - the current time of the server
+- `events` - an array of the events that are subscribed to
     
