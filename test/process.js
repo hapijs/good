@@ -75,4 +75,18 @@ describe('Process Monitor', function () {
             });
         });
     });
+
+    describe('#delay', function () {
+
+        it('passes the current event queue delay to the callback', function (done) {
+
+            var monitor = new ProcessMonitor.Monitor();
+            monitor.delay(function (err, delay) {
+
+                expect(err).not.to.exist;
+                expect(delay).to.exist;
+                done();
+            });
+        });
+    });
 });

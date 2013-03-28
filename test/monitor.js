@@ -366,6 +366,10 @@ describe('Monitor', function () {
                     cpu: function (cb) {
 
                         cb();
+                    },
+                    delay: function (cb) {
+
+                        cb();
                     }
                 };
             });
