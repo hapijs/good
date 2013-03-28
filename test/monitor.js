@@ -229,6 +229,36 @@ describe('Monitor', function () {
                 monitor._broadcast()();
             });
         });
+
+        it('broadcasts all events to a remote server subscriber', function (done) {
+
+            var remoteServer = new Hapi.Server(0);
+            remoteServer.route({ method: 'POST', path: '/', handler: function (request) {
+
+                expect(request.payload.appVer).to.exist;
+                expect(request.payload.appVer).to.not.equal('unknown');
+                done();
+            }});
+
+            var options = {
+                subscribers: {}
+            };
+
+            remoteServer.start(function () {
+
+                options.subscribers[remoteServer.settings.uri] = { events: ['log'] };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    expect(monitor._eventQueues.log).to.exist;
+
+                    server.log('ERROR', 'included in output');
+                    monitor._broadcast()();
+                });
+            });
+        });
     });
 
     describe('#_ops', function () {
