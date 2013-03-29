@@ -3,6 +3,7 @@
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Request = require('request');
 var Monitor = require('../lib/monitor');
 
 
@@ -230,7 +231,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('broadcasts all events to a remote server subscriber', function (done) {
+        it('sends all events to a remote server subscriber', function (done) {
 
             var remoteServer = new Hapi.Server(0);
             remoteServer.route({ method: 'POST', path: '/', handler: function (request) {
@@ -256,6 +257,49 @@ describe('Monitor', function () {
 
                     server.log('ERROR', 'included in output');
                     monitor._broadcast()();
+                });
+            });
+        });
+
+        it('sends response status code to remote subscribers', function (done) {
+
+            var remoteServer = new Hapi.Server(0);
+            var server = new Hapi.Server(0);
+
+            remoteServer.route({ method: 'POST', path: '/', handler: function (request) {
+
+                expect(request.payload.events[0].statusCode).to.equal(200);
+                request.reply('Success');
+                done();
+            }});
+
+            server.route({ method: 'GET', path: '/', handler: function (request) {
+
+                request.reply('Success');
+            }});
+
+            var options = {
+                subscribers: {}
+            };
+
+            remoteServer.start(function () {
+
+                options.subscribers[remoteServer.settings.uri] = { events: ['request'] };
+                var plugin = {
+                    name: 'good',
+                    register: require('../lib/index').register,
+                    version: '0.0.1'
+                };
+
+                server.plugin.register(plugin, options, function () {
+
+                    server.start(function () {
+
+                        Request(server.settings.uri, function () {
+
+                            server.plugins.good.monitor._broadcast();
+                        });
+                    });
                 });
             });
         });
@@ -426,6 +470,9 @@ describe('Monitor', function () {
                             headers: {
                                 'user-agent': 'test'
                             }
+                        },
+                        res: {
+
                         }
                     },
                     analytics: {},
@@ -454,6 +501,9 @@ describe('Monitor', function () {
                             connection: {
                                 remoteAddress: 'hapi.com'
                             }
+                        },
+                        res: {
+
                         }
                     },
                     analytics: {},
@@ -486,6 +536,9 @@ describe('Monitor', function () {
                             headers: {
                                 'user-agent': 'test'
                             }
+                        },
+                        res: {
+
                         }
                     },
                     analytics: {},
