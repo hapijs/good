@@ -479,7 +479,7 @@ describe('Monitor', function () {
 
                         }
                     },
-                    analytics: {},
+                    info: {},
                     server: server
                 };
 
@@ -510,7 +510,7 @@ describe('Monitor', function () {
 
                         }
                     },
-                    analytics: {},
+                    info: {},
                     server: server
                 };
 
@@ -545,7 +545,7 @@ describe('Monitor', function () {
 
                         }
                     },
-                    analytics: {},
+                    info: {},
                     server: server,
                     getLog: function () {
 
