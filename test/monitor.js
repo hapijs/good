@@ -38,7 +38,7 @@ describe('Monitor', function () {
         };
 
         var server = new Hapi.Server();
-        server.plugin.register(plugin, function (err) {
+        server.pack.register(plugin, function (err) {
 
             expect(err).to.not.exist;
             expect(holder).to.exist;
@@ -247,7 +247,7 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers[remoteServer.settings.uri] = { events: ['log'] };
+                options.subscribers[remoteServer.info.uri] = { events: ['log'] };
 
                 makePack(function (pack, server) {
 
@@ -284,18 +284,18 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers[remoteServer.settings.uri] = { events: ['request'] };
+                options.subscribers[remoteServer.info.uri] = { events: ['request'] };
                 var plugin = {
                     name: 'good',
                     register: require('../lib/index').register,
                     version: '0.0.1'
                 };
 
-                server.plugin.register(plugin, options, function () {
+                server.pack.register(plugin, options, function () {
 
                     server.start(function () {
 
-                        Request(server.settings.uri, function () {
+                        Request(server.info.uri, function () {
 
                             server.plugins.good.monitor._broadcast();
                         });
