@@ -3,6 +3,8 @@
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Path = require('path');
+var Fs = require('fs');
 var Request = require('request');
 var Monitor = require('../lib/monitor');
 
@@ -301,6 +303,43 @@ describe('Monitor', function () {
                         });
                     });
                 });
+            });
+        });
+
+        it('sends all events to a log file', function (done) {
+
+            var folderPath = Path.join(__dirname,'logs');
+            Fs.mkdirSync(folderPath);
+
+            var options = {
+                subscribers: { }
+            };
+
+            options.subscribers[folderPath] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcast()();
+
+                setTimeout(function () {
+
+                    var filePath = Path.join(folderPath, Fs.readdirSync(folderPath)[0]);
+                    var file = Fs.readFileSync(filePath);
+
+                    var result = JSON.parse(file.toString());
+
+                    expect(result.events[0].data).to.equal('included in output');
+
+                    Fs.unlink(filePath, function () {
+
+                        Fs.rmdir(folderPath, done);
+                    });
+                }, 20);
             });
         });
     });
