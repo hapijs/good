@@ -473,6 +473,50 @@ describe('Monitor', function () {
                 }, 10);
             });
         });
+
+        it('logs to directory when provided', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logsdir');
+
+            var options = {
+                subscribers: {}
+            };
+
+            if (!Fs.existsSync(folderPath)) {
+                Fs.mkdirSync(folderPath);
+            }
+
+            options.subscribers[folderPath + '/'] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                server.log('ERROR', 'another error');
+                server.log('ERROR', 'here is one more error');
+
+                setTimeout(function () {
+
+                    var files = Fs.readdirSync(folderPath);
+                    var file = Fs.readFileSync(Path.join(folderPath, files[0]));
+                    var formatted = file.toString().split('\n');
+
+                    var result = JSON.parse('[' + formatted + ']');
+                    expect(result[0].data).to.equal('included in output');
+                    expect(result[1].data).to.equal('another error');
+
+                    Fs.readdirSync(folderPath).forEach(function (filePath) {
+
+                        Fs.unlinkSync(Path.join(folderPath, filePath));
+                    });
+
+                    Fs.rmdir(folderPath, done);
+                }, 10);
+            });
+        });
     });
 
     describe('#_ops', function () {
