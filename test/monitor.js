@@ -3,6 +3,8 @@
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Path = require('path');
+var Fs = require('fs');
 var Request = require('request');
 var Monitor = require('../lib/monitor');
 
@@ -132,22 +134,7 @@ describe('Monitor', function () {
         });
     });
 
-    describe('#_broadcast', function () {
-
-        it('doesn\'t do anything if there are no subscribers', function (done) {
-
-            var options = {
-                subscribers: {}
-            };
-
-            makePack(function (pack, server) {
-
-                var monitor = new Monitor(pack, options);
-
-                expect(monitor._broadcast()()).to.not.exist;
-                done();
-            });
-        });
+    describe('#_broadcastConsole', function () {
 
         it('filters out events that don\'t contain the subscribers tag', function (done) {
 
@@ -202,6 +189,24 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
             });
         });
+    });
+
+    describe('#_broadcastHttp', function () {
+
+        it('doesn\'t do anything if there are no subscribers', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._broadcastHttp()).to.not.exist;
+                done();
+            });
+        });
 
         it('broadcasts all events when no tags are provided', function (done) {
 
@@ -227,7 +232,7 @@ describe('Monitor', function () {
                 };
 
                 server.log('ERROR', 'included in output');
-                monitor._broadcast()();
+                monitor._broadcastHttp();
             });
         });
 
@@ -256,7 +261,7 @@ describe('Monitor', function () {
                     expect(monitor._eventQueues.log).to.exist;
 
                     server.log('ERROR', 'included in output');
-                    monitor._broadcast()();
+                    monitor._broadcastHttp();
                 });
             });
         });
@@ -297,10 +302,219 @@ describe('Monitor', function () {
 
                         Request(server.info.uri, function () {
 
-                            server.plugins.good.monitor._broadcast();
+                            server.plugins.good.monitor._broadcastHttp();
                         });
                     });
                 });
+            });
+        });
+    });
+
+    describe('#_broadcastFile', function () {
+
+        before(function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+
+            if (!Fs.existsSync(folderPath)) {
+                Fs.mkdirSync(folderPath);
+            }
+
+            done();
+        });
+
+        after(function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            Fs.readdirSync(folderPath).forEach(function (filePath) {
+
+                Fs.unlinkSync(Path.join(folderPath, filePath));
+            });
+
+            Fs.rmdir(folderPath, done);
+        });
+
+        it('filters out events that don\'t contain the subscribers tag', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog0');
+            options.subscribers[dest] = { tags: ['ERROR', 'WARNING'], events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+                server.log('other', 'not used');
+
+                var fn = function () {
+
+                    var file = Fs.readFileSync(dest + '.001');
+                };
+
+                expect(fn).to.throw(Error);
+
+                done();
+            });
+        });
+
+        it('sends all events to a log file', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog1');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest + '.001');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('included in output');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
+        it('splits log files when maxLogSize exceeded', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+
+            var options = {
+                subscribers: {},
+                maxLogSize: 200
+            };
+
+            var dest = Path.join(folderPath, 'mylog2');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    server.log('ERROR', 'here is one more error');
+                    server.log('ERROR', 'here is one more error');
+                    server.log('ERROR', 'here is one more error');
+
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest + '.002');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('here is one more error');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
+        it('doesn\'t overwrite log file with several inital log events', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog3');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                server.log('ERROR', 'another error');
+                server.log('ERROR', 'here is one more error');
+
+                setTimeout(function () {
+
+                    var file = Fs.readFileSync(dest + '.001');
+                    var formatted = file.toString().split('\n');
+
+                    var result = JSON.parse('[' + formatted + ']');
+                    expect(result[0].data).to.equal('included in output');
+                    expect(result[1].data).to.equal('another error');
+
+                    done();
+                }, 10);
+            });
+        });
+
+        it('logs to directory when provided', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logsdir');
+
+            var options = {
+                subscribers: {}
+            };
+
+            if (!Fs.existsSync(folderPath)) {
+                Fs.mkdirSync(folderPath);
+            }
+
+            options.subscribers[folderPath + '/'] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                server.log('ERROR', 'another error');
+                server.log('ERROR', 'here is one more error');
+
+                setTimeout(function () {
+
+                    var files = Fs.readdirSync(folderPath);
+                    var file = Fs.readFileSync(Path.join(folderPath, files[0]));
+                    var formatted = file.toString().split('\n');
+
+                    var result = JSON.parse('[' + formatted + ']');
+                    expect(result[0].data).to.equal('included in output');
+                    expect(result[1].data).to.equal('another error');
+
+                    Fs.readdirSync(folderPath).forEach(function (filePath) {
+
+                        Fs.unlinkSync(Path.join(folderPath, filePath));
+                    });
+
+                    Fs.rmdir(folderPath, done);
+                }, 10);
             });
         });
     });
@@ -435,12 +649,9 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack, options);
 
-                monitor._broadcast = function () {
+                monitor._broadcastHttp = function () {
 
-                    return function () {
-
-                        done();
-                    };
+                    done();
                 };
 
                 monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
@@ -577,17 +788,15 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack, options);
 
-                var data = {
-                    events: [{
-                        event: 'ops',
-                        proc: {
-                            mem: {
-                                rss: 1
-                            },
-                            cpu: 10
-                        }
-                    }]
-                };
+                var events = [{
+                    event: 'ops',
+                    proc: {
+                        mem: {
+                            rss: 1
+                        },
+                        cpu: 10
+                    }
+                }];
 
                 Hoek.consoleFunc = function (string) {
 
@@ -596,7 +805,7 @@ describe('Monitor', function () {
                     done();
                 };
 
-                monitor._display(data);
+                monitor._display(events);
             });
         });
 
@@ -610,13 +819,11 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack, options);
 
-                var data = {
-                    events: [{
-                        event: 'request',
-                        instance: 'testInstance',
-                        method: 'testMethod'
-                    }]
-                };
+                var events = [{
+                    event: 'request',
+                    instance: 'testInstance',
+                    method: 'testMethod'
+                }];
 
                 Hoek.consoleFunc = function (string) {
 
@@ -625,7 +832,7 @@ describe('Monitor', function () {
                     done();
                 };
 
-                monitor._display(data);
+                monitor._display(events);
             });
         });
     });
