@@ -349,17 +349,14 @@ describe('Monitor', function () {
                 var monitor = new Monitor(pack, options);
                 server.log('other', 'not used');
 
-                setTimeout(function () {
+                var fn = function () {
 
-                    var fn = function () {
+                    var file = Fs.readFileSync(dest + '.001');
+                };
 
-                        var file = Fs.readFileSync(dest + '.001');
-                    };
+                expect(fn).to.throw(Error);
 
-                    expect(fn).to.throw(Error);
-
-                    done();
-                }, 10);
+                done();
             });
         });
 
@@ -387,7 +384,6 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var filePath = Path.join(folderPath, Fs.readdirSync(folderPath)[0]);
                         var file = Fs.readFileSync(dest + '.001');
                         var formatted = file.toString().split('\n');
 
@@ -396,7 +392,7 @@ describe('Monitor', function () {
 
                         done();
                     }, 10);
-                }, 20);
+                }, 10);
             });
         });
 
@@ -406,7 +402,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {},
-                maxLogSize: 30
+                maxLogSize: 200
             };
 
             var dest = Path.join(folderPath, 'mylog2');
@@ -438,7 +434,43 @@ describe('Monitor', function () {
 
                         done();
                     }, 10);
-                }, 20);
+                }, 10);
+            });
+        });
+
+        it('doesn\'t overwrite log file with several inital log events', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog3');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                server.log('ERROR', 'another error');
+                server.log('ERROR', 'here is one more error');
+
+                setTimeout(function () {
+
+                    var file = Fs.readFileSync(dest + '.001');
+                    var formatted = file.toString().split('\n');
+
+                    var result = JSON.parse('[' + formatted + ']');
+                    expect(result[0].data).to.equal('included in output');
+                    expect(result[1].data).to.equal('another error');
+
+                    done();
+                }, 10);
             });
         });
     });
