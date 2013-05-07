@@ -16,20 +16,24 @@ The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination as general events
 are a process-wide facility and will result in duplicated log events. To override some or all of the defaults, set `options` to an object with the following
 optional settings:
-- `broadcastInterval` - the interval in milliseconds to send collected events to subscribers. _0_ means send immediately. Defaults to _0_.
+
+- `broadcastInterval` - the interval in milliseconds to send collected events to HTTP subscribers. _0_ means send immediately. Defaults to _0_.
 - `opsInterval` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
 - `extendedRequests` - determines if the full request log is sent or only the event summary. Defaults to _false_.
+- `maxLogSize` - the maximum byte size to allow log files to become before creating a new log file.  Default is _0_ which means log files will not be split.  When split the log file extension will be incremented by 1.  The initial log file has an extension of .001.
 - `requestsEvent` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
-- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI or _console_. Defaults to a console subscription to all three. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration. 
+- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration. 
 
 For example:
+
 ```javascript
 var options = {
     subscribers: {
         console: ['ops', 'request', 'log'],
-        'http://localhost/logs': ['log']
+        'http://localhost/logs': ['log'],
+        '/tmp/logs/': ['request', 'log']
     }
 };
 
@@ -42,6 +46,7 @@ hapi.plugin.require('good', options, function (err) {
 ```
 
 Disabling console output:
+
 ```javascript
 var options = {
     subscribers: {
@@ -52,10 +57,22 @@ var options = {
 ```
 
 Log messages are created with tags.  Usually a log will include a tag to indicate if it is related to an error or info along with where the message originates.  If, for example, the console should only output error's that were logged you can use the following configuration:
+
 ```javascript
 var options = {
     subscribers: {
         console: { tags: ['error'], events: ['log'] }
+    }
+};
+```
+
+Log file subscribers can either be a file or a directory.  When logging to a file (there isn't a trailing slash) then the files will be written with the file name in the provided path.  Otherwise, when the subscriber is a directory the log files will be named with a timestamp and placed in the directory.  All log files will have .001, .002, and .003 formatted extensions.  Below is an example of file and directory subscribers:
+
+```javascript
+var options = {
+    subscribers: {
+        '/logs/good_log': { tags: ['error'], events: ['log'] },     // Creates good_log.001 file in /logs/
+        '/logs/': { events: ['request'] }                           // Creates {timestamp}.001 file in /logs/
     }
 };
 ```
