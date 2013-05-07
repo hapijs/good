@@ -66,7 +66,7 @@ var options = {
 };
 ```
 
-Log file subscribers can either be a file or a directory.  When a subscribe is a to a file (there isn't a trailing slash) then the files will be written with the file name in the provided path.  Otherwise, when the subscriber is a directory the log files will be named with a timestamp and placed in the directory.  All log files will have .001, .002, and .003 formatted extensions.  Below is an example of a file and directory subscribers:
+Log file subscribers can either be a file or a directory.  When logging to a file (there isn't a trailing slash) then the files will be written with the file name in the provided path.  Otherwise, when the subscriber is a directory the log files will be named with a timestamp and placed in the directory.  All log files will have .001, .002, and .003 formatted extensions.  Below is an example of file and directory subscribers:
 
 ```javascript
 var options = {
