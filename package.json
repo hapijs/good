@@ -23,7 +23,8 @@
   "dependencies": {
     "hoek": "0.8.x",
     "request": "2.20.x",
-    "async": "0.2.x"
+    "async": "0.2.x",
+    "memwatch": "0.2.x"
   },
   "peerDependencies": {
     "hapi": "1.x.x"

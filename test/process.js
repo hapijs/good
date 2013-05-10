@@ -3,6 +3,7 @@
 var Lab = require('lab');
 var ChildProcess = require('child_process');
 var Sinon = require('sinon');
+var MemWatch = require('memwatch');
 var ProcessMonitor = require('../lib/process');
 
 
@@ -85,6 +86,47 @@ describe('Process Monitor', function () {
 
                 expect(err).not.to.exist;
                 expect(delay).to.exist;
+                done();
+            });
+        });
+    });
+
+    describe('#leaks', function () {
+
+        it('passes the current list of leaks to the callback', function (done) {
+
+            var monitor = new ProcessMonitor.Monitor(true);
+            MemWatch.emit('leak', {
+                start: 'Fri, 29 Jun 2012 14:12:13 GMT',
+                end: 'Fri, 29 Jun 2012 14:12:33 GMT',
+                growth: 67984,
+                reason: 'heap growth over 5 consecutive GCs (20s) - 11.67 mb/hr'
+            });
+
+            expect(monitor._leaks.length).to.equal(1);
+            monitor.leaks(function (err, leaks) {
+
+                expect(leaks.length).to.equal(1);
+                expect(monitor._leaks.length).to.equal(0);
+                done();
+            });
+        });
+
+        it('doesn\'t log leaks when disabled', function (done) {
+
+            var monitor = new ProcessMonitor.Monitor(false);
+            MemWatch.emit('leak', {
+                start: 'Fri, 29 Jun 2012 14:12:13 GMT',
+                end: 'Fri, 29 Jun 2012 14:12:33 GMT',
+                growth: 67984,
+                reason: 'heap growth over 5 consecutive GCs (20s) - 11.67 mb/hr'
+            });
+
+            expect(monitor._leaks.length).to.equal(0);
+            monitor.leaks(function (err, leaks) {
+
+                expect(leaks.length).to.equal(0);
+                expect(monitor._leaks.length).to.equal(0);
                 done();
             });
         });
