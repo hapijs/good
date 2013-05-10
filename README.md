@@ -19,12 +19,13 @@ optional settings:
 
 - `broadcastInterval` - the interval in milliseconds to send collected events to HTTP subscribers. _0_ means send immediately. Defaults to _0_.
 - `opsInterval` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
+- `leakDetection` - determines if memory leaks should be detected.  Any leaks will be logged with ops data.  Defaults to _false_.
 - `extendedRequests` - determines if the full request log is sent or only the event summary. Defaults to _false_.
 - `maxLogSize` - the maximum byte size to allow log files to become before creating a new log file.  Default is _0_ which means log files will not be split.  When split the log file extension will be incremented by 1.  The initial log file has an extension of .001.
 - `requestsEvent` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
-- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration. 
+- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration.
 
 For example:
 
@@ -38,7 +39,7 @@ var options = {
 };
 
 hapi.plugin.require('good', options, function (err) {
-    
+
     if (!err) {
         // Plugin loaded successfully
     }
@@ -86,4 +87,4 @@ When **good** broadcasts data to a remote endpoint it sends json that has the fo
 - `appVer` - the version of **good**
 - `timestamp` - the current time of the server
 - `events` - an array of the events that are subscribed to
-    
+

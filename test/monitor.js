@@ -553,7 +553,8 @@ describe('Monitor', function () {
                 subscribers: {
                     'http://localhost:1023/': ['ops']
                 },
-                opsInterval: 100
+                opsInterval: 100,
+                leakDetection: true
             };
 
             makePack(function (pack, server) {
@@ -574,7 +575,8 @@ describe('Monitor', function () {
             var options = {
                 subscribers: {},
                 opsInterval: 100,
-                alwaysMeasureOps: true
+                alwaysMeasureOps: true,
+                leakDetection: true
             };
 
             makePack(function (pack, server) {
@@ -626,6 +628,10 @@ describe('Monitor', function () {
                         cb();
                     },
                     delay: function (cb) {
+
+                        cb();
+                    },
+                    leaks: function (cb) {
 
                         cb();
                     }
