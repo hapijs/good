@@ -239,12 +239,14 @@ describe('Monitor', function () {
         it('sends all events to a remote server subscriber', function (done) {
 
             var remoteServer = new Hapi.Server(0);
-            remoteServer.route({ method: 'POST', path: '/', handler: function (request) {
+            remoteServer.route({
+                method: 'POST', path: '/', handler: function (request) {
 
-                expect(request.payload.appVer).to.exist;
-                expect(request.payload.appVer).to.not.equal('unknown');
-                done();
-            }});
+                    expect(request.payload.appVer).to.exist;
+                    expect(request.payload.appVer).to.not.equal('unknown');
+                    done();
+                }
+            });
 
             var options = {
                 subscribers: {}
@@ -271,17 +273,21 @@ describe('Monitor', function () {
             var remoteServer = new Hapi.Server(0);
             var server = new Hapi.Server(0);
 
-            remoteServer.route({ method: 'POST', path: '/', handler: function (request) {
+            remoteServer.route({
+                method: 'POST', path: '/', handler: function (request) {
 
-                expect(request.payload.events[0].statusCode).to.equal(200);
-                request.reply('Success');
-                done();
-            }});
+                    expect(request.payload.events[0].statusCode).to.equal(200);
+                    request.reply('Success');
+                    done();
+                }
+            });
 
-            server.route({ method: 'GET', path: '/', handler: function (request) {
+            server.route({
+                method: 'GET', path: '/', handler: function (request) {
 
-                request.reply('Success');
-            }});
+                    request.reply('Success');
+                }
+            });
 
             var options = {
                 subscribers: {}
@@ -718,16 +724,15 @@ describe('Monitor', function () {
                         req: {
                             headers: {
                                 'user-agent': 'test'
-                            },
-                            connection: {
-                                remoteAddress: 'hapi.com'
                             }
                         },
                         res: {
 
                         }
                     },
-                    info: {},
+                    info: {
+                        remoteAddress: 'hapi.com'
+                    },
                     server: server
                 };
 
