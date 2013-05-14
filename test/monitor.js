@@ -189,6 +189,41 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
             });
         });
+
+        it('displays request events correctly', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                }
+            };
+
+            var server = new Hapi.Server(0);
+
+            var plugin = {
+                name: 'good',
+                register: require('../lib/index').register,
+                version: '0.0.1'
+            };
+
+            server.pack.register(plugin, options, function () {
+
+                server.start(function () {
+
+                    Hoek.consoleFunc = function (string) {
+
+                        expect(string).to.not.contain('undefined');
+                        expect(string).to.contain('test');
+                    };
+
+                    Request(server.info.uri + '?q=test', function () {
+
+                        Hoek.consoleFunc = console.log;
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('#_broadcastHttp', function () {
