@@ -515,7 +515,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('logs to directory when provided', function (done) {
+        it('logs to a directory when provided', function (done) {
 
             var folderPath = Path.join(__dirname, 'logsdir');
 
