@@ -6,6 +6,7 @@ var Hoek = require('hoek');
 var Path = require('path');
 var Fs = require('fs');
 var Request = require('request');
+var Sinon = require('sinon');
 var Monitor = require('../lib/monitor');
 
 
@@ -461,6 +462,42 @@ describe('Monitor', function () {
             });
         });
 
+        it('sends all events to a log file with an extension', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog1.log');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest + '.001');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('included in output');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
         it('writes to the next file when one already exists', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
@@ -469,6 +506,46 @@ describe('Monitor', function () {
             };
 
             var dest = Path.join(folderPath, 'mylog2');
+
+            if (!Fs.exists(dest + '.001')) {
+                Fs.writeFileSync(dest + '.001', '');
+            }
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest + '.002');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('included in output');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
+        it('writes to the next file when one already exists with extension on destination', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog2.log');
 
             if (!Fs.exists(dest + '.001')) {
                 Fs.writeFileSync(dest + '.001', '');
@@ -543,7 +620,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('doesn\'t overwrite log file with several inital log events', function (done) {
+        it('doesn\'t overwrite log file with several initial log events', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
 
@@ -620,6 +697,68 @@ describe('Monitor', function () {
 
                     Fs.rmdir(folderPath, done);
                 }, 10);
+            });
+        });
+
+        it('sends all events to a log file through multiple log emits', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog5.log');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    server.log('ERROR', 'and another error');
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest + '.001');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('included in output');
+                        expect(result[1].data).to.equal('another error');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
+        it('handles errors with reading a directory', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog6.log');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+                expect(monitor._eventQueues.log).to.exist;
+
+                var execStub = Sinon.stub(Fs, 'readdir');
+                execStub.withArgs(folderPath).callsArgWith(1, new Error());
+
+                server.log('ERROR', 'another error');
+                execStub.restore();
+                done();
             });
         });
     });
