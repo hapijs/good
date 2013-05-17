@@ -674,6 +674,62 @@ describe('Monitor', function () {
             });
         });
 
+        it('handles large amounts of log events with multiple file subscribers', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+
+            var options = {
+                subscribers: {}
+            };
+
+            var dest1 = Path.join(folderPath, 'mylog8.log');
+            var dest2 = Path.join(folderPath, 'mylog9.log');
+
+            options.subscribers[dest1] = { events: ['log'] };
+            options.subscribers[dest2] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                server.log('ERROR', 'here is one more error');
+                server.log('ERROR', 'here is one more error');
+                server.log('ERROR', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+                server.log('MYTAG', 'here is one more error');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    server.log('ERROR', 'another error');
+                    server.log('ERROR', 'another error');
+                    server.log('ERROR', 'another error');
+
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest1 + '.001');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('included in output');
+                        expect(result.length).to.equal(17);
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
         it('doesn\'t overwrite log file with several initial log events', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
