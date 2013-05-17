@@ -461,6 +461,46 @@ describe('Monitor', function () {
             });
         });
 
+        it('writes to the next file when one already exists', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog2');
+
+            if (!Fs.exists(dest + '.001')) {
+                Fs.writeFileSync(dest + '.001', '');
+            }
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest + '.002');
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.equal('included in output');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
         it('splits log files when maxLogSize exceeded', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
@@ -470,7 +510,7 @@ describe('Monitor', function () {
                 maxLogSize: 200
             };
 
-            var dest = Path.join(folderPath, 'mylog2');
+            var dest = Path.join(folderPath, 'mylog3');
 
             options.subscribers[dest] = { events: ['log'] };
 
@@ -511,7 +551,7 @@ describe('Monitor', function () {
                 subscribers: {}
             };
 
-            var dest = Path.join(folderPath, 'mylog3');
+            var dest = Path.join(folderPath, 'mylog4');
 
             options.subscribers[dest] = { events: ['log'] };
 
