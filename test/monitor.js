@@ -349,6 +349,30 @@ describe('Monitor', function () {
                 });
             });
         });
+
+        it('doesn\'t fail when a remote subscriber is unavailable', function (done) {
+
+            var options = {
+                subscribers: {
+                    'http://notfound/server': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastHttp();
+
+                setTimeout(function () {
+
+                    done();
+                }, 100);
+            });
+        });
     });
 
     describe('#_broadcastFile', function () {
