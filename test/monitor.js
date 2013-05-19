@@ -3,9 +3,9 @@
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Http = require('http');
 var Path = require('path');
 var Fs = require('fs');
-var Request = require('request');
 var Sinon = require('sinon');
 var Monitor = require('../lib/monitor');
 
@@ -217,7 +217,7 @@ describe('Monitor', function () {
                         expect(string).to.contain('test');
                     };
 
-                    Request(server.info.uri + '?q=test', function () {
+                    Http.get(server.info.uri + '?q=test', function () {
 
                         Hoek.consoleFunc = console.log;
                         done();
@@ -342,7 +342,7 @@ describe('Monitor', function () {
 
                     server.start(function () {
 
-                        Request(server.info.uri, function () {
+                        Http.get(server.info.uri, function () {
 
                             server.plugins.good.monitor._broadcastHttp();
                         });
