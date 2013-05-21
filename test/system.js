@@ -1,7 +1,6 @@
 // Load modules
 
 var Lab = require('lab');
-var ChildProcess = require('child_process');
 var Fs = require('fs');
 var Sinon = require('sinon');
 var SystemMonitor = require('../lib/system');
@@ -142,74 +141,6 @@ describe('System Monitor', function () {
                 pollStub.restore();
                 expect(stats).to.equal('99.98');
                 expect(err).to.not.exist;
-                done();
-            });
-        });
-    });
-
-    describe('#disk', function () {
-
-        it('returns disk usage information', function (done) {
-
-            var monitor = new SystemMonitor.Monitor();
-
-            var execStub = Sinon.stub(ChildProcess, 'exec');
-            execStub.withArgs('df -m test1').callsArgWith(1, null, 'Filesystem 1M-blocks Used Available Capacity  Mounted on\ntest1 1220 333 1000 100%\n', '');
-
-            monitor.disk('test1', function (err, usage) {
-
-                expect(err).to.not.exist;
-                expect(usage.total).to.equal(1220);
-                expect(usage.free).to.equal(1000);
-                execStub.restore();
-                done();
-            });
-        });
-
-        it('returns disk usage information when target is a function', function (done) {
-
-            var monitor = new SystemMonitor.Monitor();
-
-            var execStub = Sinon.stub(ChildProcess, 'exec');
-            execStub.withArgs('df -m /').callsArgWith(1, null, 'Filesystem 1M-blocks Used Available Capacity  Mounted on\n/ 1220 333 1000 100%\n', '');
-
-            monitor.disk(function (err, usage) {
-
-                expect(err).to.not.exist;
-                expect(usage.total).to.equal(1220);
-                expect(usage.free).to.equal(1000);
-                execStub.restore();
-                done();
-            });
-        });
-
-        it('returns an error when free space greater than total', function (done) {
-
-            var monitor = new SystemMonitor.Monitor();
-
-            var execStub = Sinon.stub(ChildProcess, 'exec');
-            execStub.withArgs('df -m test2').callsArgWith(1, null, 'Filesystem 1M-blocks Used Available Capacity  Mounted on\ntest2 220 333 1000 100%\n', '');
-
-            monitor.disk('test2', function (err, usage) {
-
-                expect(err).to.exist;
-                execStub.restore();
-                done();
-            });
-        });
-
-        it('passes any errors to the callback', function (done) {
-
-            var monitor = new SystemMonitor.Monitor();
-
-            var execStub = Sinon.stub(ChildProcess, 'exec');
-            execStub.withArgs('df -m test3').callsArgWith(1, new Error());
-
-            monitor.disk('test3', function (err, usage) {
-
-                expect(err).to.exist;
-                expect(usage).to.not.exist;
-                execStub.restore();
                 done();
             });
         });
