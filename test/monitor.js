@@ -726,7 +726,53 @@ describe('Monitor', function () {
 
                         done();
                     }, 10);
-                }, 10);
+                }, 20);
+            });
+        });
+
+        it('logs correct events to multiple file subscribers', function (done) {
+
+            var results = {
+                osload: 1,
+                osmem: 20,
+                osup: 50
+            };
+
+            var folderPath = Path.join(__dirname, 'logs');
+
+            var options = {
+                subscribers: {}
+            };
+
+            var dest1 = Path.join(folderPath, 'requestlog.log');
+            var dest2 = Path.join(folderPath, 'opslog.log');
+
+            options.subscribers[dest1] = { events: ['request'] };
+            options.subscribers[dest2] = { events: ['ops'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+                monitor.emit('ops', results);
+
+                server.inject('/', function () {
+
+                    setTimeout(function () {
+
+                        var file1 = Fs.readFileSync(dest1 + '.001');
+                        var formatted1 = file1.toString().split('\n');
+                        var file2 = Fs.readFileSync(dest2 + '.001');
+                        var formatted2 = file2.toString().split('\n');
+
+                        var result1 = JSON.parse('[' + formatted1 + ']');
+                        var result2 = JSON.parse('[' + formatted2 + ']');
+
+                        expect(result1[0].event).to.equal('request');
+                        expect(result2[0].event).to.equal('ops');
+
+                        done();
+                    }, 10);
+                });
             });
         });
 
@@ -939,7 +985,6 @@ describe('Monitor', function () {
 
                 monitor.once('ops', function (event) {
 
-                    expect(event.osdisk.total).to.equal(100);
                     expect(event.osup).to.equal(1000);
                     monitor.stop();
                     done();
@@ -949,10 +994,6 @@ describe('Monitor', function () {
                     cpu: function (cb) {
 
                         cb(null, 1);
-                    },
-                    disk: function (cb) {
-
-                        cb(null, { total: 100, free: 10 });
                     },
                     loadavg: function (cb) {
 
@@ -976,10 +1017,6 @@ describe('Monitor', function () {
                     memory: function (cb) {
 
                         cb(null, { rss: 100 });
-                    },
-                    cpu: function (cb) {
-
-                        cb();
                     },
                     delay: function (cb) {
 
