@@ -25,6 +25,7 @@ optional settings:
 - `requestsEvent` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
+- `requestsTimeout` - the number of milliseconds to set the request timeout to when broadcasting to HTTP subscribers
 - `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration.
 
 For example:
