@@ -79,7 +79,7 @@ describe('Monitor', function () {
         });
     });
 
-    it('doesn\'t throw an error when opsInterval is more than 100', function (done) {
+    it('doesn\'t throw an error when opsInterval is 100', function (done) {
 
         var options = {
             subscribers: {},
@@ -91,6 +91,7 @@ describe('Monitor', function () {
             var fn = function () {
 
                 var monitor = new Monitor(pack, options);
+                monitor.stop();
             };
 
             expect(fn).not.to.throw(Error);
@@ -220,8 +221,43 @@ describe('Monitor', function () {
                     Http.get(server.info.uri + '?q=test', function () {
 
                         Hoek.consoleFunc = console.log;
+                        server.plugins.good.monitor.stop();
                         done();
                     });
+                });
+            });
+        });
+
+        it('displays exceptions in log events correctly', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['log'] }
+                }
+            };
+
+            var server = new Hapi.Server(0);
+
+            var plugin = {
+                name: 'good',
+                register: require('../lib/index').register,
+                version: '0.0.1'
+            };
+
+            server.pack.register(plugin, options, function () {
+
+                server.start(function () {
+
+                    Hoek.consoleFunc = function (string) {
+
+                        expect(string).to.contain('this is my error');
+
+                        Hoek.consoleFunc = console.log;
+                        server.plugins.good.monitor.stop();
+                        done();
+                    };
+
+                    process.emit('uncaughtException', new Error('this is my error'));
                 });
             });
         });
@@ -240,6 +276,7 @@ describe('Monitor', function () {
                 var monitor = new Monitor(pack, options);
 
                 expect(monitor._broadcastHttp()).to.not.exist;
+                monitor.stop();
                 done();
             });
         });
@@ -300,6 +337,7 @@ describe('Monitor', function () {
 
                     server.log('ERROR', 'included in output');
                     monitor._broadcastHttp();
+                    monitor.stop();
                 });
             });
         });
@@ -345,6 +383,7 @@ describe('Monitor', function () {
                         Http.get(server.info.uri, function () {
 
                             server.plugins.good.monitor._broadcastHttp();
+                            server.plugins.good.monitor.stop();
                         });
                     });
                 });
@@ -367,6 +406,7 @@ describe('Monitor', function () {
 
                 server.log('ERROR', 'included in output');
                 monitor._broadcastHttp();
+                monitor.stop();
 
                 setTimeout(function () {
 
@@ -417,11 +457,11 @@ describe('Monitor', function () {
 
                 var fn = function () {
 
+                    monitor.stop();
                     var file = Fs.readFileSync(dest + '.001');
                 };
 
                 expect(fn).to.throw(Error);
-
                 done();
             });
         });
@@ -455,6 +495,7 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -491,6 +532,7 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -531,6 +573,7 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -571,6 +614,7 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -613,6 +657,7 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('here is one more error');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -667,6 +712,7 @@ describe('Monitor', function () {
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
                         expect(result.length).to.equal(17);
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -723,6 +769,7 @@ describe('Monitor', function () {
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
                         expect(result.length).to.equal(17);
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -769,6 +816,7 @@ describe('Monitor', function () {
 
                         expect(result1[0].event).to.equal('request');
                         expect(result2[0].event).to.equal('ops');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -806,6 +854,7 @@ describe('Monitor', function () {
                     var result = JSON.parse('[' + formatted + ']');
                     expect(result[0].data).to.equal('included in output');
                     expect(result[1].data).to.equal('another error');
+                    monitor.stop();
 
                     done();
                 }, 10);
@@ -851,6 +900,7 @@ describe('Monitor', function () {
                         Fs.unlinkSync(Path.join(folderPath, filePath));
                     });
 
+                    monitor.stop();
                     Fs.rmdir(folderPath, done);
                 }, 10);
             });
@@ -886,6 +936,7 @@ describe('Monitor', function () {
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
                         expect(result[1].data).to.equal('another error');
+                        monitor.stop();
 
                         done();
                     }, 10);
@@ -914,6 +965,7 @@ describe('Monitor', function () {
 
                 server.log('ERROR', 'another error');
                 execStub.restore();
+                monitor.stop();
                 done();
             });
         });
@@ -943,6 +995,7 @@ describe('Monitor', function () {
                 expect(event.os.load).to.equal(1);
                 expect(event.os.mem).to.equal(20);
                 expect(event.os.disk).to.equal(30);
+                monitor.stop();
                 done();
             });
         });
@@ -1048,6 +1101,7 @@ describe('Monitor', function () {
 
                 monitor._broadcastHttp = function () {
 
+                    monitor.stop();
                     done();
                 };
 
@@ -1065,6 +1119,8 @@ describe('Monitor', function () {
 
                     monitor._handle('notFound');
                 }).to.throw();
+
+                monitor.stop();
                 done();
             });
         });
@@ -1096,6 +1152,7 @@ describe('Monitor', function () {
 
                 expect(event.event).to.equal('request');
                 expect(event.source.userAgent).to.equal('test');
+                monitor.stop();
                 done();
             });
         });
@@ -1126,6 +1183,7 @@ describe('Monitor', function () {
 
                 expect(event.event).to.equal('request');
                 expect(event.source.remoteAddress).to.equal('hapi.com');
+                monitor.stop();
                 done();
             });
         });
@@ -1167,6 +1225,7 @@ describe('Monitor', function () {
                 expect(event.event).to.equal('request');
                 expect(event.source.userAgent).to.equal('test');
                 expect(event.log).to.deep.equal([item]);
+                monitor.stop();
                 done();
             });
         });
@@ -1198,6 +1257,7 @@ describe('Monitor', function () {
 
                     Hoek.consoleFunc = console.log;
                     expect(string).to.contain('memory');
+                    monitor.stop();
                     done();
                 };
 
@@ -1211,7 +1271,7 @@ describe('Monitor', function () {
                 subscribers: {}
             };
 
-            makePack(function (pack, server) {
+            makePack(function (pack) {
 
                 var monitor = new Monitor(pack, options);
 
@@ -1225,10 +1285,35 @@ describe('Monitor', function () {
 
                     Hoek.consoleFunc = console.log;
                     expect(string).to.contain('testMethod');
+                    monitor.stop();
                     done();
                 };
 
                 monitor._display(events);
+            });
+        });
+
+        it('prints to the log event data for exception events', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack) {
+
+                var monitor = new Monitor(pack, options);
+                var error = new Error('my error');
+                var event = monitor._exception(error);
+
+                Hoek.consoleFunc = function (string) {
+
+                    Hoek.consoleFunc = console.log;
+                    expect(string).to.contain('my error');
+                    monitor.stop();
+                    done();
+                };
+
+                monitor._display([event]);
             });
         });
     });
@@ -1241,13 +1326,36 @@ describe('Monitor', function () {
                 subscribers: {}
             };
 
-            makePack(function (pack, server) {
+            makePack(function (pack) {
 
                 var monitor = new Monitor(pack, options);
 
                 var event = monitor._log()({});
 
                 expect(event.event).to.equal('log');
+                monitor.stop();
+                done();
+            });
+        });
+    });
+
+    describe('#_exception', function () {
+
+        it('returns wrapped errors', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack) {
+
+                var monitor = new Monitor(pack, options);
+                var error = new Error('my error');
+                var event = monitor._exception(error);
+
+                expect(event.event).to.equal('log');
+                expect(event.data).to.equal('my error');
+                monitor.stop();
                 done();
             });
         });
