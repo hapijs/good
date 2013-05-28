@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+
+// Load modules
+
+var Fs = require('fs');
+var Optimist = require('optimist');
+var Replay = require('../lib/replay');
+
+
+// Declare internals
+
+var internals = {};
+
+
+internals.argv = Optimist.usage('Usage: $0 -l log.json -h host -n Concurrent Requests')
+                    .demand(['l', 'h'])
+                    .argv;
+
+
+internals.getLog = function () {
+
+    var log = null;
+    var logPath = internals.argv.l[0] !== '/' ? process.cwd() + '/' + internals.argv.l : internals.argv.l;
+
+    var logFile = Fs.readFileSync(logPath);
+    log = JSON.parse('[' + logFile.toString().split('\n').join(',') + ']');
+
+    return log;
+}
+
+
+internals.start = function () {
+
+    var concurrent = internals.argv.n ? parseInt(internals.argv.n) : 10;
+    var log = internals.getLog();
+    var replay = new Replay(internals.argv.h, concurrent, log);
+    replay();
+};
+
+internals.start();
