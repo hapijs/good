@@ -26,7 +26,7 @@ optional settings:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
 - `requestsTimeout` - the number of milliseconds to set the request timeout to when broadcasting to HTTP subscribers
-- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration.
+- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, function name, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration.
 
 For example:
 
@@ -75,6 +75,22 @@ var options = {
     subscribers: {
         '/logs/good_log': { tags: ['error'], events: ['log'] },     // Creates good_log.001 file in /logs/
         '/logs/': { events: ['request'] }                           // Creates {timestamp}.001 file in /logs/
+    }
+};
+```
+
+Function subscribers have a _name_ and a _handler_. The _name_ may be any unique string. The _handler_ is a _function_ that accepts one argument for the _event_.
+
+```javascript
+var options = {
+    subscribers: {
+        statsd: {
+            tags: ['stat'],
+            events: ['log', 'request'],
+            handler: function (event) {
+                // TODO: send a metric to statsd
+            }
+        }
     }
 };
 ```
