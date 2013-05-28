@@ -89,3 +89,10 @@ When **good** broadcasts data to a remote endpoint it sends json that has the fo
 - `timestamp` - the current time of the server
 - `events` - an array of the events that are subscribed to
 
+
+### Replaying request logs
+
+Good includes a _'replay'_ script that is capabale of replaying any request events found in a log file.  Below is the command to use to execute _'replay'_:
+
+`replay -l log.json -h host -n #_of_concurrent_requests`
+
