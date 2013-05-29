@@ -919,6 +919,59 @@ describe('Monitor', function () {
         });
     });
 
+    describe('#_broadcastHandler', function () {
+        it('calls the handler function with the event object', function (done) {
+
+            var options = {
+                subscribers: {
+                    myFunc: {
+                        events: ['request'],
+                        handler: function (event) {
+                            expect(event.event).to.equal('request');
+                            expect(event.timestamp).to.exist;
+                            done();
+                        }
+                    }
+                }
+            };
+
+            var server = new Hapi.Server(0);
+
+            var plugin = {
+                name: 'good',
+                register: require('../lib/index').register,
+                version: '0.0.1'
+            };
+
+            server.pack.register(plugin, options, function () {
+
+                server.start(function () {
+                    Http.get(server.info.uri + '?q=test', function () {});
+                });
+            });
+        });
+
+        it('does nothing if handler is not a function', function (done) {
+            var options = {
+                subscribers: {
+                    myFunc: {
+                        events: ['request'],
+                        handler: 'invalid'
+                    }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._subscriberQueues.handler['myFunc']).to.exist;
+                expect(monitor._broadcastHandler()).to.not.throw;
+                done();
+            });
+        });
+    });
+
     describe('#_ops', function () {
 
         it('sets the event with the result data correctly', function (done) {
