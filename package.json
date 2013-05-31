@@ -24,7 +24,6 @@
     "hoek": "0.9.x",
     "async": "0.2.x",
     "memwatch": "0.2.x",
-    "hapi": "1.x.x",
     "optimist": "x.x.x"
   },
   "peerDependencies": {
