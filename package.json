@@ -30,6 +30,7 @@
     "hapi": "1.x.x"
   },
   "devDependencies": {
+    "hapi": "1.x.x",
     "sinon": "1.x.x",
     "lab": "0.1.x",
     "complexity-report": "0.x.x"
