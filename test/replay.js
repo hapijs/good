@@ -48,7 +48,7 @@ describe('Replay', function () {
             };
 
             var replay = new Replay('127.0.0.1:' + server.address().port, 10, data);
-            replay();
+            replay.makeRequests();
         });
 
         server.listen(0);
@@ -83,7 +83,7 @@ describe('Replay', function () {
             };
 
             var replay = new Replay('127.0.0.1:' + server.address().port, 10, data);
-            replay();
+            replay.makeRequests();
         });
 
         server.listen(0);
@@ -116,7 +116,7 @@ describe('Replay', function () {
             };
 
             var replay = new Replay('127.0.0.1:' + server.address().port, 10, data);
-            replay();
+            replay.makeRequests();
         });
 
         server.listen(0);

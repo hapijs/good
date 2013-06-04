@@ -34,7 +34,8 @@ internals.start = function () {
     var concurrent = internals.argv.n ? parseInt(internals.argv.n) : 10;
     var log = internals.getLog();
     var replay = new Replay(internals.argv.h, concurrent, log);
-    replay();
+
+    replay.makeRequests();
 };
 
 internals.start();
