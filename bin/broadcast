@@ -32,12 +32,11 @@ internals.getLog = function (logPath, start, callback) {
     stream.once('readable', function () {
 
         var log = stream.read();
-        stream.close();
         var events = log.toString().split('\n');
         var lastEvent = events[events.length - 1];
         var length = log.length;
 
-        if (lastEvent[lastEvent.length - 1] !== '}') {
+        if (lastEvent[lastEvent.length - 1] !== '}') {                                      // Handle any incomplete events in the log
             events.pop();
             length -= Buffer.byteLength(lastEvent);
         }
