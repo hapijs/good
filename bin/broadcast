@@ -1,0 +1,98 @@
+#!/usr/bin/env node
+
+// Load modules
+
+var Fs = require('fs');
+var Hoek = require('hoek');
+var Http = require('http');
+var Optimist = require('optimist');
+var Os = require('os');
+var Url = require('url');
+
+
+// Declare internals
+
+var internals = {
+    lastIndex: 0,
+    schemaName: 'good.v1',
+    host: Os.hostname(),
+    appVer: Hoek.loadPackage(__dirname + '/..').version || 'unknown'                        // Look up a level to get the package.json page
+};
+
+
+internals.argv = Optimist.usage('Usage: $0 -l file.log -u url -i broadcastInterval')
+                    .demand(['l', 'u'])
+                    .argv;
+
+
+internals.getLog = function (logPath, start, callback) {
+
+    var stream = Fs.createReadStream(logPath, { start: start });
+
+    stream.once('readable', function () {
+
+        var log = stream.read();
+        var events = log.toString().split('\n');
+        var lastEvent = events[events.length - 1];
+        var length = log.length;
+
+        if (lastEvent[lastEvent.length - 1] !== '}') {                                      // Handle any incomplete events in the log
+            events.pop();
+            length -= Buffer.byteLength(lastEvent);
+        }
+
+        callback(length, events);
+    });
+};
+
+
+internals.broadcast = function (log) {
+
+    if (!log.length) {
+        return;
+    }
+
+    var envelope = {
+        schema: internals.schemaName,
+        host: internals.host,
+        appVer: internals.appVer,
+        timestamp: Date.now(),
+        events: log
+    };
+
+    internals.request(JSON.stringify(envelope));
+};
+
+
+internals.request = function (payload) {
+
+    var req = Http.request(internals.requestOptions);
+    req.on('error', function (err) {
+
+        console.log(err);
+    });
+
+    req.end(payload);
+};
+
+
+internals.start = function () {
+
+    var logPath = internals.argv.l[0] !== '/' ? process.cwd() + '/' + internals.argv.l : internals.argv.l;
+    var interval = internals.argv.i ? parseInt(internals.argv.i) : 10000;
+    var start = 0;
+    internals.requestOptions = Url.parse(internals.argv.u);
+    internals.requestOptions.method = 'POST';
+    internals.requestOptions.headers = { 'content-type': 'application/json' };
+
+    setInterval(function () {
+
+        internals.getLog(logPath, start, function (bytes, log) {
+
+            start += bytes;
+            internals.broadcast(log);
+        });
+    }, interval);
+};
+
+internals.start();
