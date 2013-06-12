@@ -450,7 +450,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.001');
+                        var file = Fs.readFileSync(dest);
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
@@ -486,7 +486,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.001');
+                        var file = Fs.readFileSync(dest);
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
@@ -502,7 +502,8 @@ describe('Monitor', function () {
 
             var folderPath = Path.join(__dirname, 'logs');
             var options = {
-                subscribers: {}
+                subscribers: {},
+                maxLogSize: 100000
             };
 
             var dest = Path.join(folderPath, 'mylog2');
@@ -542,7 +543,8 @@ describe('Monitor', function () {
 
             var folderPath = Path.join(__dirname, 'logs');
             var options = {
-                subscribers: {}
+                subscribers: {},
+                maxLogSize: 100000
             };
 
             var dest = Path.join(folderPath, 'mylog2.log');
@@ -661,7 +663,7 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.001');
+                        var file = Fs.readFileSync(dest);
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
@@ -717,7 +719,7 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest1 + '.001');
+                        var file = Fs.readFileSync(dest1);
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
@@ -759,9 +761,9 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file1 = Fs.readFileSync(dest1 + '.001');
+                        var file1 = Fs.readFileSync(dest1);
                         var formatted1 = file1.toString().split('\n');
-                        var file2 = Fs.readFileSync(dest2 + '.001');
+                        var file2 = Fs.readFileSync(dest2);
                         var formatted2 = file2.toString().split('\n');
 
                         var result1 = JSON.parse('[' + formatted1 + ']');
@@ -800,7 +802,7 @@ describe('Monitor', function () {
 
                 setTimeout(function () {
 
-                    var file = Fs.readFileSync(dest + '.001');
+                    var file = Fs.readFileSync(dest);
                     var formatted = file.toString().split('\n');
 
                     var result = JSON.parse('[' + formatted + ']');
@@ -880,7 +882,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'and another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.001');
+                        var file = Fs.readFileSync(dest);
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
