@@ -29,19 +29,19 @@ internals.getLog = function (logPath, start, callback) {
 
     var stream = Fs.createReadStream(logPath, { start: start });
 
-    stream.once('readable', function () {
+    stream.on('readable', function () {
 
         var log = stream.read();
         var events = log.toString().split('\n');
         var lastEvent = events[events.length - 1];
-        var length = log.length;
+        var bytesRead = log.length;
 
         if (lastEvent[lastEvent.length - 1] !== '}') {                                      // Handle any incomplete events in the log
             events.pop();
-            length -= Buffer.byteLength(lastEvent);
+            bytesRead -= Buffer.byteLength(lastEvent);
         }
 
-        callback(length, events);
+        callback(bytesRead, events);
     });
 };
 
@@ -87,10 +87,17 @@ internals.start = function () {
 
     setInterval(function () {
 
-        internals.getLog(logPath, start, function (bytes, log) {
+        Fs.stat(logPath, function (err, stat) {
 
-            start += bytes;
-            internals.broadcast(log);
+            if (!err && !stat.size) {
+                start = 0;
+            }
+
+            internals.getLog(logPath, start, function (bytesRead, log) {
+
+                start += bytesRead;
+                internals.broadcast(log);
+            });
         });
     }, interval);
 };

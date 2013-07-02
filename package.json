@@ -1,7 +1,7 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "author": "Van Nguyen <the.gol.effect@gmail.com>",
   "contributors":[
     "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
@@ -24,7 +24,7 @@
     "hoek": "0.9.x",
     "async": "0.2.x",
     "memwatch": "0.2.x",
-    "optimist": "x.x.x"
+    "optimist": "0.x.x"
   },
   "peerDependencies": {
     "hapi": "1.x.x"
