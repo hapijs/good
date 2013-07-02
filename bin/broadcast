@@ -16,13 +16,12 @@ var internals = {
     lastIndex: 0,
     schemaName: 'good.v1',
     host: Os.hostname(),
+    lastIndexPath: __dirname + '/.lastBroadcast',
     appVer: Hoek.loadPackage(__dirname + '/..').version || 'unknown'                        // Look up a level to get the package.json page
 };
 
 
-internals.argv = Optimist.usage('Usage: $0 -l file.log -u url -i broadcastInterval')
-                    .demand(['l', 'u'])
-                    .argv;
+internals.argv = Optimist.usage('Usage: $0 -c config.json -l file.log -u url -i broadcastInterval -p usePreviousIndex').argv;
 
 
 internals.getLog = function (logPath, start, callback) {
@@ -41,7 +40,14 @@ internals.getLog = function (logPath, start, callback) {
             bytesRead -= Buffer.byteLength(lastEvent);
         }
 
-        callback(bytesRead, events);
+        var result = [];
+        for (var i = 0, il = events.length; i < il; ++i) {
+            if (events[i]) {
+                result.push(events[i]);
+            }
+        }
+
+        callback(bytesRead, result);
     });
 };
 
@@ -69,37 +75,68 @@ internals.request = function (payload) {
     var req = Http.request(internals.requestOptions);
     req.on('error', function (err) {
 
-        console.log(err);
+        console.error(err);
     });
 
     req.end(payload);
 };
 
 
+internals.getConfig = function () {
+
+    if (internals.argv.c) {
+        var configFile = Fs.readFileSync(internals.argv.c);
+        return JSON.parse(configFile.toString());
+    }
+
+    return {
+        url: internals.argv.u,
+        path: internals.argv.l[0] !== '/' ? process.cwd() + '/' + internals.argv.l : internals.argv.l,
+        interval: internals.argv.i ? parseInt(internals.argv.i) : 10000,
+        useLastIndex: internals.argv.p !== undefined ? !!internals.argv.p : true
+    };
+};
+
+
 internals.start = function () {
 
-    var logPath = internals.argv.l[0] !== '/' ? process.cwd() + '/' + internals.argv.l : internals.argv.l;
-    var interval = internals.argv.i ? parseInt(internals.argv.i) : 10000;
     var start = 0;
-    internals.requestOptions = Url.parse(internals.argv.u);
+    var config = internals.getConfig();
+
+    if (config.useLastIndex && Fs.existsSync(internals.lastIndexPath)) {
+        var lastContents = Fs.readFileSync(internals.lastIndexPath).toString().split('\n');
+        start = parseInt(lastContents[lastContents.length - 1]);
+        start = isNaN(start) ? 0 : start;
+        Fs.truncateSync(internals.lastIndexPath);
+    }
+
+    var lastIndexStream = config.useLastIndex ? Fs.createWriteStream(internals.lastIndexPath) : null;
+    internals.requestOptions = Url.parse(config.url);
     internals.requestOptions.method = 'POST';
     internals.requestOptions.headers = { 'content-type': 'application/json' };
 
     setInterval(function () {
 
-        Fs.stat(logPath, function (err, stat) {
+        Fs.stat(config.path, function (err, stat) {
 
             if (!err && !stat.size) {
                 start = 0;
             }
 
-            internals.getLog(logPath, start, function (bytesRead, log) {
+            internals.getLog(config.path, start, function (bytesRead, log) {
 
                 start += bytesRead;
                 internals.broadcast(log);
+                lastIndexStream && lastIndexStream.write(start.toString(), function (err) {
+
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                });
             });
         });
-    }, interval);
+    }, config.interval);
 };
 
 internals.start();
