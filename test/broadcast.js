@@ -24,85 +24,129 @@ var it = Lab.test;
 describe('Broadcast', function () {
 
     var broadcastPath = Path.join(__dirname, '..', 'bin', 'broadcast');
-    var logPath = Path.join(__dirname, 'request_log_test.001');
-    var data = '{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],' +
-        '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}\n{"event":"request","timestamp"' +
-        ':1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test","query":{},"source":' +
-        '{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}';
+    var lastBroadcastPath = Path.join(__dirname, '..', 'bin', '.lastBroadcast');
+    var logPath1 = Path.join(__dirname, 'request_log_test.001');
+    var logPath2 = Path.join(__dirname, 'request_log_test.002');
+    var logPath3 = Path.join(__dirname, 'request_log_test.003');
+    var logPath4 = Path.join(__dirname, 'request_log_test.004');
+    var logPath5 = Path.join(__dirname, 'request_log_test.005');
+    var data1 = '{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],' +
+        '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}';
+    var data2 = '{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],' +
+        '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}';
 
     before(function (done) {
 
-        if (Fs.existsSync(logPath)) {
-            Fs.unlinkSync(logPath);
+        if (Fs.existsSync(logPath1)) {
+            Fs.unlinkSync(logPath1);
         }
 
-        Fs.writeFile(logPath, data, done);
+        if (Fs.existsSync(logPath2)) {
+            Fs.unlinkSync(logPath2);
+        }
+
+        if (Fs.existsSync(logPath3)) {
+            Fs.unlinkSync(logPath3);
+        }
+
+        if (Fs.existsSync(logPath4)) {
+            Fs.unlinkSync(logPath4);
+        }
+
+        if (Fs.existsSync(logPath5)) {
+            Fs.unlinkSync(logPath5);
+        }
+
+        done();
     });
 
     after(function (done) {
 
-        if (Fs.existsSync(logPath)) {
-            Fs.unlink(logPath, done);
+        if (Fs.existsSync(logPath1)) {
+            Fs.unlink(logPath1, done);
+        }
+
+        if (Fs.existsSync(logPath2)) {
+            Fs.unlink(logPath2, done);
+        }
+
+        if (Fs.existsSync(logPath3)) {
+            Fs.unlink(logPath3, done);
+        }
+
+        if (Fs.existsSync(logPath4)) {
+            Fs.unlink(logPath4, done);
+        }
+
+        if (Fs.existsSync(logPath5)) {
+            Fs.unlink(logPath5, done);
+        }
+
+        if (Fs.existsSync(lastBroadcastPath)) {
+            Fs.unlinkSync(lastBroadcastPath);
         }
     });
 
     it('sends log file to remote server', function (done) {
 
-        var broadcast = null;
-        var server = Http.createServer(function (req, res) {
+        var stream = Fs.createWriteStream(logPath1, { flags: 'a' });
+        stream.write(data1, function () {
+        stream.write('\n' + data2, function () {
 
-            var result = '';
-            req.on('data', function (data) {
+            var broadcast = null;
+            var server = Http.createServer(function (req, res) {
 
-                result += data.toString();
+                var result = '';
+                req.on('data', function (data) {
+
+                    result += data.toString();
+                });
+
+                req.once('end', function () {
+
+                    var obj = JSON.parse(result);
+
+                    expect(obj.schema).to.equal('good.v1');
+                    expect(obj.events[1]).to.equal('{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080",' +
+                        '"labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}');
+
+                    broadcast.kill(0);
+                    done();
+                });
+
+                res.end();
+            }).listen(0);
+
+            server.once('listening', function () {
+
+                var url = 'http://127.0.0.1:' + server.address().port + '/';
+
+                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath1, '-u', url, '-i', 5, '-p', 0]);
+                broadcast.stderr.on('data', function (data) {
+
+                    expect(data.toString()).to.not.exist;
+                });
+
+                broadcast.once('close', function (code) {
+
+                    expect(code).to.equal(0);
+                });
             });
-
-            req.once('end', function () {
-
-                var obj = JSON.parse(result);
-
-                expect(obj.schema).to.equal('good.v1');
-                expect(obj.events[1]).to.equal('{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080",' +
-                    '"labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}');
-
-                broadcast.kill();
-                done();
-            });
-
-            res.end();
-        }).listen(0);
-
-        server.once('listening', function () {
-
-            var url = 'http://127.0.0.1:' + server.address().port + '/';
-
-            broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath, '-u', url, '-i', 5]);
-            broadcast.stderr.on('data', function (data) {
-
-                expect(data).to.not.exist;
-            });
-
-            broadcast.once('close', function (code) {
-
-                expect(code).to.equal(0);
-            });
+        });
         });
     });
 
     it('handles a log file that grows', function (done) {
 
-        var logPathGrow = Path.join(__dirname, 'request_log_test.002');
-        var nextData = '{"event":"request","timestamp"' +
+        var nextData = '\n{"event":"request","timestamp"' +
             ':1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test2","query":{},"source":' +
             '{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}';
         var broadcast = null;
         var runCount = 0;
 
-        if (Fs.existsSync(logPathGrow)) {
-            Fs.unlinkSync(logPathGrow);
-        }
-        var stream = Fs.createWriteStream(logPathGrow, { flags: 'a' });
-        stream.write(data, function () {
+        var stream = Fs.createWriteStream(logPath2, { flags: 'a' });
+        stream.write(data1, function () {
+        stream.write('\n' + data2, function () {
 
             var server = Http.createServer(function (req, res) {
 
@@ -126,11 +170,8 @@ describe('Broadcast', function () {
                         expect(obj.events[0]).to.equal('{"event":"request","timestamp":1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080",' +
                             '"labels":["api","http"],"method":"get","path":"/test2","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}');
 
-                        broadcast.kill();
-
-                        if (Fs.existsSync(logPathGrow)) {
-                            Fs.unlink(logPathGrow, done);
-                        }
+                        broadcast.kill(0);
+                        done();
                     }
                 });
 
@@ -141,10 +182,10 @@ describe('Broadcast', function () {
 
                 var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPathGrow, '-u', url, '-i', 5]);
+                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath2, '-u', url, '-i', 5, '-p', 0]);
                 broadcast.stderr.on('data', function (data) {
 
-                    expect(data).to.not.exist;
+                    expect(data.toString()).to.not.exist;
                 });
 
                 broadcast.once('close', function (code) {
@@ -155,25 +196,23 @@ describe('Broadcast', function () {
                 setTimeout(function () {
 
                     stream.write(nextData, function () {});
-                }, 150);
+                }, 100);
             });
+        });
         });
     });
 
     it('handles a log file that gets truncated', function (done) {
 
-        var logPathGrow = Path.join(__dirname, 'request_log_test.003');
         var nextData = '{"event":"request","timestamp"' +
             ':1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test2","query":{},"source":' +
             '{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}';
         var broadcast = null;
         var runCount = 0;
 
-        if (Fs.existsSync(logPathGrow)) {
-            Fs.unlinkSync(logPathGrow);
-        }
-        var stream = Fs.createWriteStream(logPathGrow, { flags: 'a' });
-        stream.write(data, function () {
+        var stream = Fs.createWriteStream(logPath3, { flags: 'a' });
+        stream.write(data1, function () {
+        stream.write('\n' + data2, function () {
 
             var server = Http.createServer(function (req, res) {
 
@@ -197,11 +236,8 @@ describe('Broadcast', function () {
                         expect(obj.events[0]).to.equal('{"event":"request","timestamp":1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080",' +
                             '"labels":["api","http"],"method":"get","path":"/test2","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}');
 
-                        broadcast.kill();
-
-                        if (Fs.existsSync(logPathGrow)) {
-                            Fs.unlink(logPathGrow, done);
-                        }
+                        broadcast.kill(0);
+                        done();
                     }
                 });
 
@@ -212,10 +248,10 @@ describe('Broadcast', function () {
 
                 var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPathGrow, '-u', url, '-i', 5]);
+                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath3, '-u', url, '-i', 5, '-p', 0]);
                 broadcast.stderr.on('data', function (data) {
 
-                    expect(data).to.not.exist;
+                    expect(data.toString()).to.not.exist;
                 });
 
                 broadcast.once('close', function (code) {
@@ -225,10 +261,155 @@ describe('Broadcast', function () {
 
                 setTimeout(function () {
 
-                    var stat = Fs.statSync(logPathGrow);
-                    Fs.truncateSync(logPathGrow, stat.size);
+                    var stat = Fs.statSync(logPath3);
+                    Fs.truncateSync(logPath3, stat.size);
                     stream.write(nextData, function () {});
                 }, 150);
+            });
+        });
+        });
+    });
+
+    it('works when broadcast process is restarted', function (done) {
+
+        var nextData = '\n{"event":"request","timestamp"' +
+            ':1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test2","query":{},"source":' +
+            '{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}';
+        var broadcast1 = null;
+        var broadcast2 = null;
+        var url = null;
+        var runCount = 0;
+
+        var stream = Fs.createWriteStream(logPath4, { flags: 'a' });
+        stream.write(data1, function () {
+        stream.write('\n' + data2, function () {
+
+            var server = Http.createServer(function (req, res) {
+
+                var result = '';
+                req.on('data', function (data) {
+
+                    result += data.toString();
+                });
+
+                req.once('end', function () {
+
+                    var obj = JSON.parse(result);
+
+                    expect(obj.schema).to.equal('good.v1');
+
+                    if (runCount++ === 0) {
+                        expect(obj.events[1]).to.equal('{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080",' +
+                            '"labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}');
+                    }
+                    else {
+                        expect(obj.events[0]).to.equal('{"event":"request","timestamp":1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080",' +
+                            '"labels":["api","http"],"method":"get","path":"/test2","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}');
+
+                        broadcast2.kill(0);
+                        done();
+                    }
+                });
+
+                res.end();
+            }).listen(0);
+
+            server.once('listening', function () {
+
+                url = 'http://127.0.0.1:' + server.address().port + '/';
+
+                broadcast1 = ChildProcess.spawn('node', [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
+                broadcast1.stderr.on('data', function (data) {
+
+                    expect(data.toString()).to.not.exist;
+                });
+
+                broadcast1.once('close', function (code) {
+
+                    expect(code).to.equal(0);
+                });
+
+                setTimeout(function () {
+
+                    broadcast1.kill(0);
+                    broadcast2 = ChildProcess.spawn('node', [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
+                    broadcast2.stderr.on('data', function (data) {
+
+                        expect(data.toString()).to.not.exist;
+                    });
+
+                    broadcast2.once('close', function (code) {
+
+                        expect(code).to.equal(0);
+                    });
+
+                    stream.write(nextData, function () {});
+                }, 200);
+            });
+        });
+        });
+    });
+
+    it('sends log file to remote server using a config file', function (done) {
+
+        var configPath = __dirname + '/broadcast.json';
+        var stream = Fs.createWriteStream(logPath5, { flags: 'a' });
+
+        stream.write(data1, function () {
+            stream.write('\n' + data2, function () {
+
+                var broadcast = null;
+                var server = Http.createServer(function (req, res) {
+
+                    var result = '';
+                    req.on('data', function (data) {
+
+                        result += data.toString();
+                    });
+
+                    req.once('end', function () {
+
+                        var obj = JSON.parse(result);
+
+                        expect(obj.schema).to.equal('good.v1');
+                        expect(obj.events[1]).to.equal('{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080",' +
+                            '"labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}');
+
+                        Fs.unlinkSync(configPath);
+                        broadcast.kill(0);
+                        done();
+                    });
+
+                    res.end();
+                }).listen(0);
+
+                server.once('listening', function () {
+
+                    var url = 'http://127.0.0.1:' + server.address().port + '/';
+                    var configObj = {
+                        url: url,
+                        path: logPath5,
+                        interval: 5,
+                        useLastIndex: false
+                    };
+
+                    Fs.writeFileSync(configPath, JSON.stringify(configObj));
+                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', configPath]);
+                    broadcast.stderr.on('data', function (data) {
+
+                        expect(data.toString()).to.not.exist;
+                    });
+
+                    broadcast.stdout.on('data', function (data) {
+
+                        console.log(data.toString());
+                    });
+
+                    broadcast.once('close', function (code) {
+
+                        expect(code).to.equal(0);
+                    });
+                });
             });
         });
     });
