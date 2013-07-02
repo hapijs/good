@@ -261,8 +261,7 @@ describe('Broadcast', function () {
 
                 setTimeout(function () {
 
-                    var stat = Fs.statSync(logPath3);
-                    Fs.truncateSync(logPath3, stat.size);
+                    Fs.truncateSync(logPath3, data1.length + data2.length + 1);
                     stream.write(nextData, function () {});
                 }, 150);
             });
