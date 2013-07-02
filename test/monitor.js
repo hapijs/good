@@ -498,6 +498,43 @@ describe('Monitor', function () {
             });
         });
 
+        it('handles logging to file when event queue is empty', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog_empty.log');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastFile();
+
+                setTimeout(function () {
+
+                    server.log('ERROR', 'another error');
+                    setTimeout(function () {
+
+                        var file = Fs.readFileSync(dest);
+                        var formatted = file.toString().split('\n');
+
+                        var result = JSON.parse('[' + formatted + ']');
+                        expect(result[1].data).to.equal('another error');
+
+                        done();
+                    }, 10);
+                }, 10);
+            });
+        });
+
         it('writes to the next file when one already exists', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
