@@ -53,7 +53,11 @@ internals.getLog = function (logPath, start, callback) {
         for (var i = 0, il = events.length; i < il; ++i) {
             var event = events[i];
             if (event && event[0] === '{' && event[event.length - 1] === '}') {
-                result.push(JSON.parse(event));
+                try {
+                    result.push(JSON.parse(event));
+                } catch (err) {
+                    console.error(err);
+                }
             }
         }
 
