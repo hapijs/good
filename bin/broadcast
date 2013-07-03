@@ -17,7 +17,11 @@ var internals = {
     schemaName: 'good.v1',
     host: Os.hostname(),
     lastIndexPath: __dirname + '/.lastBroadcast',
-    appVer: Hoek.loadPackage(__dirname + '/..').version || 'unknown'                        // Look up a level to get the package.json page
+    appVer: Hoek.loadPackage(__dirname + '/..').version || 'unknown',                       // Look up a level to get the package.json page
+    defaults: {
+        useLastIndex: true,
+        interval: 10000
+    }
 };
 
 
@@ -27,11 +31,16 @@ internals.argv = Optimist.usage('Usage: $0 -c config.json -l file.log -u url -i 
 internals.getLog = function (logPath, start, callback) {
 
     var stream = Fs.createReadStream(logPath, { start: start });
+    var log = '';
 
     stream.on('readable', function () {
 
-        var log = stream.read();
-        var events = log.toString().split('\n');
+        log += stream.read().toString('ascii');
+    });
+
+    stream.once('end', function () {
+
+        var events = log.split('\n');
         var lastEvent = events[events.length - 1];
         var bytesRead = log.length;
 
@@ -42,8 +51,9 @@ internals.getLog = function (logPath, start, callback) {
 
         var result = [];
         for (var i = 0, il = events.length; i < il; ++i) {
-            if (events[i]) {
-                result.push(events[i]);
+            var event = events[i];
+            if (event && event[0] === '{' && event[event.length - 1] === '}') {
+                result.push(JSON.parse(event));
             }
         }
 
@@ -78,7 +88,8 @@ internals.request = function (payload) {
         console.error(err);
     });
 
-    req.end(payload);
+    req.write(payload);
+    req.end();
 };
 
 
@@ -102,6 +113,7 @@ internals.start = function () {
 
     var start = 0;
     var config = internals.getConfig();
+    config = Hoek.applyToDefaults(internals.defaults, config);
 
     if (config.useLastIndex && Fs.existsSync(internals.lastIndexPath)) {
         var lastContents = Fs.readFileSync(internals.lastIndexPath).toString().split('\n');
@@ -114,6 +126,7 @@ internals.start = function () {
     internals.requestOptions = Url.parse(config.url);
     internals.requestOptions.method = 'POST';
     internals.requestOptions.headers = { 'content-type': 'application/json' };
+    internals.requestOptions.agent = false;
 
     setInterval(function () {
 
