@@ -73,7 +73,7 @@ internals.broadcast = function (log) {
         host: internals.host,
         appVer: internals.appVer,
         timestamp: Date.now(),
-        events: log,
+        events: log
     };
 
     internals.request(JSON.stringify(envelope));
