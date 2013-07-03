@@ -197,7 +197,7 @@ describe('Broadcast', function () {
                 setTimeout(function () {
 
                     stream.write(nextData, function () {});
-                }, 100);
+                }, 150);
             });
         });
         });
