@@ -39,8 +39,7 @@ var options = {
     }
 };
 
-hapi.plugin.require('good', options, function (err) {
-
+hapiServer.pack.require('good', options, function (err) {
     if (!err) {
         // Plugin loaded successfully
     }
