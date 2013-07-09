@@ -16,7 +16,7 @@ var internals = {
     lastIndex: 0,
     schemaName: 'good.v1',
     host: Os.hostname(),
-    lastIndexPath: __dirname + '/.lastBroadcast',
+    lastIndexPath: __dirname + '/lastBroadcast',
     appVer: Hoek.loadPackage(__dirname + '/..').version || 'unknown',                       // Look up a level to get the package.json page
     defaults: {
         useLastIndex: true,
@@ -136,7 +136,12 @@ internals.start = function () {
 
         Fs.stat(config.path, function (err, stat) {
 
-            if (!err && !stat.size) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+
+            if (stat.size < start) {
                 start = 0;
             }
 
