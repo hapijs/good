@@ -31,6 +31,10 @@ optional settings:
 For example:
 
 ```javascript
+var Hapi = require('hapi');
+
+var server = new Hapi.Server();
+
 var options = {
     subscribers: {
         console: ['ops', 'request', 'log'],
@@ -39,7 +43,7 @@ var options = {
     }
 };
 
-hapi.plugin.require('good', options, function (err) {
+server.pack.require('good', options, function (err) {
 
     if (!err) {
         // Plugin loaded successfully
