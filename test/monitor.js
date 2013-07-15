@@ -623,7 +623,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {},
-                maxLogSize: 200
+                maxLogSize: 180
             };
 
             var dest = Path.join(folderPath, 'mylog3');
@@ -709,7 +709,7 @@ describe('Monitor', function () {
 
                         done();
                     }, 10);
-                }, 10);
+                }, 20);
             });
         });
 
@@ -761,7 +761,7 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
-                        expect(result.length).to.equal(17);
+                        expect(result.length).to.be.greaterThan(12);
 
                         done();
                     }, 10);
@@ -810,7 +810,7 @@ describe('Monitor', function () {
                         expect(result2[0].event).to.equal('ops');
 
                         done();
-                    }, 10);
+                    }, 20);
                 });
             });
         });
@@ -847,7 +847,7 @@ describe('Monitor', function () {
                     expect(result[1].data).to.equal('another error');
 
                     done();
-                }, 10);
+                }, 20);
             });
         });
 
