@@ -217,7 +217,7 @@ describe('Monitor', function () {
                         expect(string).to.contain('test');
                     };
 
-                    Http.get(server.info.uri + '?q=test', function () {
+                    Http.get('http://127.0.0.1:' + server.info.port + '/?q=test', function () {
 
                         Hoek.consoleFunc = console.log;
                         done();
@@ -290,7 +290,7 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers['http://127.0.0.1:' + remoteServer.info.port + '/'] = { events: ['log'] };
+                options.subscribers['http://127.0.0.1:' + remoteServer.info.port] = { events: ['log'] };
 
                 makePack(function (pack, server) {
 
@@ -331,7 +331,7 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers[remoteServer.info.uri] = { events: ['request'] };
+                options.subscribers['http://127.0.0.1:' + remoteServer.info.port] = { events: ['request'] };
                 var plugin = {
                     name: 'good',
                     register: require('../lib/index').register,
