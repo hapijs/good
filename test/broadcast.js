@@ -314,7 +314,7 @@ describe('Broadcast', function () {
                     else {
                         expect(obj.events.length).to.be.greaterThan(0)
 
-                        broadcast2.kill(0);
+                        broadcast2 && broadcast2.kill(0);
                         done();
                     }
                 });
