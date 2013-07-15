@@ -623,7 +623,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {},
-                maxLogSize: 180
+                maxLogSize: 200
             };
 
             var dest = Path.join(folderPath, 'mylog3');
