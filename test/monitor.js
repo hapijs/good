@@ -342,7 +342,7 @@ describe('Monitor', function () {
 
                     server.start(function () {
 
-                        Http.get(server.info.uri, function () {
+                        Http.get('http://127.0.0.1:' + server.info.port, function () {
 
                             server.plugins.good.monitor._broadcastHttp();
                         });
