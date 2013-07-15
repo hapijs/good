@@ -1,9 +1,11 @@
 // Load modules
 
 var Lab = require('lab');
+var ChildProcess = require('child_process');
+var Fs = require('fs');
+var Path = require('path');
 var Hoek = require('hoek');
 var Http = require('http');
-var Replay = require('../lib/replay');
 
 
 // Declare internals
@@ -19,107 +21,136 @@ var after = Lab.after;
 var describe = Lab.experiment;
 var it = Lab.test;
 
-
 describe('Replay', function () {
+
+    var replayPath = Path.join(__dirname, '..', 'bin', 'replay');
+    var logPath1 = Path.join(__dirname, 'replay.001');
+    var data1 = '{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],' +
+        '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}';
+    var data2 = '{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],' +
+        '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}';
+
+    before(function (done) {
+
+        if (Fs.existsSync(logPath1)) {
+            Fs.unlinkSync(logPath1);
+        }
+
+        done();
+    });
+
+    after(function (done) {
+
+        if (Fs.existsSync(logPath1)) {
+            Fs.unlink(logPath1, done);
+        }
+    });
 
     it('makes a request to the provided good log requests', function (done) {
 
-        var data = [{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200},
-            {"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}];
+        var replay = null;
+        var stream = Fs.createWriteStream(logPath1, { flags: 'a' });
+        stream.write(data1, function () {
+            stream.write('\n' + data2, function () {
 
-        var server = Http.createServer(function (req, res) {
+                var server = Http.createServer(function (req, res) {
 
-            expect(req.url).to.equal('/test');
-            res.end('Content-Type: text/plain');
-            server.close();
+                    expect(req.url).to.equal('/test');
+                    res.end('Content-Type: text/plain');
+                    replay.kill(0);
 
-            done();
+                    done();
+                });
+
+                server.once('listening', function () {
+
+                    var url = 'http://127.0.0.1:' + server.address().port + '/';
+
+                    replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
+                    replay.stderr.on('data', function (data) {
+
+                        expect(data.toString()).to.not.exist;
+                    });
+
+                    replay.once('close', function (code) {
+
+                        expect(code).to.equal(0);
+                    });
+                });
+
+                server.listen(0);
+            });
         });
-
-
-        server.once('listening', function () {
-
-            var count = 3;                                                  // consume the 3 entries logged by replay
-            Hoek.consoleFunc = function (string) {
-
-                if (count-- === 0) {
-                    Hoek.consoleFunc = console.log;
-                }
-            };
-
-            var replay = new Replay('127.0.0.1:' + server.address().port, 10, data);
-            replay.makeRequests();
-        });
-
-        server.listen(0);
     });
 
     it('handles request errors', function (done) {
 
-        var data = [{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}];
+        var replay = null;
+        var stream = Fs.createWriteStream(logPath1, { flags: 'a' });
+        stream.write(data1, function () {
+            stream.write('\n' + data2, function () {
 
-        var server = Http.createServer(function (req, res) {
+                var server = Http.createServer(function (req, res) {
 
-            var exit = process.exit;
+                    req.socket.destroy();
+                });
 
-            process.exit = function () {
+                server.once('listening', function () {
 
-                process.exit = exit;
-                done();
-            };
+                    var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-            req.socket.destroy();
+                    replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
+                    replay.stderr.on('data', function (data) {
+
+                        expect(data.toString()).to.exist;
+                        replay.kill();
+                        done();
+                    });
+
+                    replay.once('close', function (code) {
+
+                        expect(code).to.equal(0);
+                    });
+                });
+
+                server.listen(0);
+            });
         });
-
-
-        server.once('listening', function () {
-
-            var count = 3;
-            Hoek.consoleFunc = function (string) {
-
-                if (count-- === 0) {
-                    Hoek.consoleFunc = console.log;
-                }
-            };
-
-            var replay = new Replay('127.0.0.1:' + server.address().port, 10, data);
-            replay.makeRequests();
-        });
-
-        server.listen(0);
     });
 
     it('handles response errors', function (done) {
 
-        var data = [{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}];
+        var replay = null;
+        var stream = Fs.createWriteStream(logPath1, { flags: 'a' });
+        stream.write(data1, function () {
+            stream.write('\n' + data2, function () {
 
-        var server = Http.createServer(function (req, res) {
+                var server = Http.createServer(function (req, res) {
 
-            res.destroy();
+                    res.socket.destroy();
+                });
 
-            setTimeout(function () {
+                server.once('listening', function () {
 
-                done();
-            }, 10);
+                    var url = 'http://127.0.0.1:' + server.address().port + '/';
+
+                    replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
+                    replay.stderr.on('data', function (data) {
+
+                        expect(data.toString()).to.exist;
+                        replay.kill();
+                        done();
+                    });
+
+                    replay.once('close', function (code) {
+
+                        expect(code).to.equal(0);
+                    });
+                });
+
+                server.listen(0);
+            });
         });
-
-
-        server.once('listening', function () {
-
-            var count = 3;
-            Hoek.consoleFunc = function (string) {
-
-                if (count-- === 0) {
-                    Hoek.consoleFunc = console.log;
-                    console.log('\n');                                                  // add a newline after last item for pretty test output
-                }
-            };
-
-            var replay = new Replay('127.0.0.1:' + server.address().port, 10, data);
-            replay.makeRequests();
-        });
-
-        server.listen(0);
     });
 });
 

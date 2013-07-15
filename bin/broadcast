@@ -113,6 +113,18 @@ internals.getConfig = function () {
 };
 
 
+internals.logLastIndex = function (lastIndexStream, start) {
+
+    lastIndexStream.write('\n' + start.toString(), function (err) {
+
+        if (err) {
+            console.error(err);
+            return;
+        }
+    });
+};
+
+
 internals.start = function () {
 
     var start = 0;
@@ -149,13 +161,9 @@ internals.start = function () {
 
                 start += bytesRead;
                 internals.broadcast(log);
-                lastIndexStream && lastIndexStream.write(start.toString(), function (err) {
-
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                });
+                if (lastIndexStream) {
+                    internals.logLastIndex(lastIndexStream, start);
+                }
             });
         });
     }, config.interval);
