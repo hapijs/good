@@ -405,11 +405,6 @@ describe('Broadcast', function () {
                         expect(data.toString()).to.not.exist;
                     });
 
-                    broadcast.stdout.on('data', function (data) {
-
-                        console.log(data.toString());
-                    });
-
                     broadcast.once('close', function (code) {
 
                         expect(code).to.equal(0);
