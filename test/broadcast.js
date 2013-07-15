@@ -229,9 +229,13 @@ describe('Broadcast', function () {
             var server = Http.createServer(function (req, res) {
 
                 var result = '';
-                req.on('data', function (data) {
+                req.on('readable', function () {
 
-                    result += data.toString();
+                    var read = req.read();
+
+                    if (read) {
+                        result += read.toString();
+                    }
                 });
 
                 req.once('end', function () {

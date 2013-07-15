@@ -956,6 +956,70 @@ describe('Monitor', function () {
                 done();
             });
         });
+
+        it('handles the error when destination file exists', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {},
+                maxLogSize: 0
+            };
+
+            var dest = Path.join(folderPath, 'mylog7.log.001');
+
+            if (Fs.exists(dest)) {
+                Fs.unlinkSync(dest);
+            }
+
+            var s = Fs.openSync(dest, 'wx+');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    done();
+                }, 20);
+            });
+        });
+
+        it('handles the error when directory doesn\'t exist', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {},
+                maxLogSize: 100
+            };
+
+            var dest = Path.join(folderPath, 'mylogpath/');
+
+            if (Fs.exists(dest)) {
+                Fs.unlinkSync(dest);
+            }
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    done();
+                }, 20);
+            });
+        });
     });
 
     describe('#_ops', function () {
