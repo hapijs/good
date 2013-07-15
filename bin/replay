@@ -2,9 +2,11 @@
 
 // Load modules
 
+var Hoek = require('hoek');
 var Fs = require('fs');
 var Optimist = require('optimist');
-var Replay = require('../lib/replay');
+var Http = require('http');
+var Url = require('url');
 
 
 // Declare internals
@@ -12,8 +14,8 @@ var Replay = require('../lib/replay');
 var internals = {};
 
 
-internals.argv = Optimist.usage('Usage: $0 -l log.json -h host -n Concurrent Requests')
-                    .demand(['l', 'h'])
+internals.argv = Optimist.usage('Usage: $0 -l log.json -u url -n Concurrent Requests')
+                    .demand(['l', 'u'])
                     .argv;
 
 
@@ -28,14 +30,91 @@ internals.getLog = function () {
     return log;
 }
 
+internals.parseUrls = function (url, entries) {
+
+    var urls = [];
+    for (var i = 0, il = entries.length; i < il; ++i) {
+        var entry = entries[i];
+        if (entry.event === 'request' && entry.method === 'get') {
+            if (entry.path) {
+                url.path = entry.path;
+                url.query = entry.query;
+                urls.push(url);
+            }
+        }
+    }
+
+    return urls;
+};
+
+internals.handleResponse = function (response) {
+
+    response.once('data', function () { });
+
+    response.once('error', function () {
+
+        Hoek.consoleFunc('error for: ' + response.req.path);
+        response.destroy();
+    });
+
+    response.once('finish', function () {
+
+        internals.makeRequest();
+    });
+};
+
+
+internals.makeRequest = function () {
+
+    var url = internals.urls.pop();
+
+    while (!url) {
+        if (!internals.urls.length) {
+            return;
+        }
+
+        url = internals.urls.pop();
+    }
+
+    Hoek.consoleFunc(url);
+    var req = Http.get(url, function (res) {
+
+        internals.handleResponse(res);
+    });
+
+    req.once('error', function (err) {
+
+        Hoek.consoleFunc(err);
+        internals.makeRequest();
+    });
+
+    req.once('finish', function () {
+
+        internals.makeRequest();
+    });
+};
+
+
+internals.makeRequests = function () {
+
+    Http.globalAgent.maxSockets = internals.availableSockets;
+    Hoek.consoleFunc('Total requests to make: ' + internals.urls.length);
+    Hoek.consoleFunc('Making requests...');
+
+    for (var i = 0, il = (internals.urls.length > internals.availableSockets ? internals.availableSockets : internals.urls.length); i < il; ++i) {
+
+        internals.makeRequest();
+    }
+};
+
 
 internals.start = function () {
 
-    var concurrent = internals.argv.n ? parseInt(internals.argv.n) : 10;
+    internals.availableSockets = internals.argv.n ? parseInt(internals.argv.n) : 10;
     var log = internals.getLog();
-    var replay = new Replay(internals.argv.h, concurrent, log);
+    internals.urls = internals.parseUrls(Url.parse(internals.argv.u), log)
 
-    replay.makeRequests();
+    internals.makeRequests();
 };
 
 internals.start();

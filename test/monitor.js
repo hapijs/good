@@ -217,7 +217,7 @@ describe('Monitor', function () {
                         expect(string).to.contain('test');
                     };
 
-                    Http.get(server.info.uri + '?q=test', function () {
+                    Http.get('http://127.0.0.1:' + server.info.port + '/?q=test', function () {
 
                         Hoek.consoleFunc = console.log;
                         done();
@@ -290,7 +290,7 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers[remoteServer.info.uri] = { events: ['log'] };
+                options.subscribers['http://127.0.0.1:' + remoteServer.info.port] = { events: ['log'] };
 
                 makePack(function (pack, server) {
 
@@ -331,7 +331,7 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers[remoteServer.info.uri] = { events: ['request'] };
+                options.subscribers['http://127.0.0.1:' + remoteServer.info.port] = { events: ['request'] };
                 var plugin = {
                     name: 'good',
                     register: require('../lib/index').register,
@@ -342,7 +342,7 @@ describe('Monitor', function () {
 
                     server.start(function () {
 
-                        Http.get(server.info.uri, function () {
+                        Http.get('http://127.0.0.1:' + server.info.port, function () {
 
                             server.plugins.good.monitor._broadcastHttp();
                         });
@@ -623,7 +623,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {},
-                maxLogSize: 200
+                maxLogSize: 180
             };
 
             var dest = Path.join(folderPath, 'mylog3');
@@ -708,8 +708,8 @@ describe('Monitor', function () {
                         expect(result.length).to.equal(17);
 
                         done();
-                    }, 10);
-                }, 10);
+                    }, 20);
+                }, 30);
             });
         });
 
@@ -761,11 +761,11 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[0].data).to.equal('included in output');
-                        expect(result.length).to.equal(17);
+                        expect(result.length).to.be.greaterThan(12);
 
                         done();
-                    }, 10);
-                }, 20);
+                    }, 20);
+                }, 30);
             });
         });
 
@@ -810,7 +810,7 @@ describe('Monitor', function () {
                         expect(result2[0].event).to.equal('ops');
 
                         done();
-                    }, 10);
+                    }, 20);
                 });
             });
         });
@@ -847,7 +847,7 @@ describe('Monitor', function () {
                     expect(result[1].data).to.equal('another error');
 
                     done();
-                }, 10);
+                }, 30);
             });
         });
 
@@ -954,6 +954,70 @@ describe('Monitor', function () {
                 server.log('ERROR', 'another error');
                 execStub.restore();
                 done();
+            });
+        });
+
+        it('handles the error when destination file exists', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {},
+                maxLogSize: 0
+            };
+
+            var dest = Path.join(folderPath, 'mylog7.log.001');
+
+            if (Fs.exists(dest)) {
+                Fs.unlinkSync(dest);
+            }
+
+            var s = Fs.openSync(dest, 'wx+');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    done();
+                }, 20);
+            });
+        });
+
+        it('handles the error when directory doesn\'t exist', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {},
+                maxLogSize: 100
+            };
+
+            var dest = Path.join(folderPath, 'mylogpath/');
+
+            if (Fs.exists(dest)) {
+                Fs.unlinkSync(dest);
+            }
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+
+                setTimeout(function () {
+
+                    done();
+                }, 20);
             });
         });
     });

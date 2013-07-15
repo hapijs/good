@@ -72,32 +72,34 @@ describe('Broadcast', function () {
     after(function (done) {
 
         if (Fs.existsSync(logPath1)) {
-            Fs.unlink(logPath1, done);
+            Fs.unlinkSync(logPath1);
         }
 
         if (Fs.existsSync(logPath2)) {
-            Fs.unlink(logPath2, done);
+            Fs.unlinkSync(logPath2);
         }
 
         if (Fs.existsSync(logPath3)) {
-            Fs.unlink(logPath3, done);
+            Fs.unlinkSync(logPath3);
         }
 
         if (Fs.existsSync(logPath4)) {
-            Fs.unlink(logPath4, done);
+            Fs.unlinkSync(logPath4);
         }
 
         if (Fs.existsSync(logPath5)) {
-            Fs.unlink(logPath5, done);
+            Fs.unlinkSync(logPath5);
         }
 
         if (Fs.existsSync(logPath6)) {
-            Fs.unlink(logPath6, done);
+            Fs.unlinkSync(logPath6);
         }
 
         if (Fs.existsSync(lastBroadcastPath)) {
             Fs.unlinkSync(lastBroadcastPath);
         }
+
+        done();
     });
 
     it('sends log file to remote server', function (done) {
@@ -227,9 +229,13 @@ describe('Broadcast', function () {
             var server = Http.createServer(function (req, res) {
 
                 var result = '';
-                req.on('data', function (data) {
+                req.on('readable', function () {
 
-                    result += data.toString();
+                    var read = req.read();
+
+                    if (read) {
+                        result += read.toString();
+                    }
                 });
 
                 req.once('end', function () {
@@ -312,7 +318,7 @@ describe('Broadcast', function () {
                     else {
                         expect(obj.events.length).to.be.greaterThan(0)
 
-                        broadcast2.kill(0);
+                        broadcast2 && broadcast2.kill(0);
                         done();
                     }
                 });
@@ -405,11 +411,6 @@ describe('Broadcast', function () {
                         expect(data.toString()).to.not.exist;
                     });
 
-                    broadcast.stdout.on('data', function (data) {
-
-                        console.log(data.toString());
-                    });
-
                     broadcast.once('close', function (code) {
 
                         expect(code).to.equal(0);
@@ -458,7 +459,7 @@ describe('Broadcast', function () {
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
                     broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath6, '-u', url, '-i', 5, '-p', 0]);
-                    broadcast.stderr.on('data', function (data) {
+                    broadcast.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.exist;
                         broadcast.kill(0);
