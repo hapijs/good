@@ -290,7 +290,7 @@ describe('Monitor', function () {
 
             remoteServer.start(function () {
 
-                options.subscribers[remoteServer.info.uri] = { events: ['log'] };
+                options.subscribers['http://127.0.0.1:' + remoteServer.info.port + '/'] = { events: ['log'] };
 
                 makePack(function (pack, server) {
 
@@ -708,8 +708,8 @@ describe('Monitor', function () {
                         expect(result.length).to.equal(17);
 
                         done();
-                    }, 10);
-                }, 20);
+                    }, 20);
+                }, 30);
             });
         });
 
@@ -764,8 +764,8 @@ describe('Monitor', function () {
                         expect(result.length).to.be.greaterThan(12);
 
                         done();
-                    }, 10);
-                }, 20);
+                    }, 20);
+                }, 30);
             });
         });
 
@@ -847,7 +847,7 @@ describe('Monitor', function () {
                     expect(result[1].data).to.equal('another error');
 
                     done();
-                }, 20);
+                }, 30);
             });
         });
 
