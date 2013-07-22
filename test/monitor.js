@@ -168,7 +168,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {
-                    'console': { tags: ['ERROR', 'WARNING'], events: ['log'] }
+                    'console': { tags: ['ERROR', 'WARNING'], events: ['log', 'error'] }
                 }
             };
 
@@ -215,13 +215,49 @@ describe('Monitor', function () {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
+                        Hoek.consoleFunc = console.log;
+                        done();
                     };
 
-                    Http.get('http://127.0.0.1:' + server.info.port + '/?q=test', function () {
+                    Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
+                });
+            });
+        });
+
+        it('displays error events correctly', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['error'] }
+                }
+            };
+
+            var server = new Hapi.Server(0);
+            server.route({ method: 'GET', path: '/err', handler: function (request) {
+
+                request.reply(new Hapi.error.internal('my error'))
+            }});
+
+            var plugin = {
+                name: 'good',
+                register: require('../lib/index').register,
+                version: '0.0.1'
+            };
+
+            server.pack.register(plugin, options, function () {
+
+                server.start(function () {
+
+                    Hoek.consoleFunc = function (string) {
+
+                        expect(string).to.contain('my error');
+                        expect(string).to.contain('internalError')
 
                         Hoek.consoleFunc = console.log;
                         done();
-                    });
+                    };
+
+                    Http.get('http://127.0.0.1:' + server.info.port + '/err');
                 });
             });
         });
@@ -891,7 +927,7 @@ describe('Monitor', function () {
                     });
 
                     Fs.rmdir(folderPath, done);
-                }, 10);
+                }, 20);
             });
         });
 

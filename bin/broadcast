@@ -146,24 +146,31 @@ internals.start = function () {
 
     setInterval(function () {
 
-        Fs.stat(config.path, function (err, stat) {
+        Fs.exists(config.path, function (exists) {
 
-            if (err) {
-                console.error(err);
+            if (!exists) {
                 return;
             }
 
-            if (stat.size < start) {
-                start = 0;
-            }
+            Fs.stat(config.path, function (err, stat) {
 
-            internals.getLog(config.path, start, function (bytesRead, log) {
-
-                start += bytesRead;
-                internals.broadcast(log);
-                if (lastIndexStream) {
-                    internals.logLastIndex(lastIndexStream, start);
+                if (err) {
+                    console.error(err);
+                    return;
                 }
+
+                if (stat.size < start) {
+                    start = 0;
+                }
+
+                internals.getLog(config.path, start, function (bytesRead, log) {
+
+                    start += bytesRead;
+                    internals.broadcast(log);
+                    if (lastIndexStream) {
+                        internals.logLastIndex(lastIndexStream, start);
+                    }
+                });
             });
         });
     }, config.interval);

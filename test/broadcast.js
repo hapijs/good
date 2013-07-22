@@ -342,8 +342,11 @@ describe('Broadcast', function () {
                 });
 
                 setTimeout(function () {
-
                     broadcast1.kill(0);
+                }, 1);
+
+                setTimeout(function () {
+
                     broadcast2 = ChildProcess.spawn('node', [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
                     broadcast2.stderr.on('data', function (data) {
 
@@ -356,7 +359,7 @@ describe('Broadcast', function () {
                     });
 
                     stream.write(nextData, function () {});
-                }, 200);
+                }, 100);
             });
         });
         });

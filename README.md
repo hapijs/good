@@ -8,10 +8,11 @@
 The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
 
 
-**good** is a process monitor for three types of events:
+**good** is a process monitor for the following types of events:
 - System and process performance (ops) - CPU, memory, disk, and other metrics.
 - Requests logging (request) - framework and application generated logs generated during the lifecycle of each incoming request.
 - General events (log) - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Described in [General Events Logging](#general-events-logging).
+- Internal errors (error) - request responses that have a status code of 500.  Descibed in the [server events documentation](http://spumko.github.io/resource/api/#server-events).
 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination as general events
 are a process-wide facility and will result in duplicated log events. To override some or all of the defaults, set `options` to an object with the following
