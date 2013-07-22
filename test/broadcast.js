@@ -112,9 +112,12 @@ describe('Broadcast', function () {
             var server = Http.createServer(function (req, res) {
 
                 var result = '';
-                req.on('data', function (data) {
+                req.on('readable', function () {
 
-                    result += data.toString();
+                    var read = req.read();
+                    if (read) {
+                        result += read.toString();
+                    }
                 });
 
                 req.once('end', function () {
@@ -165,9 +168,12 @@ describe('Broadcast', function () {
             var server = Http.createServer(function (req, res) {
 
                 var result = '';
-                req.on('data', function (data) {
+                req.on('readable', function () {
 
-                    result += data.toString();
+                    var read = req.read();
+                    if (read) {
+                        result += read.toString();
+                    }
                 });
 
                 req.once('end', function () {
@@ -232,7 +238,6 @@ describe('Broadcast', function () {
                 req.on('readable', function () {
 
                     var read = req.read();
-
                     if (read) {
                         result += read.toString();
                     }
@@ -301,9 +306,12 @@ describe('Broadcast', function () {
             var server = Http.createServer(function (req, res) {
 
                 var result = '';
-                req.on('data', function (data) {
+                req.on('readable', function () {
 
-                    result += data.toString();
+                    var read = req.read();
+                    if (read) {
+                        result += read.toString();
+                    }
                 });
 
                 req.once('end', function () {
@@ -319,8 +327,7 @@ describe('Broadcast', function () {
                         expect(obj.events.length).to.be.greaterThan(0)
 
                         broadcast2 && broadcast2.kill(0);
-                        broadcast2 && done();
-                        broadcast2 = null;
+                        done()
                     }
                 });
 
@@ -378,9 +385,12 @@ describe('Broadcast', function () {
                 var server = Http.createServer(function (req, res) {
 
                     var result = '';
-                    req.on('data', function (data) {
+                    req.on('readable', function () {
 
-                        result += data.toString();
+                        var read = req.read();
+                        if (read) {
+                            result += read.toString();
+                        }
                     });
 
                     req.once('end', function () {
@@ -439,9 +449,12 @@ describe('Broadcast', function () {
                 var server = Http.createServer(function (req, res) {
 
                     var result = '';
-                    req.on('data', function (data) {
+                    req.on('readable', function () {
 
-                        result += data.toString();
+                        var read = req.read();
+                        if (read) {
+                            result += read.toString();
+                        }
                     });
 
                     req.once('end', function () {
