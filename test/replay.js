@@ -42,8 +42,10 @@ describe('Replay', function () {
     after(function (done) {
 
         if (Fs.existsSync(logPath1)) {
-            Fs.unlink(logPath1, done);
+            Fs.unlinkSync(logPath1);
         }
+
+        done();
     });
 
     it('makes a request to the provided good log requests', function (done) {
@@ -58,8 +60,6 @@ describe('Replay', function () {
                     expect(req.url).to.equal('/test');
                     res.end('Content-Type: text/plain');
                     replay.kill(0);
-
-                    done();
                 });
 
                 server.once('listening', function () {
@@ -67,15 +67,12 @@ describe('Replay', function () {
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
                     replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
-                    replay.stderr.on('data', function (data) {
+                    replay.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.not.exist;
                     });
 
-                    replay.once('close', function (code) {
-
-                        expect(code).to.equal(0);
-                    });
+                    replay.once('close', done);
                 });
 
                 server.listen(0);
@@ -100,16 +97,11 @@ describe('Replay', function () {
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
                     replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
-                    replay.stderr.on('data', function (data) {
+                    replay.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.exist;
-                        replay.kill();
+                        replay.kill(0);
                         done();
-                    });
-
-                    replay.once('close', function (code) {
-
-                        expect(code).to.equal(0);
                     });
                 });
 
@@ -135,16 +127,11 @@ describe('Replay', function () {
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
                     replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
-                    replay.stderr.on('data', function (data) {
+                    replay.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.exist;
-                        replay.kill();
+                        replay.kill(0);
                         done();
-                    });
-
-                    replay.once('close', function (code) {
-
-                        expect(code).to.equal(0);
                     });
                 });
 
