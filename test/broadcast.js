@@ -328,7 +328,8 @@ describe('Broadcast', function () {
                         expect(obj.events.length).to.be.greaterThan(0)
 
                         broadcast2 && broadcast2.kill(0);
-                        done()
+                        done();
+                        done = function () {};
                     }
                 });
 
