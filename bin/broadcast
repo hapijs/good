@@ -30,15 +30,22 @@ internals.argv = Optimist.usage('Usage: $0 -c config.json -l file.log -u url -i 
 
 internals.getLog = function (logPath, start, callback) {
 
-    var stream = Fs.createReadStream(logPath, { start: start });
     var log = '';
+    var stream = Fs.createReadStream(logPath, { start: start });
 
     stream.on('readable', function () {
 
-        log += stream.read().toString('ascii');
+        var read = stream.read();
+        if (read) {
+            log += read.toString('ascii');
+        }
     });
 
     stream.once('end', function () {
+
+        if (!log) {
+            return callback(0, []);
+        }
 
         var events = log.split('\n');
         var lastEvent = events[events.length - 1];

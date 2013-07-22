@@ -224,14 +224,13 @@ describe('Broadcast', function () {
     it('handles a log file that gets truncated', function (done) {
 
         var nextData = '{"event":"request","timestamp"' +
-            ':1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],"method":"get","path":"/test2","query":{},"source":' +
+            ':1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080","labels":["http"],"method":"get","path":"/","query":{},"source":' +
             '{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}';
         var broadcast = null;
         var runCount = 0;
 
         var stream = Fs.createWriteStream(logPath3, { flags: 'a' });
         stream.write(data1, function () {
-        stream.write('\n' + data2, function () {
 
             var server = Http.createServer(function (req, res) {
 
@@ -251,7 +250,7 @@ describe('Broadcast', function () {
                     expect(obj.schema).to.equal('good.v1');
 
                     if (runCount++ === 0) {
-                        expect(obj.events[1].id).to.equal('1369328753222-42369-62002');
+                        expect(obj.events[0].id).to.equal('1369328752975-42369-3828');
                     }
                     else {
                         expect(obj.events[0].id).to.equal('1469328953222-42369-62002');
@@ -274,6 +273,11 @@ describe('Broadcast', function () {
                     expect(data.toString()).to.not.exist;
                 });
 
+                broadcast.stdout.on('data', function (data) {
+
+                    console.log(data.toString());
+                });
+
                 broadcast.once('close', function (code) {
 
                     expect(code).to.equal(0);
@@ -281,11 +285,16 @@ describe('Broadcast', function () {
 
                 setTimeout(function () {
 
-                    Fs.truncateSync(logPath3, data1.length + data2.length + 1);
-                    stream.write(nextData, function () {});
+                    Fs.stat(logPath3, function (err, stat) {
+
+                        Fs.truncate(logPath3, stat.size, function (err) {
+
+                            expect(err).to.not.exist;
+                            Fs.writeFileSync(logPath3, nextData);
+                        });
+                    });
                 }, 100);
             });
-        });
         });
     });
 
