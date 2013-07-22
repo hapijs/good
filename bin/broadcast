@@ -113,15 +113,36 @@ internals.getConfig = function () {
 };
 
 
-internals.logLastIndex = function (lastIndexStream, start) {
+internals.logLastIndex = function (start) {
 
-    lastIndexStream.write('\n' + start.toString(), function (err) {
+    var truncate = function (next) {
 
-        if (err) {
-            console.error(err);
-            return;
-        }
-    });
+        Fs.exists(internals.lastIndexPath, function (exists) {
+
+            if (!exists) {
+                return next();
+            }
+
+            Fs.stat(internals.lastIndexPath, function (err, stat) {
+
+                Fs.truncate(internals.lastIndexPath, stat.size, next);
+            });
+        });
+    };
+
+    var log = function () {
+
+        var lastIndexStream = Fs.createWriteStream(internals.lastIndexPath);
+        lastIndexStream.write('\n' + start.toString(), function (err) {
+
+            if (err) {
+                console.error(err);
+                return;
+            }
+        });
+    };
+
+    truncate(log);
 };
 
 
@@ -138,7 +159,6 @@ internals.start = function () {
         Fs.truncateSync(internals.lastIndexPath);
     }
 
-    var lastIndexStream = config.useLastIndex ? Fs.createWriteStream(internals.lastIndexPath) : null;
     internals.requestOptions = Url.parse(config.url);
     internals.requestOptions.method = 'POST';
     internals.requestOptions.headers = { 'content-type': 'application/json' };
@@ -167,8 +187,8 @@ internals.start = function () {
 
                     start += bytesRead;
                     internals.broadcast(log);
-                    if (lastIndexStream) {
-                        internals.logLastIndex(lastIndexStream, start);
+                    if (config.useLastIndex) {
+                        internals.logLastIndex(start);
                     }
                 });
             });
