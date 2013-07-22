@@ -283,7 +283,7 @@ describe('Broadcast', function () {
 
                     Fs.truncateSync(logPath3, data1.length + data2.length + 1);
                     stream.write(nextData, function () {});
-                }, 150);
+                }, 100);
             });
         });
         });
