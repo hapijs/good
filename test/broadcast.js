@@ -320,6 +320,7 @@ describe('Broadcast', function () {
 
                         broadcast2 && broadcast2.kill(0);
                         broadcast2 && done();
+                        broadcast2 = null;
                     }
                 });
 
