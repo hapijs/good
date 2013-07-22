@@ -293,7 +293,7 @@ describe('Broadcast', function () {
                             Fs.writeFileSync(logPath3, nextData);
                         });
                     });
-                }, 100);
+                }, 150);
             });
         });
     });
@@ -378,7 +378,7 @@ describe('Broadcast', function () {
                     });
 
                     stream.write(nextData, function () {});
-                }, 100);
+                }, 150);
             });
         });
         });
