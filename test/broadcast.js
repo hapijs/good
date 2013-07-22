@@ -129,6 +129,7 @@ describe('Broadcast', function () {
 
                     broadcast.kill(0);
                     done();
+                    done = function () {};
                 });
 
                 res.end();
