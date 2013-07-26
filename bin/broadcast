@@ -41,6 +41,13 @@ internals.getLog = function (logPath, start, callback) {
         }
     });
 
+    stream.on('error', function (err) {
+
+        console.error(err);
+        stream.removeAllListeners();
+        callback(0, []);
+    });
+
     stream.once('end', function () {
 
         if (!log) {
@@ -93,7 +100,18 @@ internals.broadcast = function (log) {
 
 internals.request = function (payload) {
 
-    var req = Http.request(internals.requestOptions);
+    var req = Http.request(internals.requestOptions, function (res) {
+
+        res.on('error', function (err) {
+
+            console.error(err);
+        });
+
+        res.on('readable', function () {
+
+            res.read();                                                                     // Prevent mem leak
+        });
+    });
     req.on('error', function (err) {
 
         console.error(err);
@@ -132,6 +150,11 @@ internals.logLastIndex = function (start) {
 
             Fs.stat(internals.lastIndexPath, function (err, stat) {
 
+                if (err) {
+                    console.error(err);
+                    return next();
+                }
+
                 Fs.truncate(internals.lastIndexPath, stat.size, next);
             });
         });
@@ -140,6 +163,13 @@ internals.logLastIndex = function (start) {
     var log = function () {
 
         var lastIndexStream = Fs.createWriteStream(internals.lastIndexPath);
+
+        lastIndexStream.on('error', function (err) {
+
+            console.error(err);
+            lastIndexStream.removeAllListeners();
+        });
+
         lastIndexStream.write('\n' + start.toString(), function (err) {
 
             if (err) {
@@ -155,6 +185,10 @@ internals.logLastIndex = function (start) {
 
 internals.start = function () {
 
+    process.once('SIGUSR2', function () {
+
+        process.exit(0);
+    });
     var start = 0;
     var config = internals.getConfig();
     config = Hoek.applyToDefaults(internals.defaults, config);
