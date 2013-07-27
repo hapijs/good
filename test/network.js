@@ -1,6 +1,7 @@
 // Load modules
 
 var Lab = require('lab');
+var Hoek = require('hoek');
 var Events = require('events');
 var NetworkMonitor = require('../lib/network');
 
@@ -26,8 +27,10 @@ describe('Network Monitor', function () {
         var emitter = new Events.EventEmitter();
         var network = new NetworkMonitor.Monitor(emitter);
 
-        emitter.emit('request', null, { tags: ['received']});
-        emitter.emit('request', null, { tags: ['received']});
+        var tags = ['hapi', 'received'];
+        var tagsMap = Hoek.mapToObject(tags);
+        emitter.emit('request', null, { tags: tags }, tagsMap);
+        emitter.emit('request', null, { tags: tags }, tagsMap);
         emitter.emit('response');
 
         network.requests(function (err, result) {
