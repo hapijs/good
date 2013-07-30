@@ -1124,48 +1124,10 @@ describe('Monitor', function () {
 
                 monitor.once('ops', function (event) {
 
-                    expect(event.osup).to.equal(1000);
+                    expect(event.osup).to.be.greaterThan(0);
                     monitor.stop();
                     done();
                 });
-
-                monitor._os = {
-                    cpu: function (cb) {
-
-                        cb(null, 1);
-                    },
-                    loadavg: function (cb) {
-
-                        cb();
-                    },
-                    mem: function (cb) {
-
-                        cb();
-                    },
-                    uptime: function (cb) {
-
-                        cb(null, 1000);
-                    }
-                };
-
-                monitor._process = {
-                    uptime: function (cb) {
-
-                        cb(null, 1000);
-                    },
-                    memory: function (cb) {
-
-                        cb(null, { rss: 100 });
-                    },
-                    delay: function (cb) {
-
-                        cb();
-                    },
-                    leaks: function (cb) {
-
-                        cb();
-                    }
-                };
             });
         });
     });

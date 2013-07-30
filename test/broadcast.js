@@ -32,6 +32,7 @@ describe('Broadcast', function () {
     var logPath5 = Path.join(__dirname, 'request_log_test.005');
     var logPath6 = Path.join(__dirname, 'request_log_test.006');
     var logPath7 = Path.join(__dirname, 'request_log_test.007');
+    var broadcastJsonPath = Path.join(__dirname, 'broadcast.json');
     var data1 = '{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],' +
         '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}';
     var data2 = '{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],' +
@@ -71,6 +72,10 @@ describe('Broadcast', function () {
             Fs.unlinkSync(logPath7);
         }
 
+        if (Fs.existsSync(broadcastJsonPath)) {
+            Fs.unlinkSync(broadcastJsonPath);
+        }
+
         done();
     });
 
@@ -102,6 +107,10 @@ describe('Broadcast', function () {
 
         if (Fs.existsSync(logPath7)) {
             Fs.unlinkSync(logPath7);
+        }
+
+        if (Fs.existsSync(broadcastJsonPath)) {
+            Fs.unlinkSync(broadcastJsonPath);
         }
 
         if (Fs.existsSync(lastBroadcastPath)) {
@@ -392,7 +401,6 @@ describe('Broadcast', function () {
 
     it('sends log file to remote server using a config file', function (done) {
 
-        var configPath = __dirname + '/broadcast.json';
         var stream = Fs.createWriteStream(logPath5, { flags: 'a' });
 
         stream.write(data1, function () {
@@ -417,7 +425,7 @@ describe('Broadcast', function () {
                         expect(obj.schema).to.equal('good.v1');
                         expect(obj.events[1].id).to.equal('1369328753222-42369-62002');
 
-                        Fs.unlinkSync(configPath);
+                        Fs.unlinkSync(broadcastJsonPath);
                         broadcast.kill('SIGUSR2');
                     });
 
@@ -434,8 +442,8 @@ describe('Broadcast', function () {
                         useLastIndex: false
                     };
 
-                    Fs.writeFileSync(configPath, JSON.stringify(configObj));
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', configPath]);
+                    Fs.writeFileSync(broadcastJsonPath, JSON.stringify(configObj));
+                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', broadcastJsonPath]);
                     broadcast.stderr.on('data', function (data) {
 
                         expect(data.toString()).to.not.exist;
@@ -516,7 +524,6 @@ describe('Broadcast', function () {
 
     it('handles connection errors to remote server', function (done) {
 
-        var configPath = __dirname + '/broadcast.json';
         var stream = Fs.createWriteStream(logPath7, { flags: 'a' });
 
         stream.write(data1, function () {
@@ -538,8 +545,8 @@ describe('Broadcast', function () {
                         useLastIndex: false
                     };
 
-                    Fs.writeFileSync(configPath, JSON.stringify(configObj));
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', configPath]);
+                    Fs.writeFileSync(broadcastJsonPath, JSON.stringify(configObj));
+                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', broadcastJsonPath]);
                     broadcast.stderr.on('data', function (data) {
 
                         expect(data.toString()).to.contain('ECONNRESET');
