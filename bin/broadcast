@@ -6,6 +6,7 @@ var Fs = require('fs');
 var Hoek = require('hoek');
 var Http = require('http');
 var Optimist = require('optimist');
+var Path = require('path');
 var Os = require('os');
 var Url = require('url');
 
@@ -192,6 +193,10 @@ internals.start = function () {
     var start = 0;
     var config = internals.getConfig();
     config = Hoek.applyToDefaults(internals.defaults, config);
+
+    if (config.useLastIndex) {
+        internals.lastIndexPath += ('_' + Path.basename(config.path));
+    }
 
     if (config.useLastIndex && Fs.existsSync(internals.lastIndexPath)) {
         var lastContents = Fs.readFileSync(internals.lastIndexPath).toString().split('\n');

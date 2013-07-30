@@ -24,7 +24,7 @@ var it = Lab.test;
 describe('Broadcast', function () {
 
     var broadcastPath = Path.join(__dirname, '..', 'bin', 'broadcast');
-    var lastBroadcastPath = Path.join(__dirname, '..', 'bin', 'lastBroadcast');
+    var lastBroadcastPath = Path.join(__dirname, '..', 'bin', 'lastBroadcast_request_log_test.004');
     var logPath1 = Path.join(__dirname, 'request_log_test.001');
     var logPath2 = Path.join(__dirname, 'request_log_test.002');
     var logPath3 = Path.join(__dirname, 'request_log_test.003');
