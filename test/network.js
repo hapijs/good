@@ -29,18 +29,44 @@ describe('Network Monitor', function () {
 
         var tags = ['hapi', 'received'];
         var tagsMap = Hoek.mapToObject(tags);
-        emitter.emit('request', null, { tags: tags }, tagsMap);
-        emitter.emit('request', null, { tags: tags }, tagsMap);
-        emitter.emit('response');
+        var request = { server: { info: { port: 80 }}}
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('response', request);
 
         network.requests(function (err, result) {
 
-            expect(result).to.equal(2);
+            expect(result['80']).to.equal(2);
         });
 
         network.concurrents(function (err, result) {
 
-            expect(result).to.equal(1);
+            expect(result['80']).to.equal(1);
+        });
+
+        done();
+    });
+
+    it('defaults to port 0 when server info isn\'t set', function (done) {
+
+        var emitter = new Events.EventEmitter();
+        var network = new NetworkMonitor.Monitor(emitter);
+
+        var tags = ['hapi', 'received'];
+        var tagsMap = Hoek.mapToObject(tags);
+        var request = { server: {}}
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('response', request);
+
+        network.requests(function (err, result) {
+
+            expect(result['0']).to.equal(2);
+        });
+
+        network.concurrents(function (err, result) {
+
+            expect(result['0']).to.equal(1);
         });
 
         done();
