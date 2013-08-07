@@ -1106,7 +1106,6 @@ describe('Monitor', function () {
                         monitor.once('ops', function (event) {
 
                             expect(event.requests['80']).to.equal(2);
-                            expect(event.concurrents['80']).to.equal(0);
                             expect(event.osload).to.exist;
                             monitor.stop();
                             done();
