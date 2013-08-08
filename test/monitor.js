@@ -1100,11 +1100,17 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack, options);
 
-                monitor.once('ops', function (event) {
+                server.inject({ url: '/' }, function () {
+                    server.inject({ url: '/' }, function () {
 
-                    expect(event.osload).to.exist;
-                    monitor.stop();
-                    done();
+                        monitor.once('ops', function (event) {
+
+                            expect(event.requests['80']).to.equal(2);
+                            expect(event.osload).to.exist;
+                            monitor.stop();
+                            done();
+                        });
+                    });
                 });
             });
         });
