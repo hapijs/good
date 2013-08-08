@@ -21,7 +21,8 @@ var internals = {
     appVer: Hoek.loadPackage(__dirname + '/..').version || 'unknown',                       // Look up a level to get the package.json page
     defaults: {
         useLastIndex: true,
-        interval: 10000
+        interval: 10000,
+        onlySendNew: false
     }
 };
 
@@ -134,7 +135,8 @@ internals.getConfig = function () {
         url: internals.argv.u,
         path: internals.argv.l[0] !== '/' ? process.cwd() + '/' + internals.argv.l : internals.argv.l,
         interval: internals.argv.i ? parseInt(internals.argv.i) : 10000,
-        useLastIndex: internals.argv.p !== undefined ? !!internals.argv.p : true
+        useLastIndex: internals.argv.p !== undefined ? !!internals.argv.p : true,
+        onlySendNew: internals.argv.n !== undefined ? !!internals.argv.n : false,
     };
 };
 
@@ -190,27 +192,52 @@ internals.start = function () {
 
         process.exit(0);
     });
+
     var start = 0;
     var config = internals.getConfig();
     config = Hoek.applyToDefaults(internals.defaults, config);
-
-    if (config.useLastIndex) {
-        internals.lastIndexPath += ('_' + Path.basename(config.path));
-    }
-
-    if (config.useLastIndex && Fs.existsSync(internals.lastIndexPath)) {
-        var lastContents = Fs.readFileSync(internals.lastIndexPath).toString().split('\n');
-        start = parseInt(lastContents[lastContents.length - 1]);
-        start = isNaN(start) ? 0 : start;
-        Fs.truncateSync(internals.lastIndexPath);
-    }
 
     internals.requestOptions = Url.parse(config.url);
     internals.requestOptions.method = 'POST';
     internals.requestOptions.headers = { 'content-type': 'application/json' };
     internals.requestOptions.agent = false;
 
-    setInterval(function () {
+    var determineStart = function (next) {
+
+        if (config.useLastIndex) {
+            internals.lastIndexPath += ('_' + Path.basename(config.path));
+        }
+
+        if (config.useLastIndex && Fs.existsSync(internals.lastIndexPath)) {
+            var lastContents = Fs.readFileSync(internals.lastIndexPath).toString().split('\n');
+            start = parseInt(lastContents[lastContents.length - 1]);
+            start = isNaN(start) ? 0 : start;
+            Fs.truncateSync(internals.lastIndexPath);
+            return next();
+        }
+
+        if (!config.onlySendNew) {
+            return next();
+        }
+
+        Fs.exists(config.path, function (exists) {
+
+            if (!exists) {
+                return next();
+            }
+
+            Fs.stat(config.path, function (err, stat) {
+
+                if (!err) {
+                    start = stat.size ? stat.size - 1 : 0;
+                }
+
+                next();
+            });
+        });
+    };
+
+    var processLog = function () {
 
         Fs.exists(config.path, function (exists) {
 
@@ -225,7 +252,7 @@ internals.start = function () {
                     return;
                 }
 
-                if (stat.size < start) {
+                if (stat && stat.size < start) {
                     start = 0;
                 }
 
@@ -239,7 +266,12 @@ internals.start = function () {
                 });
             });
         });
-    }, config.interval);
+    };
+
+    determineStart(function () {
+
+        setInterval(processLog, config.interval);
+    });
 };
 
 internals.start();
