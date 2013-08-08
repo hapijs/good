@@ -252,7 +252,7 @@ internals.start = function () {
                     return;
                 }
 
-                if (stat && stat.size < start) {
+                if (stat.size < start) {
                     start = 0;
                 }
 
