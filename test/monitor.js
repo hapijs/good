@@ -412,6 +412,76 @@ describe('Monitor', function () {
         });
     });
 
+    describe('#_broadcastUdp', function () {
+
+        it('doesn\'t do anything if there are no subscribers', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._broadcastUdp()).to.not.exist;
+                done();
+            });
+        });
+
+        it('broadcasts all events when no tags are provided', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._subscriberQueues.console).to.exist;
+                expect(monitor._eventQueues.log).to.exist;
+
+                Hoek.consoleFunc = function (string) {
+
+                    Hoek.consoleFunc = console.log;
+                    expect(string).to.contain('included in output');
+                    monitor.stop();
+                    done();
+                };
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastUdp();
+            });
+        });
+
+        it('doesn\'t fail when a remote subscriber is unavailable', function (done) {
+
+            var options = {
+                subscribers: {
+                    'udp://notfound/server': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastUdp();
+
+                setTimeout(function () {
+
+                    done();
+                }, 100);
+            });
+        });
+    });
+
     describe('#_broadcastFile', function () {
 
         before(function (done) {
