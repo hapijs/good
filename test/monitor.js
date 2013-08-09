@@ -8,6 +8,7 @@ var Path = require('path');
 var Fs = require('fs');
 var Sinon = require('sinon');
 var Monitor = require('../lib/monitor');
+var dgram = require('dgram');
 
 
 // Declare internals
@@ -408,6 +409,111 @@ describe('Monitor', function () {
 
                     done();
                 }, 100);
+            });
+        });
+    });
+
+    describe('#_broadcastUdp', function () {
+
+        it('doesn\'t do anything if there are no subscribers', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._broadcastUdp()).to.not.exist;
+                done();
+            });
+        });
+
+        it('broadcasts all events when no tags are provided', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._subscriberQueues.console).to.exist;
+                expect(monitor._eventQueues.log).to.exist;
+
+                Hoek.consoleFunc = function (string) {
+
+                    Hoek.consoleFunc = console.log;
+                    expect(string).to.contain('included in output');
+                    monitor.stop();
+                    done();
+                };
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastUdp();
+            });
+        });
+
+        it('doesn\'t fail when a remote subscriber is unavailable', function (done) {
+
+            var options = {
+                subscribers: {
+                    'udp://notfound:1234': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastUdp();
+
+                setTimeout(function () {
+                    done();
+                }, 100);
+            });
+        });
+
+        it('sends all events to a remote server subscriber', function (done) {
+
+            var remoteServer = function(callback){
+                var server = dgram.createSocket('udp4');
+
+                server.on('message', function (msg, rinfo) {
+                    done();
+                });
+
+                server.on('listening', function () {
+                    callback();
+                });
+
+                server.bind(41234, '127.0.0.1');
+            };
+
+            var options = {
+                subscribers: {}
+            };
+
+            remoteServer(function () {
+
+                options.subscribers['udp://127.0.0.1:41234'] = { events: ['log'] };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    expect(monitor._eventQueues.log).to.exist;
+
+                    server.log('ERROR', 'included in output');
+                    monitor._broadcastHttp();
+                });
             });
         });
     });
