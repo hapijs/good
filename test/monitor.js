@@ -8,7 +8,7 @@ var Path = require('path');
 var Fs = require('fs');
 var Sinon = require('sinon');
 var Monitor = require('../lib/monitor');
-var dgram = require('dgram');
+var Dgram = require('dgram');
 
 
 // Declare internals
@@ -483,27 +483,19 @@ describe('Monitor', function () {
 
         it('sends all events to a remote server subscriber', function (done) {
 
-            var remoteServer = function(callback){
-                var server = dgram.createSocket('udp4');
+            var remoteServer = Dgram.createSocket('udp4');
 
-                server.on('message', function (msg, rinfo) {
-                    done();
-                });
+            remoteServer.on('message', function (msg, rinfo) {
 
-                server.on('listening', function () {
-                    callback();
-                });
+                done();
+            });
 
-                server.bind(41234, '127.0.0.1');
-            };
+            remoteServer.on('listening', function () {
 
-            var options = {
-                subscribers: {}
-            };
-
-            remoteServer(function () {
-
-                options.subscribers['udp://127.0.0.1:41234'] = { events: ['log'] };
+                var options = {
+                    subscribers: {}
+                };
+                options.subscribers['udp://127.0.0.1:' + remoteServer.address().port] = { events: ['log'] };
 
                 makePack(function (pack, server) {
 
@@ -512,9 +504,11 @@ describe('Monitor', function () {
                     expect(monitor._eventQueues.log).to.exist;
 
                     server.log('ERROR', 'included in output');
-                    monitor._broadcastHttp();
+                    monitor._broadcastUdp();
                 });
             });
+
+            remoteServer.bind(0, '127.0.0.1');
         });
     });
 
