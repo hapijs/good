@@ -8,6 +8,7 @@ var Path = require('path');
 var Fs = require('fs');
 var Sinon = require('sinon');
 var Monitor = require('../lib/monitor');
+var dgram = require('dgram');
 
 
 // Declare internals
@@ -477,6 +478,42 @@ describe('Monitor', function () {
                 setTimeout(function () {
                     done();
                 }, 100);
+            });
+        });
+
+        it('sends all events to a remote server subscriber', function (done) {
+
+            var remoteServer = function(callback){
+                var server = dgram.createSocket('udp4');
+
+                server.on('message', function (msg, rinfo) {
+                    done();
+                });
+
+                server.on('listening', function () {
+                    callback();
+                });
+
+                server.bind(41234, '127.0.0.1');
+            };
+
+            var options = {
+                subscribers: {}
+            };
+
+            remoteServer(function () {
+
+                options.subscribers['udp://127.0.0.1:41234'] = { events: ['log'] };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    expect(monitor._eventQueues.log).to.exist;
+
+                    server.log('ERROR', 'included in output');
+                    monitor._broadcastHttp();
+                });
             });
         });
     });
