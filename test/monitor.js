@@ -461,7 +461,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {
-                    'udp://notfound/server': { events: ['log'] }
+                    'udp://notfound:1234': { events: ['log'] }
                 }
             };
 
@@ -475,7 +475,6 @@ describe('Monitor', function () {
                 monitor._broadcastUdp();
 
                 setTimeout(function () {
-
                     done();
                 }, 100);
             });
