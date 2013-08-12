@@ -74,13 +74,17 @@ describe('Network Monitor', function () {
 
         var tags = ['hapi', 'received'];
         var tagsMap = Hoek.mapToObject(tags);
-        var request1 = { server: server1 };
-        var request2 = { server: server2 };
+        var request1 = { server: server1, msec: 1 };
+        var request2 = { server: server2, msec: 2 };
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
+        emitter.emit('response', request1);
+        request1.msec = 3;
+        emitter.emit('response', request1);
+        emitter.emit('response', request2);
 
         network.requests(function (err, result) {
 
@@ -92,6 +96,14 @@ describe('Network Monitor', function () {
 
             expect(result['80']).to.equal(1);
             expect(result['443']).to.equal(3);
+        });
+
+        network.responseTimes(function (err, result) {
+
+            expect(result['80'].max).to.equal(3);
+            expect(result['80'].avg).to.equal(2);
+            expect(result['443'].max).to.equal(2);
+            expect(result['443'].avg).to.equal(2);
         });
 
         done();
