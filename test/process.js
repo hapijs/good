@@ -63,7 +63,7 @@ describe('Process Monitor', function () {
 
         it('passes the current list of leaks to the callback', function (done) {
 
-            var monitor = new ProcessMonitor.Monitor(true);
+            var monitor = new ProcessMonitor.Monitor({ leakDetection: true });
             MemWatch.emit('leak', {
                 start: 'Fri, 29 Jun 2012 14:12:13 GMT',
                 end: 'Fri, 29 Jun 2012 14:12:33 GMT',
@@ -82,7 +82,7 @@ describe('Process Monitor', function () {
 
         it('doesn\'t log leaks when disabled', function (done) {
 
-            var monitor = new ProcessMonitor.Monitor(false);
+            var monitor = new ProcessMonitor.Monitor({ leakDetection: false });
             MemWatch.emit('leak', {
                 start: 'Fri, 29 Jun 2012 14:12:13 GMT',
                 end: 'Fri, 29 Jun 2012 14:12:33 GMT',
@@ -95,6 +95,26 @@ describe('Process Monitor', function () {
 
                 expect(leaks.length).to.equal(0);
                 expect(monitor._leaks.length).to.equal(0);
+                done();
+            });
+        });
+    });
+
+    describe('#gc', function () {
+
+        it('passes the current gc count to the callback', function (done) {
+
+            var monitor = new ProcessMonitor.Monitor({ gcDetection: true });
+            MemWatch.emit('stats', {
+                start: 'Fri, 29 Jun 2012 14:12:13 GMT',
+                end: 'Fri, 29 Jun 2012 14:12:33 GMT',
+                growth: 67984,
+                reason: 'heap growth over 5 consecutive GCs (20s) - 11.67 mb/hr'
+            });
+
+            monitor.gcCount(function (err, count) {
+
+                expect(count).to.equal(1);
                 done();
             });
         });

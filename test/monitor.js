@@ -1193,7 +1193,8 @@ describe('Monitor', function () {
                     'http://localhost:1023/': ['ops']
                 },
                 opsInterval: 100,
-                leakDetection: true
+                leakDetection: true,
+                gcDetection: true
             };
 
             makePack(function (pack, server) {
@@ -1221,7 +1222,8 @@ describe('Monitor', function () {
                 subscribers: {},
                 opsInterval: 100,
                 alwaysMeasureOps: true,
-                leakDetection: true
+                leakDetection: true,
+                gcDetection: true
             };
 
             makePack(function (pack, server) {
