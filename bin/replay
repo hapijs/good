@@ -30,21 +30,38 @@ internals.getLog = function () {
     return log;
 }
 
-internals.parseUrls = function (url, entries) {
+internals.parseUrls = function (options, entries) {
 
-    var urls = [];
+    internals.urls = [];
     for (var i = 0, il = entries.length; i < il; ++i) {
+        var url = Hoek.clone(options);
         var entry = entries[i];
         if (entry.event === 'request' && entry.method === 'get') {
             if (entry.path) {
                 url.path = entry.path;
                 url.query = entry.query;
-                urls.push(url);
+                url.headers = {};
+
+                if (entry.log) {
+                    for (var ei = 0, eil = entry.log.length; ei < eil; ++ei) {
+                        var log = entry.log[ei];
+                        if (!log.tags) {
+                            continue;
+                        }
+
+                        if (log.tags.indexOf('state') !== -1) {
+                            url.headers.Cookie = log.data;
+                        }
+                        else if (log.tags.indexOf('received') !== -1) {
+                            url.headers['User-Agent'] = log.data.agent;
+                        }
+                    }
+                }
+
+                internals.urls.push(url);
             }
         }
     }
-
-    return urls;
 };
 
 internals.handleResponse = function (response) {
@@ -76,7 +93,6 @@ internals.makeRequest = function () {
         url = internals.urls.pop();
     }
 
-    Hoek.consoleFunc(url);
     var req = Http.get(url, function (res) {
 
         internals.handleResponse(res);
@@ -112,7 +128,7 @@ internals.start = function () {
 
     internals.availableSockets = internals.argv.n ? parseInt(internals.argv.n) : 10;
     var log = internals.getLog();
-    internals.urls = internals.parseUrls(Url.parse(internals.argv.u), log)
+    internals.parseUrls(Url.parse(internals.argv.u), log)
 
     internals.makeRequests();
 };
