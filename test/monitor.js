@@ -1203,13 +1203,17 @@ describe('Monitor', function () {
 
                 server.inject({ url: '/' }, function () {
                     server.inject({ url: '/' }, function () {
+                        server.inject({ url: '/test' }, function () {
 
-                        monitor.once('ops', function (event) {
+                            monitor.once('ops', function (event) {
 
-                            expect(event.requests['80']).to.equal(2);
-                            expect(event.osload).to.exist;
-                            monitor.stop();
-                            done();
+                                expect(event.requests['80'].total).to.equal(3);
+                                expect(event.requests['80']['/']).to.equal(2);
+                                expect(event.requests['80']['/test']).to.equal(1);
+                                expect(event.osload).to.exist;
+                                monitor.stop();
+                                done();
+                            });
                         });
                     });
                 });
