@@ -74,15 +74,15 @@ describe('Network Monitor', function () {
 
         var tags = ['hapi', 'received'];
         var tagsMap = Hoek.mapToObject(tags);
-        var request1 = { server: server1, msec: 1 };
-        var request2 = { server: server2, msec: 2 };
+        var request1 = { server: server1, info: { received: Date.now() - 1 }};
+        var request2 = { server: server2, info: { received: Date.now() - 2 } };
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
         emitter.emit('response', request1);
-        request1.msec = 3;
+        request1.info.received -= 2;
         emitter.emit('response', request1);
         emitter.emit('response', request2);
 
