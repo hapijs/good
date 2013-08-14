@@ -135,7 +135,7 @@ describe('Broadcast', function () {
         if (Fs.existsSync(logPath1)) {
             Fs.unlinkSync(logPath1);
         }
-        
+
         var stream = Fs.createWriteStream(logPath1, { flags: 'a' });
         stream.write(data1, function () {
         stream.write('\n' + data2, function () {
