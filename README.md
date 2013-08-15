@@ -21,13 +21,14 @@ optional settings:
 - `broadcastInterval` - the interval in milliseconds to send collected events to HTTP subscribers. _0_ means send immediately. Defaults to _0_.
 - `opsInterval` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
 - `leakDetection` - determines if memory leaks should be detected.  Any leaks will be logged with ops data.  Defaults to _false_.
+- `gcDetection` - determines if garbage collections should be detected and counted.  The GC count is logged with ops data.  Defaults to _false_.
 - `extendedRequests` - determines if the full request log is sent or only the event summary. Defaults to _false_.
 - `maxLogSize` - the maximum byte size to allow log files to become before creating a new log file.  Default is _0_ which means log files will not be split.  When split the log file extension will be incremented by 1.  The initial log file has an extension of .001.
 - `requestsEvent` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
 - `requestsTimeout` - the number of milliseconds to set the request timeout to when broadcasting to HTTP subscribers
-- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, and _log_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration.
+- `subscribers` - an object where each key is a destination and each value is either an array or object with an array of subscriptions. The subscriptions that are available are _ops_, _request_, _log_ and _error_. The destination can be a URI, file or directory path, and _console_. Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array into the subscribers "console" configuration.
 
 For example:
 
@@ -38,9 +39,10 @@ var server = new Hapi.Server();
 
 var options = {
     subscribers: {
-        console: ['ops', 'request', 'log'],
+        console: ['ops', 'request', 'log', 'error'],
         'http://localhost/logs': ['log'],
-        '/tmp/logs/': ['request', 'log']
+        '/tmp/logs/': ['request', 'log'],
+        'udp://127.0.0.1:9000': ['request']
     }
 };
 
