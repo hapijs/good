@@ -36,13 +36,13 @@ describe('Network Monitor', function () {
 
         var tags = ['hapi', 'received'];
         var tagsMap = Hoek.mapToObject(tags);
-        var request = { server: server };
+        var request = { server: server, url: { pathname: '/' } };
         emitter.emit('request', request, { tags: tags }, tagsMap);
         emitter.emit('request', request, { tags: tags }, tagsMap);
 
         network.requests(function (err, result) {
 
-            expect(result['80']).to.equal(2);
+            expect(result['80'].total).to.equal(2);
         });
 
         network.concurrents(function (err, result) {
@@ -74,8 +74,8 @@ describe('Network Monitor', function () {
 
         var tags = ['hapi', 'received'];
         var tagsMap = Hoek.mapToObject(tags);
-        var request1 = { server: server1, info: { received: Date.now() - 1 }};
-        var request2 = { server: server2, info: { received: Date.now() - 2 } };
+        var request1 = { server: server1, info: { received: Date.now() - 1 }, url: { pathname: '/' }};
+        var request2 = { server: server2, info: { received: Date.now() - 2 }, url: { pathname: '/test' } };
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
@@ -88,8 +88,8 @@ describe('Network Monitor', function () {
 
         network.requests(function (err, result) {
 
-            expect(result['80']).to.equal(2);
-            expect(result['443']).to.equal(3);
+            expect(result['80'].total).to.equal(2);
+            expect(result['443'].total).to.equal(3);
         });
 
         network.concurrents(function (err, result) {
