@@ -6,7 +6,6 @@ var Hoek = require('hoek');
 var Http = require('http');
 var Path = require('path');
 var Fs = require('fs');
-var Sinon = require('sinon');
 var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 
@@ -1084,11 +1083,14 @@ describe('Monitor', function () {
                 var monitor = new Monitor(pack, options);
                 expect(monitor._eventQueues.log).to.exist;
 
-                var execStub = Sinon.stub(Fs, 'readdir');
-                execStub.withArgs(folderPath).callsArgWith(1, new Error());
+                var readdir = Fs.readdir;
+                Fs.readdir = function (path, callback) {
+
+                    callback(new Error());
+                    Fs.readdir = readdir;
+                }
 
                 server.log('ERROR', 'another error');
-                execStub.restore();
                 done();
             });
         });
