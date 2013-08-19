@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "hapi": "1.x.x",
-    "sinon": "1.x.x",
     "lab": "0.2.x"
   },
   "scripts": {
