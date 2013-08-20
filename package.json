@@ -1,12 +1,7 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "0.9.0",
-  "author": "Van Nguyen <the.gol.effect@gmail.com>",
-  "contributors":[
-    "Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)",
-    "Wyatt Preul <wpreul@gmail.com> (http://jsgeek.com)"
-  ],
+  "version": "0.10.0",
   "repository": "git://github.com/spumko/good",
   "main": "index",
   "keywords": [
@@ -21,7 +16,7 @@
     "node": "0.10.x"
   },
   "dependencies": {
-    "hoek": "0.9.x",
+    "hoek": "1.0.x",
     "async": "0.2.x",
     "memwatch": "0.2.x",
     "optimist": "0.x.x"
