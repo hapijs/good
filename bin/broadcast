@@ -109,10 +109,7 @@ internals.request = function (payload) {
             console.error(err);
         });
 
-        res.on('readable', function () {
-
-            res.read();                                                                     // Prevent mem leak
-        });
+        res.pipe(process.stdout);                               // Pipe any response details to stdout
     });
     req.on('error', function (err) {
 
