@@ -1210,8 +1210,10 @@ describe('Monitor', function () {
                             monitor.once('ops', function (event) {
 
                                 expect(event.requests['80'].total).to.equal(3);
-                                expect(event.requests['80']['/']).to.equal(2);
-                                expect(event.requests['80']['/test']).to.equal(1);
+                                expect(event.requests['80']['/'].total).to.equal(2);
+                                expect(event.requests['80']['/test'].total).to.equal(1);
+                                expect(event.requests['80']['/test'].avg).to.exist;
+                                expect(event.requests['80']['/test'].max).to.exist;
                                 expect(event.osload).to.exist;
                                 monitor.stop();
                                 done();
