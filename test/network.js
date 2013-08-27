@@ -1,7 +1,9 @@
 // Load modules
 
 var Lab = require('lab');
+var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Http = require('http');
 var Events = require('events');
 var NetworkMonitor = require('../lib/network');
 
@@ -107,5 +109,60 @@ describe('Network Monitor', function () {
         });
 
         done();
+    });
+
+    it('tracks server disconnects', function (done) {
+
+        var dataServer = new Hapi.Server(0);
+        var proxiedServer = new Hapi.Server(0);
+        var server = new Hapi.Server(0);
+
+        proxiedServer.route({ method: '*', path: '/{p*}', handler: function (request) {
+
+        }});
+
+        dataServer.route({ method: '*', path: '/{p*}', handler: function (request) {
+
+            expect(request.payload.events[0].load.requests[server.info.port]['/'].disconnects).to.equal(1);
+            server.stop();
+            proxiedServer.stop();
+            dataServer.stop();
+
+            done();
+        }});
+
+        dataServer.start(function () {
+
+            proxiedServer.start(function () {
+
+                server.route({ method: '*', path: '/{p*}', handler: { proxy: { mapUri: function (request, next) {
+
+                    next(null, 'http://127.0.0.1:' + proxiedServer.info.port + request.path);
+                }}}});
+
+                var options = {
+                    subscribers: {},
+                    opsInterval: 100
+                };
+                options.subscribers['http://127.0.0.1:' + dataServer.info.port] = ['ops'];
+
+                server.pack.require('../', options, function () {
+
+                    server.start(function () {
+
+                        var req = Http.get('http://127.0.0.1:' + server.info.port, function () {
+
+                        });
+
+                        req.on('error', function () {});
+
+                        setTimeout(function () {
+
+                            req.destroy();
+                        }, 5);
+                    });
+                });
+            });
+        });
     });
 });
