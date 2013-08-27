@@ -231,7 +231,7 @@ describe('Broadcast', function () {
 
                 var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath2, '-u', url, '-i', 5, '-p', 0]);
+                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath2, '-u', url, '-i', 10, '-p', 0]);
                 broadcast.stderr.on('data', function (data) {
 
                     expect(data.toString()).to.not.exist;
