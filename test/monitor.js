@@ -1058,6 +1058,7 @@ describe('Monitor', function () {
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
+                        expect(result[0].data).to.exist;
                         expect(result[0].data).to.equal('included in output');
                         expect(result[1].data).to.equal('another error');
 
