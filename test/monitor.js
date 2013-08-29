@@ -1063,7 +1063,7 @@ describe('Monitor', function () {
                         expect(result[1].data).to.equal('another error');
 
                         done();
-                    }, 10);
+                    }, 20);
                 }, 10);
             });
         });
