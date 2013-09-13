@@ -123,7 +123,7 @@ describe('Network Monitor', function () {
 
         dataServer.route({ method: '*', path: '/{p*}', handler: function (request) {
 
-            expect(request.payload.events[0].load.requests[server.info.port]['/'].disconnects).to.equal(1);
+            expect(request.payload.events[0].load.requests[server.info.port].disconnects).to.equal(1);
             server.stop();
             proxiedServer.stop();
             dataServer.stop();
