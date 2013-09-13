@@ -1,7 +1,7 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "repository": "git://github.com/spumko/good",
   "main": "index",
   "keywords": [
@@ -16,7 +16,7 @@
     "node": "0.10.x"
   },
   "dependencies": {
-    "hoek": "1.0.x",
+    "hoek": "1.x.x",
     "async": "0.2.x",
     "memwatch": "0.2.x",
     "optimist": "0.x.x"
