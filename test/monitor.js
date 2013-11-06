@@ -581,6 +581,42 @@ describe('Monitor', function () {
             });
         });
 
+
+        it('handles circular reference when stringifying', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog11');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                var circObj = { howdy: 'hi' };
+                circObj.obj = circObj;
+
+                server.log('ERROR', circObj);
+
+                setTimeout(function () {
+
+                    var file = Fs.readFileSync(dest);
+                    var formatted = file.toString().split('\n');
+
+                    expect(formatted[0]).to.contain('Circular');
+
+                    done();
+                }, 10);
+            });
+        });
+
+
         it('sends all events to a log file', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
