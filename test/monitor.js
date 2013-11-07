@@ -32,7 +32,7 @@ describe('Monitor', function () {
 
             Fs.readdir(folderPath, function (err, files) {
 
-                while (files.length) {
+                while (files && files.length) {
                     Fs.unlinkSync(Path.join(folderPath, files.pop()));
                 };
 
