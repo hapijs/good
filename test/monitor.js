@@ -32,7 +32,7 @@ describe('Monitor', function () {
 
             Fs.readdir(folderPath, function (err, files) {
 
-                while (files.length) {
+                while (files && files.length) {
                     Fs.unlinkSync(Path.join(folderPath, files.pop()));
                 };
 
@@ -41,8 +41,8 @@ describe('Monitor', function () {
         };
 
 
-        fmFolder(Path.join(__dirname, 'logs'), function () {
-            fmFolder(Path.join(__dirname, 'logsdir'), done);
+        rmFolder(Path.join(__dirname, 'logs'), function () {
+            rmFolder(Path.join(__dirname, 'logsdir'), done);
         });
     });
 
@@ -580,6 +580,42 @@ describe('Monitor', function () {
                 done();
             });
         });
+
+
+        it('handles circular reference when stringifying', function (done) {
+
+            var folderPath = Path.join(__dirname, 'logs');
+            var options = {
+                subscribers: {}
+            };
+
+            var dest = Path.join(folderPath, 'mylog11');
+
+            options.subscribers[dest] = { events: ['log'] };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                var circObj = { howdy: 'hi' };
+                circObj.obj = circObj;
+
+                server.log('ERROR', circObj);
+
+                setTimeout(function () {
+
+                    var file = Fs.readFileSync(dest);
+                    var formatted = file.toString().split('\n');
+
+                    expect(formatted[0]).to.contain('Circular');
+
+                    done();
+                }, 10);
+            });
+        });
+
 
         it('sends all events to a log file', function (done) {
 
