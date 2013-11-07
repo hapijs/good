@@ -41,8 +41,8 @@ describe('Monitor', function () {
         };
 
 
-        fmFolder(Path.join(__dirname, 'logs'), function () {
-            fmFolder(Path.join(__dirname, 'logsdir'), done);
+        rmFolder(Path.join(__dirname, 'logs'), function () {
+            rmFolder(Path.join(__dirname, 'logsdir'), done);
         });
     });
 
