@@ -303,11 +303,6 @@ describe('Broadcast', function () {
                     expect(data.toString()).to.not.exist;
                 });
 
-                broadcast.stdout.on('data', function (data) {
-
-                    console.log(data.toString());
-                });
-
                 broadcast.once('close', function (code) {
 
                     expect(code).to.equal(0);
@@ -670,7 +665,6 @@ describe('Broadcast', function () {
                     broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath2, '-u', url, '-i', 5, '-p', 0, '-n', 1]);
                     broadcast.stderr.on('data', function (data) {
 
-                        console.log(data.toString())
                         expect(data).to.not.exist;
                     });
 
