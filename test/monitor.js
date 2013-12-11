@@ -1224,7 +1224,6 @@ describe('Monitor', function () {
             var results = {
                 osload: 1,
                 osmem: 20,
-                osdisk: 30,
                 osup: 50
             };
 
@@ -1240,7 +1239,6 @@ describe('Monitor', function () {
 
                 expect(event.os.load).to.equal(1);
                 expect(event.os.mem).to.equal(20);
-                expect(event.os.disk).to.equal(30);
                 done();
             });
         });
