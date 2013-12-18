@@ -39,10 +39,10 @@ var server = new Hapi.Server();
 
 var options = {
     subscribers: {
-        console: ['ops', 'request', 'log', 'error'],
+        'console':                 ['ops', 'request', 'log', 'error'],
         'http://localhost/logs': ['log'],
-        '/tmp/logs/': ['request', 'log'],
-        'udp://127.0.0.1:9000': ['request']
+        '/tmp/logs/':            ['request', 'log'],
+        'udp://127.0.0.1:9000':  ['request']
     }
 };
 
