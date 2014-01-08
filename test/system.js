@@ -1,7 +1,7 @@
 // Load modules
 
 var Lab = require('lab');
-var Fs = require('fs');
+var Fs = require('graceful-fs');
 var SystemMonitor = require('../lib/system');
 
 
