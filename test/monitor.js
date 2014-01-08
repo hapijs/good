@@ -99,7 +99,7 @@ describe('Monitor', function () {
         });
     });
 
-    it('doesn\'t throw an error when opsInterval is more than 100', function (done) {
+    it('does not throw an error when opsInterval is more than 100', function (done) {
 
         var options = {
             subscribers: {},
@@ -253,9 +253,9 @@ describe('Monitor', function () {
             };
 
             var server = new Hapi.Server(0);
-            server.route({ method: 'GET', path: '/err', handler: function (request) {
+            server.route({ method: 'GET', path: '/err', handler: function (request, reply) {
 
-                request.reply(new Hapi.error.internal('my error'))
+                reply(new Hapi.error.internal('my error'))
             }});
 
             var plugin = {
@@ -285,7 +285,7 @@ describe('Monitor', function () {
 
     describe('#_broadcastHttp', function () {
 
-        it('doesn\'t do anything if there are no subscribers', function (done) {
+        it('does not do anything if there are no subscribers', function (done) {
 
             var options = {
                 subscribers: {}
@@ -332,7 +332,7 @@ describe('Monitor', function () {
 
             var remoteServer = new Hapi.Server(0);
             remoteServer.route({
-                method: 'POST', path: '/', handler: function (request) {
+                method: 'POST', path: '/', handler: function (request, reply) {
 
                     expect(request.payload.appVer).to.exist;
                     expect(request.payload.appVer).to.not.equal('unknown');
@@ -366,18 +366,18 @@ describe('Monitor', function () {
             var server = new Hapi.Server(0);
 
             remoteServer.route({
-                method: 'POST', path: '/', handler: function (request) {
+                method: 'POST', path: '/', handler: function (request, reply) {
 
                     expect(request.payload.events[0].statusCode).to.equal(200);
-                    request.reply('Success');
+                    reply('Success');
                     done();
                 }
             });
 
             server.route({
-                method: 'GET', path: '/', handler: function (request) {
+                method: 'GET', path: '/', handler: function (request, reply) {
 
-                    request.reply('Success');
+                    reply('Success');
                 }
             });
 
@@ -407,7 +407,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('doesn\'t fail when a remote subscriber is unavailable', function (done) {
+        it('does not fail when a remote subscriber is unavailable', function (done) {
 
             var options = {
                 subscribers: {
@@ -434,7 +434,7 @@ describe('Monitor', function () {
 
     describe('#_broadcastUdp', function () {
 
-        it('doesn\'t do anything if there are no subscribers', function (done) {
+        it('does not do anything if there are no subscribers', function (done) {
 
             var options = {
                 subscribers: {}
@@ -477,7 +477,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('doesn\'t fail when a remote subscriber is unavailable', function (done) {
+        it('does not fail when a remote subscriber is unavailable', function (done) {
 
             var options = {
                 subscribers: {
@@ -1006,7 +1006,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('doesn\'t overwrite log file with several initial log events', function (done) {
+        it('does not overwrite log file with several initial log events', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
 
@@ -1185,7 +1185,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('handles the error when directory doesn\'t exist', function (done) {
+        it('handles the error when directory does not exist', function (done) {
 
             var folderPath = Path.join(__dirname, 'logs');
             var options = {

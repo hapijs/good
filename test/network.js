@@ -1,10 +1,11 @@
 // Load modules
 
+var Http = require('http');
+var Events = require('events');
+var Stream = require('stream');
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Http = require('http');
-var Events = require('events');
 var NetworkMonitor = require('../lib/network');
 
 
@@ -76,8 +77,8 @@ describe('Network Monitor', function () {
 
         var tags = ['hapi', 'received'];
         var tagsMap = Hoek.mapToObject(tags);
-        var request1 = { server: server1, info: { received: Date.now() - 1 }, url: { pathname: '/' }};
-        var request2 = { server: server2, info: { received: Date.now() - 2 }, url: { pathname: '/test' } };
+        var request1 = { server: server1, info: { received: Date.now() - 1 }, url: { pathname: '/' }, response: { statusCode: 200 }, getLog: function () { return []; } };
+        var request2 = { server: server2, info: { received: Date.now() - 2 }, url: { pathname: '/test' }, response: { statusCode: 200 }, getLog: function () { return []; } };
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request1, { tags: tags }, tagsMap);
         emitter.emit('request', request2, { tags: tags }, tagsMap);
@@ -113,54 +114,70 @@ describe('Network Monitor', function () {
 
     it('tracks server disconnects', function (done) {
 
-        var dataServer = new Hapi.Server(0);
-        var proxiedServer = new Hapi.Server(0);
+        var goodServer = new Hapi.Server(0);
         var server = new Hapi.Server(0);
 
-        proxiedServer.route({ method: '*', path: '/{p*}', handler: function (request) {
+        goodServer.route({
+            method: '*', path: '/{p*}', handler: function (request, reply) {
 
-        }});
+                expect(request.payload.events[0].load.requests[server.info.port].disconnects).to.equal(1);
+                server.stop();
+                goodServer.stop();
 
-        dataServer.route({ method: '*', path: '/{p*}', handler: function (request) {
+                done();
+            }
+        });
 
-            expect(request.payload.events[0].load.requests[server.info.port].disconnects).to.equal(1);
-            server.stop();
-            proxiedServer.stop();
-            dataServer.stop();
+        var TestStream = function () {
 
-            done();
-        }});
+            Stream.Readable.call(this);
+        };
 
-        dataServer.start(function () {
+        Hapi.utils.inherits(TestStream, Stream.Readable);
 
-            proxiedServer.start(function () {
+        TestStream.prototype._read = function (size) {
 
-                server.route({ method: '*', path: '/{p*}', handler: { proxy: { mapUri: function (request, next) {
+            var self = this;
 
-                    next(null, 'http://127.0.0.1:' + proxiedServer.info.port + request.path);
-                }}}});
+            if (this.isDone) {
+                return;
+            }
 
-                var options = {
-                    subscribers: {},
-                    opsInterval: 100
-                };
-                options.subscribers['http://127.0.0.1:' + dataServer.info.port] = ['ops'];
+            this.isDone = true;
 
-                server.pack.require('../', options, function () {
+            setTimeout(function () { self.push('Hello'); }, 10);
+            setTimeout(function () { self.push(null); }, 20);
+        };
 
-                    server.start(function () {
+        var handler = function (request, reply) {
 
-                        var req = Http.get('http://127.0.0.1:' + server.info.port, function () {
+            reply(new TestStream());
+        };
 
-                        });
+        goodServer.start(function () {
 
-                        req.on('error', function () {});
+            server.route({ method: 'POST', path: '/', handler: handler });
 
-                        setTimeout(function () {
+            var options = {
+                subscribers: {},
+                opsInterval: 100
+            };
+            options.subscribers['http://127.0.0.1:' + goodServer.info.port] = ['ops'];
 
-                            req.destroy();
-                        }, 5);
-                    });
+            server.pack.require('../', options, function () {
+
+                server.start(function () {
+
+                    var options = {
+                        hostname: '127.0.0.1',
+                        port: server.info.port,
+                        path: '/',
+                        method: 'POST'
+                    };
+
+                    var req = Http.request(options, function (res) { req.destroy(); });
+                    req.end('{}');
+                    req.on('error', function () { });
                 });
             });
         });
