@@ -2,7 +2,7 @@
 
 var Lab = require('lab');
 var ChildProcess = require('child_process');
-var Fs = require('fs');
+var Fs = require('graceful-fs');
 var Path = require('path');
 var Hoek = require('hoek');
 var Http = require('http');

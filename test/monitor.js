@@ -5,7 +5,7 @@ var Hapi = require('hapi');
 var Hoek = require('hoek');
 var Http = require('http');
 var Path = require('path');
-var Fs = require('fs');
+var Fs = require('graceful-fs');
 var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 
