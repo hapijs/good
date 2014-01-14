@@ -21,8 +21,7 @@
     "async": "0.2.x",
     "memwatch": "0.2.x",
     "optimist": "0.6.x",
-    "json-stringify-safe": "5.0.x",
-    "colors": "~0.6.2"
+    "json-stringify-safe": "5.0.x"
   },
   "peerDependencies": {
     "hapi": "2.x.x"
