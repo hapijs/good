@@ -21,7 +21,8 @@
     "async": "0.2.x",
     "memwatch": "0.2.x",
     "optimist": "0.6.x",
-    "json-stringify-safe": "5.0.x"
+    "json-stringify-safe": "5.0.x",
+    "redis": "~0.9.1"
   },
   "peerDependencies": {
     "hapi": "2.x.x"
