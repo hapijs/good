@@ -39,10 +39,11 @@ var server = new Hapi.Server();
 
 var options = {
     subscribers: {
-        'console':               ['ops', 'request', 'log', 'error'],
-        'http://localhost/logs': ['log'],
-        '/tmp/logs/':            ['request', 'log'],
-        'udp://127.0.0.1:9000':  ['request']
+        'console':                         ['ops', 'request', 'log', 'error'],
+        'http://localhost/logs':           ['log'],
+        '/tmp/logs/':                      ['request', 'log'],
+        'udp://127.0.0.1:9000':            ['request'],
+        'redis://127.0.0.1:6379/listname': ['request']
     }
 };
 
@@ -103,3 +104,14 @@ Good includes a _'replay'_ script that is capabale of replaying any request even
 
 `replay -l log.json -h host -n #_of_concurrent_requests`
 
+### Redis Logging
+
+Redis logging requires a url formatted like this:
+
+`redis://<hostname>:<port>/<listname>`
+
+e.g.
+
+`redis://127.0.0.1:6379/mylogs`
+
+This will append to the specified list using an [RPUSH](http://redis.io/commands/rpush).
