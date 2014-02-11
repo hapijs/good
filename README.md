@@ -126,7 +126,7 @@ When **good** broadcasts data to a remote endpoint it sends json that has the fo
 var options = {
   extraFields: {
     'identifier': 'myapplication-logs'
-    'build': '0.1.0
+    'build': '0.1.0'
   }
 }
 ```
