@@ -736,8 +736,8 @@ describe('Monitor', function () {
 
             var dest = Path.join(folderPath, 'mylog2');
 
-            if (!Fs.exists(dest + '.001')) {
-                Fs.writeFileSync(dest + '.001', '');
+            if (!Fs.exists(dest + '.000')) {
+                Fs.writeFileSync(dest + '.000', '');
             }
 
             options.subscribers[dest] = { events: ['log'] };
@@ -755,7 +755,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.002');
+                        var file = Fs.readFileSync(dest + '.001');
                         var formatted = file.toString().split('\n');
 
                         var result = JSON.parse('[' + formatted + ']');
@@ -1460,6 +1460,9 @@ describe('Monitor', function () {
                             rss: 1
                         },
                         cpu: 10
+                    },
+                    os: {
+                        load: 10
                     }
                 }];
 

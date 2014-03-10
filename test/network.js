@@ -112,6 +112,41 @@ describe('Network Monitor', function () {
         done();
     });
 
+    it('defaults to port 0', function (done) {
+
+        var server1 = {
+            _connections: {
+                'ip:123': {}
+            }
+        };
+        var emitter = new Events.EventEmitter();
+        var network = new NetworkMonitor.Monitor(emitter);
+
+        var tags = ['hapi', 'received'];
+        var tagsMap = Hoek.mapToObject(tags);
+        var request1 = { server: server1, info: { received: Date.now() - 1 }, url: { pathname: '/' }, response: { statusCode: 200 }, getLog: function () { return []; } };
+        emitter.emit('request', request1, { tags: tags }, tagsMap);
+        emitter.emit('response', request1);
+
+        network.requests(function (err, result) {
+
+            expect(result['0'].total).to.equal(1);
+        });
+
+        network.concurrents(function (err, result) {
+
+            expect(result['0']).to.equal(1);
+        });
+
+        network.responseTimes(function (err, result) {
+
+            expect(result['0'].max).to.be.at.least(1);
+            expect(result['0'].avg).to.be.at.least(1);
+        });
+
+        done();
+    });
+
     it('tracks server disconnects', function (done) {
 
         var goodServer = new Hapi.Server(0);
