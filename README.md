@@ -12,7 +12,7 @@ The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling 
 - System and process performance (ops) - CPU, memory, disk, and other metrics.
 - Requests logging (request) - framework and application generated logs generated during the lifecycle of each incoming request.
 - General events (log) - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Described in [General Events Logging](#general-events-logging).
-- Internal errors (error) - request responses that have a status code of 500.  Descibed in the [server events documentation](http://spumko.github.io/resource/api/#server-events).
+- Internal errors (error) - request responses that have a status code of 500.  Described in the [server events documentation](http://spumko.github.io/resource/api/#server-events).
 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination as general events
 are a process-wide facility and will result in duplicated log events. To override some or all of the defaults, set `options` to an object with the following
@@ -99,7 +99,6 @@ When **good** broadcasts data to a remote endpoint it sends json that has the fo
 
 ### Replaying request logs
 
-Good includes a _'replay'_ script that is capabale of replaying any request events found in a log file.  Below is the command to use to execute _'replay'_:
+Good includes a _'replay'_ script that is capable of replaying any request events found in a log file.  Below is the command to use to execute _'replay'_:
 
 `replay -l log.json -h host -n #_of_concurrent_requests`
-
