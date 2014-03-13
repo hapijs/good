@@ -24,7 +24,7 @@ var it = Lab.test;
 describe('Broadcast', function () {
 
     var broadcastPath = Path.join(__dirname, '..', 'bin', 'broadcast');
-    var lastBroadcastPath = Path.join(__dirname, '..', 'bin', 'lastBroadcast_request_log_test.004');
+    var lastBroadcastPath = Path.join(__dirname, '..', 'lib', 'lastBroadcast_request_log_test.004');
     var logPath1 = Path.join(__dirname, 'request_log_test.001');
     var logPath2 = Path.join(__dirname, 'request_log_test.002');
     var logPath3 = Path.join(__dirname, 'request_log_test.003');
@@ -41,7 +41,7 @@ describe('Broadcast', function () {
         '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}';
     var opsData1 = '{"event":"ops","timestamp":1375466329196,"os":{"load":[0.38671875,0.390625,0.51171875],"mem":{"total":3221225472,"free":2790420480},"uptime":5690647,"cpu":"70.81"},"proc":{"uptime":414,"mem":{"rss":204468224,"heapTotal":64403456,"heapUsed":29650600,"total":3221225472},"delay":0},"load":{"requests":{"8080":1007,"8443":178},"concurrents":{"8080":8,"8443":-7}}}';
 
-    var locations = [lastBroadcastPath, logPath1, logPath2, logPath3, logPath4, logPath5, logPath6, logPath7, opsLogPath1, broadcastJsonPath];
+    var locations = [logPath1, logPath2, logPath3, logPath4, logPath5, logPath6, logPath7, opsLogPath1, broadcastJsonPath, lastBroadcastPath];
     var cleanup = function (done) {
         for (var i = 0, il = locations.length; i < il; ++i) {
             if (Fs.existsSync(locations[i])) {
