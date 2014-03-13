@@ -8,6 +8,7 @@ var Path = require('path');
 var Fs = require('fs');
 var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
+var Net = require('net');
 
 
 // Declare internals
@@ -528,6 +529,116 @@ describe('Monitor', function () {
             });
 
             remoteServer.bind(0, '127.0.0.1');
+        });
+    });
+
+    describe('#_broadcastRedis', function () {
+
+        it('does not do anything if there are no subscribers', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._broadcastRedis()).to.not.exist;
+                done();
+            });
+        });
+
+        it('broadcasts all events when no tags are provided', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._subscriberQueues.console).to.exist;
+                expect(monitor._eventQueues.log).to.exist;
+
+                Hoek.consoleFunc = function (string) {
+
+                    Hoek.consoleFunc = console.log;
+                    expect(string).to.contain('included in output');
+                    monitor.stop();
+                    done();
+                };
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastRedis();
+            });
+        });
+
+        it('does not fail when a remote subscriber is unavailable', function (done) {
+
+            var options = {
+                subscribers: {
+                    'redis://notfound:1234/listname': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.log).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastRedis();
+
+                setTimeout(function () {
+                    done();
+                }, 100);
+            });
+        });
+
+        it('sends all events to a remote server subscriber', function (done) {
+
+            var remoteServer = Net.createServer(function (c) {
+                c.on('data', function (data) {
+                    var d = data.toString();
+
+                    if (d.indexOf("rpush\r\n") > -1) {
+                        c.write(':1\r\n');
+                    }
+
+                    if (d.indexOf("info\r\n") > -1) {
+                        c.write('$32\r\n# Server\r\nredis_version:2.6.16\r\n');
+                    }
+
+                    if (d.indexOf("quit\r\n") > -1) {
+                        c.end();
+                        done();
+                    }
+                });
+            });
+
+            remoteServer.listen(function () {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                options.subscribers['redis://127.0.0.1:' + remoteServer.address().port + '/listname'] = { events: ['log'] };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    expect(monitor._eventQueues.log).to.exist;
+
+                    server.log('ERROR', 'included in output');
+                    monitor._broadcastRedis();
+                });
+            });
         });
     });
 
