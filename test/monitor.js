@@ -1451,6 +1451,7 @@ describe('Monitor', function () {
 
                 var events = [{
                     event: 'ops',
+                    os: { load: [ 1.0, 1.0, 1.0 ] },
                     proc: {
                         mem: {
                             rss: 1
