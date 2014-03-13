@@ -20,13 +20,13 @@
     "nipple": "2.x.x",
     "async": "0.2.x",
     "optimist": "0.6.x",
-    "json-stringify-safe": "5.0.x",
-    "redis": "0.9.x"
+    "json-stringify-safe": "5.0.x"
   },
   "peerDependencies": {
     "hapi": ">=2.x.x"
   },
   "devDependencies": {
+    "redis": "0.9.x",
     "hapi": "3.x.x",
     "lab": "1.x.x"
   },
