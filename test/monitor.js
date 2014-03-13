@@ -1497,6 +1497,121 @@ describe('Monitor', function () {
                 monitor._display(events);
             });
         });
+
+        describe('#print status code', function () {
+
+            it('200', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'GET',
+                        statusCode: 200
+                    }];
+
+                    Hoek.consoleFunc = function (string) {
+
+                        Hoek.consoleFunc = console.log;
+                        expect(string).to.contain('[32m200');
+                        done();
+                    };
+
+                    monitor._display(events);
+                });
+            });
+
+            it('304', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'GET',
+                        statusCode: 304
+                    }];
+
+                    Hoek.consoleFunc = function (string) {
+
+                        Hoek.consoleFunc = console.log;
+                        expect(string).to.contain('[36m304');
+                        done();
+                    };
+
+                    monitor._display(events);
+                });
+            });
+
+            it('404', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'GET',
+                        statusCode: 404
+                    }];
+
+                    Hoek.consoleFunc = function (string) {
+
+                        Hoek.consoleFunc = console.log;
+                        expect(string).to.contain('[33m404');
+                        done();
+                    };
+
+                    monitor._display(events);
+                });
+            });
+
+            it('500', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'GET',
+                        statusCode: 500
+                    }];
+
+                    Hoek.consoleFunc = function (string) {
+
+                        Hoek.consoleFunc = console.log;
+                        expect(string).to.contain('[31m500');
+                        done();
+                    };
+
+                    monitor._display(events);
+                });
+            });
+        })
     });
 
     describe('#_log', function () {
