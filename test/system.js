@@ -21,17 +21,6 @@ var it = Lab.test;
 
 describe('System Monitor', function () {
 
-    it('throws an error when constructed without new', function (done) {
-
-        var fn = function () {
-
-            SystemMonitor.Monitor();
-        };
-
-        expect(fn).throws(Error, 'OSMonitor must be instantiated using new');
-        done();
-    });
-
     describe('#mem', function () {
 
         it('returns an object with the current memory usage', function (done) {

@@ -40,8 +40,8 @@ describe('Monitor', function () {
             });
         };
 
-
         rmFolder(Path.join(__dirname, 'logs'), function () {
+
             rmFolder(Path.join(__dirname, 'logsdir'), done);
         });
     });
@@ -1249,9 +1249,7 @@ describe('Monitor', function () {
                 subscribers: {
                     'http://localhost:1023/': ['ops']
                 },
-                opsInterval: 100,
-                leakDetection: true,
-                gcDetection: true
+                opsInterval: 100
             };
 
             makePack(function (pack, server) {
@@ -1281,9 +1279,7 @@ describe('Monitor', function () {
             var options = {
                 subscribers: {},
                 opsInterval: 100,
-                alwaysMeasureOps: true,
-                leakDetection: true,
-                gcDetection: true
+                alwaysMeasureOps: true
             };
 
             makePack(function (pack, server) {

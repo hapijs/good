@@ -34,107 +34,28 @@ describe('Broadcast', function () {
     var logPath7 = Path.join(__dirname, 'request_log_test.007');
     var opsLogPath1 = Path.join(__dirname, 'ops_log_test.001');
     var broadcastJsonPath = Path.join(__dirname, 'broadcast.json');
+
     var data1 = '{"event":"request","timestamp":1369328752975,"id":"1369328752975-42369-3828","instance":"http://localhost:8080","labels":["api","http"],' +
         '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":71,"statusCode":200}';
     var data2 = '{"event":"request","timestamp":1369328753222,"id":"1369328753222-42369-62002","instance":"http://localhost:8080","labels":["api","http"],' +
         '"method":"get","path":"/test","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":9,"statusCode":200}';
     var opsData1 = '{"event":"ops","timestamp":1375466329196,"os":{"load":[0.38671875,0.390625,0.51171875],"mem":{"total":3221225472,"free":2790420480},"uptime":5690647,"cpu":"70.81"},"proc":{"uptime":414,"mem":{"rss":204468224,"heapTotal":64403456,"heapUsed":29650600,"total":3221225472},"delay":0},"load":{"requests":{"8080":1007,"8443":178},"concurrents":{"8080":8,"8443":-7}}}';
 
-    before(function (done) {
-
-        if (Fs.existsSync(lastBroadcastPath)) {
-            Fs.unlinkSync(lastBroadcastPath);
+    var locations = [lastBroadcastPath, logPath1, logPath2, logPath3, logPath4, logPath5, logPath6, logPath7, opsLogPath1, broadcastJsonPath];
+    var cleanup = function (done) {
+        for (var i = 0, il = locations.length; i < il; ++i) {
+            if (Fs.existsSync(locations[i])) {
+                Fs.unlinkSync(locations[i]);
+            }
         }
 
-        if (Fs.existsSync(logPath1)) {
-            Fs.unlinkSync(logPath1);
-        }
+        return done();
+    };
 
-        if (Fs.existsSync(logPath2)) {
-            Fs.unlinkSync(logPath2);
-        }
-
-        if (Fs.existsSync(logPath3)) {
-            Fs.unlinkSync(logPath3);
-        }
-
-        if (Fs.existsSync(logPath4)) {
-            Fs.unlinkSync(logPath4);
-        }
-
-        if (Fs.existsSync(logPath5)) {
-            Fs.unlinkSync(logPath5);
-        }
-
-        if (Fs.existsSync(logPath6)) {
-            Fs.unlinkSync(logPath6);
-        }
-
-        if (Fs.existsSync(logPath7)) {
-            Fs.unlinkSync(logPath7);
-        }
-
-        if (Fs.existsSync(opsLogPath1)) {
-            Fs.unlinkSync(opsLogPath1);
-        }
-
-        if (Fs.existsSync(broadcastJsonPath)) {
-            Fs.unlinkSync(broadcastJsonPath);
-        }
-
-        done();
-    });
-
-    after(function (done) {
-
-        if (Fs.existsSync(logPath1)) {
-            Fs.unlinkSync(logPath1);
-        }
-
-        if (Fs.existsSync(logPath2)) {
-            Fs.unlinkSync(logPath2);
-        }
-
-        if (Fs.existsSync(logPath3)) {
-            Fs.unlinkSync(logPath3);
-        }
-
-        if (Fs.existsSync(logPath4)) {
-            Fs.unlinkSync(logPath4);
-        }
-
-        if (Fs.existsSync(logPath5)) {
-            Fs.unlinkSync(logPath5);
-        }
-
-        if (Fs.existsSync(logPath6)) {
-            Fs.unlinkSync(logPath6);
-        }
-
-        if (Fs.existsSync(logPath7)) {
-            Fs.unlinkSync(logPath7);
-        }
-
-        if (Fs.existsSync(opsLogPath1)) {
-            Fs.unlinkSync(opsLogPath1);
-        }
-
-        if (Fs.existsSync(broadcastJsonPath)) {
-            Fs.unlinkSync(broadcastJsonPath);
-        }
-
-        if (Fs.existsSync(lastBroadcastPath)) {
-            Fs.unlinkSync(lastBroadcastPath);
-        }
-
-        done();
-    });
+    before(cleanup);
+    after(cleanup);
 
     it('sends log file to remote server', function (done) {
-
-        if (Fs.existsSync(logPath1)) {
-            Fs.unlinkSync(logPath1);
-        }
 
         var stream = Fs.createWriteStream(logPath1, { flags: 'a' });
         stream.write(data1, function () {
@@ -323,7 +244,6 @@ describe('Broadcast', function () {
             });
         });
     });
-
 
     it('works when broadcast process is restarted', function (done) {
 
