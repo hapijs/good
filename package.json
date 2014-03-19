@@ -13,7 +13,7 @@
     "plugin"
   ],
   "engines": {
-    "node": ">=0.10.22"
+    "node": "0.10.x"
   },
   "dependencies": {
     "hoek": "1.x.x",
