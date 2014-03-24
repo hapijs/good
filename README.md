@@ -22,8 +22,6 @@ set `options` to an object with the following optional settings:
 
 - `broadcastInterval` - the interval in milliseconds to send collected events to HTTP subscribers. _0_ means send immediately. Defaults to _0_.
 - `opsInterval` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
-- `leakDetection` - determines if memory leaks should be detected.  Any leaks will be logged with ops data.  Defaults to _false_.
-- `gcDetection` - determines if garbage collections should be detected and counted.  The GC count is logged with ops data.  Defaults to _false_.
 - `extendedRequests` - determines if the full request log is sent or only the event summary. Defaults to _false_.
 - `maxLogSize` - the maximum byte size to allow log files to become before creating a new log file.  Default is _0_ which means log files will
   not be split.  When split the log file extension will be incremented by 1.  The initial log file has an extension of .001.
