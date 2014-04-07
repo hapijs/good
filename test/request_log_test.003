@@ -1,0 +1,1 @@
+{"event":"request","timestamp":1469328953222,"id":"1469328953222-42369-62002","instance":"http://localhost:8080","labels":["http"],"method":"get","path":"/","query":{},"source":{"remoteAddress":"127.0.0.1"},"responseTime":19,"statusCode":200}
