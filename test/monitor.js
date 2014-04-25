@@ -173,14 +173,14 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                var trap = console.log;
+                console.log = function(string) {
 
                     expect(string).to.not.exist;
                 };
-
                 server.log('other', 'not used');
-                Hoek.consoleFunc = console.log;
                 monitor.stop();
+                console.log = trap;
                 done();
             });
         });
@@ -200,15 +200,15 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                var trap = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
+                monitor.stop();
+                console.log = trap;
+                done();
             });
         });
 
@@ -232,15 +232,15 @@ describe('Monitor', function () {
 
                 server.start(function () {
 
-                    Hoek.consoleFunc = function (string) {
+                    var trap = console.log;
+                    console.log = function(string) {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
-                        Hoek.consoleFunc = console.log;
-                        done();
                     };
-
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
+                    console.log = trap;
+                    done();
                 });
             });
         });
@@ -269,16 +269,15 @@ describe('Monitor', function () {
 
                 server.start(function () {
 
-                    Hoek.consoleFunc = function (string) {
+                    var trap = console.log;
+                    console.log = function(string) {
 
-                        expect(string).to.contain('my error');
-                        expect(string).to.contain('internalError')
-
-                        Hoek.consoleFunc = console.log;
-                        done();
+                        expect(string).to.not.contain('undefined');
+                        expect(string).to.contain('test');
                     };
-
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
+                    console.log = trap;
+                    done();
                 });
             });
         });
@@ -295,7 +294,6 @@ describe('Monitor', function () {
             makePack(function (pack, server) {
 
                 var monitor = new Monitor(pack, options);
-
                 expect(monitor._broadcastHttp()).to.not.exist;
                 done();
             });
@@ -315,17 +313,16 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
+                var trap = console.log;
+                console.log = function(string) {
 
-                Hoek.consoleFunc = function (string) {
-
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
                 monitor._broadcastHttp();
+                monitor.stop();
+                console.log = trap;
+                done();
             });
         });
 
@@ -464,17 +461,16 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
+                var trap = console.log;
+                console.log = function(string) {
 
-                Hoek.consoleFunc = function (string) {
-
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
                 monitor._broadcastUdp();
+                monitor.stop();
+                console.log = trap;
+                done();
             });
         });
 
@@ -563,17 +559,16 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
+                var trap = console.log;
+                console.log = function(string) {
 
-                Hoek.consoleFunc = function (string) {
-
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
                 monitor._broadcastRedis();
+                monitor.stop();
+                console.log = trap;
+                done();
             });
         });
 
@@ -1570,15 +1565,14 @@ describe('Monitor', function () {
                         cpu: 10
                     }
                 }];
+                var trap = console.log;
+                console.log = function(string) {
 
-                Hoek.consoleFunc = function (string) {
-
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('memory');
-                    done();
                 };
-
                 monitor._display(events);
+                console.log = trap;
+                done();
             });
         });
 
@@ -1598,14 +1592,14 @@ describe('Monitor', function () {
                     method: 'testMethod'
                 }];
 
-                Hoek.consoleFunc = function (string) {
+                var trap = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('testMethod');
-                    done();
                 };
-
                 monitor._display(events);
+                console.log = trap;
+                done();
             });
         });
 
@@ -1628,14 +1622,14 @@ describe('Monitor', function () {
                         statusCode: 200
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    var trap = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[32m200');
-                        done();
                     };
-
                     monitor._display(events);
+                    console.log = trap;
+                    done();
                 });
             });
 
@@ -1656,14 +1650,14 @@ describe('Monitor', function () {
                         statusCode: 304
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    var trap = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[36m304');
-                        done();
                     };
-
                     monitor._display(events);
+                    console.log = trap;
+                    done();
                 });
             });
 
@@ -1684,14 +1678,14 @@ describe('Monitor', function () {
                         statusCode: 404
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    var trap = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[33m404');
-                        done();
                     };
-
                     monitor._display(events);
+                    console.log = trap;
+                    done();
                 });
             });
 
@@ -1712,14 +1706,14 @@ describe('Monitor', function () {
                         statusCode: 500
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    var trap = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[31m500');
-                        done();
                     };
-
                     monitor._display(events);
+                    console.log = trap;
+                    done();
                 });
             });
         })
