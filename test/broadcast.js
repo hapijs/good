@@ -90,7 +90,7 @@ describe('Broadcast', function () {
 
                 var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath1, '-u', url, '-i', 5, '-p', 0]);
+                broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath1, '-u', url, '-i', 5, '-p', 0]);
                 broadcast.stderr.on('data', function (data) {
 
                     expect(data.toString()).to.not.exist;
@@ -152,7 +152,7 @@ describe('Broadcast', function () {
 
                 var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath2, '-u', url, '-i', 10, '-p', 0]);
+                broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath2, '-u', url, '-i', 10, '-p', 0]);
                 broadcast.stderr.on('data', function (data) {
 
                     expect(data.toString()).to.not.exist;
@@ -218,7 +218,7 @@ describe('Broadcast', function () {
 
                 var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath3, '-u', url, '-i', 5, '-p', 0]);
+                broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath3, '-u', url, '-i', 5, '-p', 0]);
                 broadcast.stderr.on('data', function (data) {
 
                     expect(data.toString()).to.not.exist;
@@ -302,7 +302,7 @@ describe('Broadcast', function () {
 
                 url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                broadcast1 = ChildProcess.spawn('node', [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
+                broadcast1 = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
                 broadcast1.stderr.on('data', function (data) {
 
                     expect(data.toString()).to.not.exist;
@@ -310,7 +310,7 @@ describe('Broadcast', function () {
 
                 broadcast1.once('close', function (code) {
 
-                    broadcast2 = ChildProcess.spawn('node', [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
+                    broadcast2 = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
                     broadcast2.stderr.on('data', function (data) {
 
                     });
@@ -372,7 +372,7 @@ describe('Broadcast', function () {
                     };
 
                     Fs.writeFileSync(broadcastJsonPath, JSON.stringify(configObj));
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', broadcastJsonPath]);
+                    broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', broadcastJsonPath]);
                     broadcast.stderr.on('data', function (data) {
 
                         expect(data.toString()).to.not.exist;
@@ -429,7 +429,7 @@ describe('Broadcast', function () {
 
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath6, '-u', url, '-i', 5, '-p', 0]);
+                    broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath6, '-u', url, '-i', 5, '-p', 0]);
                     broadcast.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.exist;
@@ -475,7 +475,7 @@ describe('Broadcast', function () {
                     };
 
                     Fs.writeFileSync(broadcastJsonPath, JSON.stringify(configObj));
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-c', broadcastJsonPath]);
+                    broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', broadcastJsonPath]);
                     broadcast.stderr.on('data', function (data) {
 
                         expect(data.toString()).to.contain('ECONNRESET');
@@ -527,7 +527,7 @@ describe('Broadcast', function () {
 
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', opsLogPath1, '-u', url, '-i', 5, '-p', 0]);
+                    broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', opsLogPath1, '-u', url, '-i', 5, '-p', 0]);
                     broadcast.stderr.on('data', function (data) {
 
                         expect(data.toString()).to.not.exist;
@@ -582,7 +582,7 @@ describe('Broadcast', function () {
 
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                    broadcast = ChildProcess.spawn('node', [broadcastPath, '-l', logPath2, '-u', url, '-i', 5, '-p', 0, '-n', 1]);
+                    broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath2, '-u', url, '-i', 5, '-p', 0, '-n', 1]);
                     broadcast.stderr.on('data', function (data) {
 
                         expect(data).to.not.exist;

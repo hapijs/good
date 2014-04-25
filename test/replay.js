@@ -66,7 +66,7 @@ describe('Replay', function () {
 
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                    replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
+                    replay = ChildProcess.spawn(process.execPath, [replayPath, '-l', logPath1, '-u', url]);
                     replay.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.not.exist;
@@ -96,7 +96,7 @@ describe('Replay', function () {
 
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                    replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
+                    replay = ChildProcess.spawn(process.execPath, [replayPath, '-l', logPath1, '-u', url]);
                     replay.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.exist;
@@ -126,7 +126,7 @@ describe('Replay', function () {
 
                     var url = 'http://127.0.0.1:' + server.address().port + '/';
 
-                    replay = ChildProcess.spawn('node', [replayPath, '-l', logPath1, '-u', url]);
+                    replay = ChildProcess.spawn(process.execPath, [replayPath, '-l', logPath1, '-u', url]);
                     replay.stderr.once('data', function (data) {
 
                         expect(data.toString()).to.exist;
