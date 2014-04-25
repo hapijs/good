@@ -96,7 +96,7 @@ describe('Broadcast', function () {
                     expect(data.toString()).to.not.exist;
                 });
 
-                broadcast.once('close', function (code) {
+                broadcast.once('finish', function (code) {
 
                     expect(code).to.equal(0);
                     done();
