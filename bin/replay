@@ -70,7 +70,7 @@ internals.handleResponse = function (response) {
 
     response.once('error', function () {
 
-        Hoek.consoleFunc('error for: ' + response.req.path);
+        Hoek.abort('error for: ' + response.req.path);
         response.destroy();
     });
 
@@ -100,7 +100,7 @@ internals.makeRequest = function () {
 
     req.once('error', function (err) {
 
-        Hoek.consoleFunc(err);
+        console.log(err);
         internals.makeRequest();
     });
 
@@ -114,8 +114,8 @@ internals.makeRequest = function () {
 internals.makeRequests = function () {
 
     Http.globalAgent.maxSockets = internals.availableSockets;
-    Hoek.consoleFunc('Total requests to make: ' + internals.urls.length);
-    Hoek.consoleFunc('Making requests...');
+    console.log('Total requests to make: ' + internals.urls.length);
+    console.log('Making requests...');
 
     for (var i = 0, il = (internals.urls.length > internals.availableSockets ? internals.availableSockets : internals.urls.length); i < il; ++i) {
 

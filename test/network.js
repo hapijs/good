@@ -133,7 +133,7 @@ describe('Network Monitor', function () {
             Stream.Readable.call(this);
         };
 
-        Hapi.utils.inherits(TestStream, Stream.Readable);
+        Hoek.inherits(TestStream, Stream.Readable);
 
         TestStream.prototype._read = function (size) {
 
