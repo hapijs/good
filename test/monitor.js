@@ -27,25 +27,25 @@ var it = Lab.test;
 
 describe('Monitor', function () {
 
-    after(function (done) {
-
-        var rmFolder = function (folderPath, next) {
-
-            Fs.readdir(folderPath, function (err, files) {
-
-                while (files && files.length) {
-                    Fs.unlinkSync(Path.join(folderPath, files.pop()));
-                };
-
-                Fs.rmdir(folderPath, next);
-            });
-        };
-
-        rmFolder(Path.join(__dirname, 'logs'), function () {
-
-            rmFolder(Path.join(__dirname, 'logsdir'), done);
-        });
-    });
+//    after(function (done) {
+//
+//        var rmFolder = function (folderPath, next) {
+//
+//            Fs.readdir(folderPath, function (err, files) {
+//
+//                while (files && files.length) {
+//                    Fs.unlinkSync(Path.join(folderPath, files.pop()));
+//                };
+//
+//                Fs.rmdir(folderPath, next);
+//            });
+//        };
+//
+//        rmFolder(Path.join(__dirname, 'logs'), function () {
+//
+//            rmFolder(Path.join(__dirname, 'logsdir'), done);
+//        });
+//    });
 
     var makePack = function (callback) {
 
@@ -173,14 +173,16 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
                     expect(string).to.not.exist;
                 };
-
                 server.log('other', 'not used');
-                Hoek.consoleFunc = console.log;
                 monitor.stop();
+                // reset console.log back to normal
+                console.log = trapConsole;
                 done();
             });
         });
@@ -200,15 +202,17 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
+                monitor.stop();
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -230,18 +234,20 @@ describe('Monitor', function () {
 
             server.pack.register(plugin, options, function () {
 
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
                 server.start(function () {
 
-                    Hoek.consoleFunc = function (string) {
+                    console.log = function(string) {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
-                        Hoek.consoleFunc = console.log;
-                        done();
                     };
-
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
                 });
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -269,16 +275,17 @@ describe('Monitor', function () {
 
                 server.start(function () {
 
-                    Hoek.consoleFunc = function (string) {
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
 
-                        expect(string).to.contain('my error');
-                        expect(string).to.contain('internalError')
-
-                        Hoek.consoleFunc = console.log;
-                        done();
+                        expect(string).to.not.contain('undefined');
+                        expect(string).to.contain('test');
                     };
-
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
                 });
             });
         });
@@ -295,7 +302,6 @@ describe('Monitor', function () {
             makePack(function (pack, server) {
 
                 var monitor = new Monitor(pack, options);
-
                 expect(monitor._broadcastHttp()).to.not.exist;
                 done();
             });
@@ -316,16 +322,18 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
                 monitor._broadcastHttp();
+                monitor.stop();
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -465,16 +473,18 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
                 monitor._broadcastUdp();
+                monitor.stop();
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -564,16 +574,18 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('included in output');
-                    monitor.stop();
-                    done();
                 };
-
                 server.log('ERROR', 'included in output');
                 monitor._broadcastRedis();
+                monitor.stop();
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -1571,14 +1583,16 @@ describe('Monitor', function () {
                     }
                 }];
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('memory');
-                    done();
                 };
-
                 monitor._display(events);
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -1598,14 +1612,16 @@ describe('Monitor', function () {
                     method: 'testMethod'
                 }];
 
-                Hoek.consoleFunc = function (string) {
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
 
-                    Hoek.consoleFunc = console.log;
                     expect(string).to.contain('testMethod');
-                    done();
                 };
-
                 monitor._display(events);
+                // reset console.log back to normal
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -1628,14 +1644,16 @@ describe('Monitor', function () {
                         statusCode: 200
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[32m200');
-                        done();
                     };
-
                     monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
                 });
             });
 
@@ -1656,14 +1674,16 @@ describe('Monitor', function () {
                         statusCode: 304
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[36m304');
-                        done();
                     };
-
                     monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
                 });
             });
 
@@ -1684,14 +1704,16 @@ describe('Monitor', function () {
                         statusCode: 404
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[33m404');
-                        done();
                     };
-
                     monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
                 });
             });
 
@@ -1712,14 +1734,16 @@ describe('Monitor', function () {
                         statusCode: 500
                     }];
 
-                    Hoek.consoleFunc = function (string) {
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
 
-                        Hoek.consoleFunc = console.log;
                         expect(string).to.contain('[31m500');
-                        done();
                     };
-
                     monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
                 });
             });
         })
