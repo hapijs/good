@@ -173,14 +173,14 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.not.exist;
                 };
                 server.log('other', 'not used');
                 monitor.stop();
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -200,14 +200,14 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('included in output');
                 };
                 server.log('ERROR', 'included in output');
                 monitor.stop();
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -230,18 +230,18 @@ describe('Monitor', function () {
 
             server.pack.register(plugin, options, function () {
 
+                var trapConsole = console.log;
                 server.start(function () {
 
-                    var trap = console.log;
                     console.log = function(string) {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
-                    console.log = trap;
-                    done();
                 });
+                console.log = trapConsole;
+                done();
             });
         });
 
@@ -269,14 +269,14 @@ describe('Monitor', function () {
 
                 server.start(function () {
 
-                    var trap = console.log;
+                    var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
-                    console.log = trap;
+                    console.log = trapConsole;
                     done();
                 });
             });
@@ -313,7 +313,7 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('included in output');
@@ -321,7 +321,7 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
                 monitor._broadcastHttp();
                 monitor.stop();
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -461,7 +461,7 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('included in output');
@@ -469,7 +469,7 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
                 monitor._broadcastUdp();
                 monitor.stop();
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -559,7 +559,7 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('included in output');
@@ -567,7 +567,7 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
                 monitor._broadcastRedis();
                 monitor.stop();
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -1565,13 +1565,13 @@ describe('Monitor', function () {
                         cpu: 10
                     }
                 }];
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('memory');
                 };
                 monitor._display(events);
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -1592,13 +1592,13 @@ describe('Monitor', function () {
                     method: 'testMethod'
                 }];
 
-                var trap = console.log;
+                var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('testMethod');
                 };
                 monitor._display(events);
-                console.log = trap;
+                console.log = trapConsole;
                 done();
             });
         });
@@ -1622,13 +1622,13 @@ describe('Monitor', function () {
                         statusCode: 200
                     }];
 
-                    var trap = console.log;
+                    var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[32m200');
                     };
                     monitor._display(events);
-                    console.log = trap;
+                    console.log = trapConsole;
                     done();
                 });
             });
@@ -1650,13 +1650,13 @@ describe('Monitor', function () {
                         statusCode: 304
                     }];
 
-                    var trap = console.log;
+                    var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[36m304');
                     };
                     monitor._display(events);
-                    console.log = trap;
+                    console.log = trapConsole;
                     done();
                 });
             });
@@ -1678,13 +1678,13 @@ describe('Monitor', function () {
                         statusCode: 404
                     }];
 
-                    var trap = console.log;
+                    var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[33m404');
                     };
                     monitor._display(events);
-                    console.log = trap;
+                    console.log = trapConsole;
                     done();
                 });
             });
@@ -1706,13 +1706,13 @@ describe('Monitor', function () {
                         statusCode: 500
                     }];
 
-                    var trap = console.log;
+                    var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[31m500');
                     };
                     monitor._display(events);
-                    console.log = trap;
+                    console.log = trapConsole;
                     done();
                 });
             });
