@@ -173,6 +173,7 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
@@ -180,6 +181,7 @@ describe('Monitor', function () {
                 };
                 server.log('other', 'not used');
                 monitor.stop();
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -200,6 +202,7 @@ describe('Monitor', function () {
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
 
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
@@ -207,6 +210,7 @@ describe('Monitor', function () {
                 };
                 server.log('ERROR', 'included in output');
                 monitor.stop();
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -230,6 +234,7 @@ describe('Monitor', function () {
 
             server.pack.register(plugin, options, function () {
 
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 server.start(function () {
 
@@ -240,6 +245,7 @@ describe('Monitor', function () {
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
                 });
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -269,6 +275,7 @@ describe('Monitor', function () {
 
                 server.start(function () {
 
+                    // trap console output so it doesnt show up in stdout
                     var trapConsole = console.log;
                     console.log = function(string) {
 
@@ -276,6 +283,7 @@ describe('Monitor', function () {
                         expect(string).to.contain('test');
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
+                    // reset console.log back to normal
                     console.log = trapConsole;
                     done();
                 });
@@ -313,6 +321,8 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
+
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
@@ -321,6 +331,7 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
                 monitor._broadcastHttp();
                 monitor.stop();
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -461,6 +472,8 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
+
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
@@ -469,6 +482,7 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
                 monitor._broadcastUdp();
                 monitor.stop();
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -559,6 +573,8 @@ describe('Monitor', function () {
 
                 expect(monitor._subscriberQueues.console).to.exist;
                 expect(monitor._eventQueues.log).to.exist;
+
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
@@ -567,6 +583,7 @@ describe('Monitor', function () {
                 server.log('ERROR', 'included in output');
                 monitor._broadcastRedis();
                 monitor.stop();
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -1565,12 +1582,15 @@ describe('Monitor', function () {
                         cpu: 10
                     }
                 }];
+
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('memory');
                 };
                 monitor._display(events);
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -1592,12 +1612,14 @@ describe('Monitor', function () {
                     method: 'testMethod'
                 }];
 
+                // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
 
                     expect(string).to.contain('testMethod');
                 };
                 monitor._display(events);
+                // reset console.log back to normal
                 console.log = trapConsole;
                 done();
             });
@@ -1622,12 +1644,14 @@ describe('Monitor', function () {
                         statusCode: 200
                     }];
 
+                    // trap console output so it doesnt show up in stdout
                     var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[32m200');
                     };
                     monitor._display(events);
+                    // reset console.log back to normal
                     console.log = trapConsole;
                     done();
                 });
@@ -1650,12 +1674,14 @@ describe('Monitor', function () {
                         statusCode: 304
                     }];
 
+                    // trap console output so it doesnt show up in stdout
                     var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[36m304');
                     };
                     monitor._display(events);
+                    // reset console.log back to normal
                     console.log = trapConsole;
                     done();
                 });
@@ -1678,12 +1704,14 @@ describe('Monitor', function () {
                         statusCode: 404
                     }];
 
+                    // trap console output so it doesnt show up in stdout
                     var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[33m404');
                     };
                     monitor._display(events);
+                    // reset console.log back to normal
                     console.log = trapConsole;
                     done();
                 });
@@ -1706,12 +1734,14 @@ describe('Monitor', function () {
                         statusCode: 500
                     }];
 
+                    // trap console output so it doesnt show up in stdout
                     var trapConsole = console.log;
                     console.log = function(string) {
 
                         expect(string).to.contain('[31m500');
                     };
                     monitor._display(events);
+                    // reset console.log back to normal
                     console.log = trapConsole;
                     done();
                 });
