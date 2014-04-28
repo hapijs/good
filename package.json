@@ -23,7 +23,7 @@
     "json-stringify-safe": "5.0.x"
   },
   "peerDependencies": {
-    "hapi": ">=4.x.x"
+    "hapi": ">=2.x.x"
   },
   "devDependencies": {
     "redis": "0.9.x",
