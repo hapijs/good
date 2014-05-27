@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "redis": "0.9.x",
-    "hapi": "4.x.x",
+    "hapi": "5.x.x",
     "lab": "3.x.x"
   },
   "scripts": {
