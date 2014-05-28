@@ -33,6 +33,7 @@ set `options` to an object with the following optional settings:
   The subscriptions that are available are _ops_, _request_, _log_ and _error_. The destination can be a URI, file or directory path, and _console_.
   Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array
   into the subscribers "console" configuration.
+- `logAllRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
 
 For example:
 
