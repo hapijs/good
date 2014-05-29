@@ -248,17 +248,11 @@ describe('Broadcast', function () {
         var url = null;
         var runCount = 0;
 
-        console.log(logPath4);
-
         var stream = Fs.createWriteStream(logPath4, { flags: 'a' });
 
         stream.write(data1, function () {
 
-            console.log('finished writing data 1');
-
             stream.write('\n' + data2, function () {
-
-                console.log('finished writing data 2');
 
                 var server = Http.createServer(function (req, res) {
 
@@ -288,15 +282,11 @@ describe('Broadcast', function () {
                         }
                     });
 
-                    res.on('error', function (err) {
-
-                        console.log('Response error! ' + JSON.stringify(err));
+                    res.on('error', function () {
 
                     });
 
-                    req.on('error', function (err) {
-
-                        console.log('Response error! ' + JSON.stringify(err));
+                    req.on('error', function () {
 
                     });
 
@@ -310,8 +300,6 @@ describe('Broadcast', function () {
                     broadcast1 = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
                     broadcast1.stderr.on('data', function (data) {
 
-                        console.log('In data handler: ' + JSON.stringify(data));
-
                         expect(data.toString()).to.not.exist;
                     });
 
@@ -320,13 +308,9 @@ describe('Broadcast', function () {
                         broadcast2 = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', logPath4, '-u', url, '-i', 5]);
                         broadcast2.stderr.on('data', function (data) {
 
-                            console.log('In data handler for 2: ' + JSON.stringify(data));
-
                         });
 
                         broadcast2.once('close', function (code) {
-
-                            console.log('In close handler: ' + JSON.stringify(data));
 
                             expect(code).to.equal(0);
                             done();
