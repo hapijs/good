@@ -59,7 +59,7 @@ describe('Broadcast', function () {
 
 
         var broadcast = null;
-        var server = Hapi.createServer('127.0.0.1', 8001);
+        var server = Hapi.createServer('127.0.0.1', 0);
 
         server.route({
             path: '/',
@@ -74,9 +74,9 @@ describe('Broadcast', function () {
         });
 
         server.start( function () {
-            var url = 'http://127.0.0.1:8001/';
+            var url = server.info.uri;
 
-            broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', '/Users/nvcexploder/src/git/spumko/good/test/fixtures/test_01.log', '-u', url, '-i', 5, '-p', 0]);
+            broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', './test/fixtures/test_01.log', '-u', url, '-i', 5, '-p', 0]);
 
             broadcast.stderr.on('data', function (data) {
                 expect(data.toString()).to.not.exist;
