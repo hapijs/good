@@ -164,7 +164,12 @@ describe('Network Monitor', function () {
             };
             options.subscribers['http://127.0.0.1:' + goodServer.info.port] = ['ops'];
 
-            server.pack.require('../', options, function () {
+            var plugin = {
+                plugin: require('..'),
+                options: options
+            };
+
+            server.pack.register(plugin, function () {
 
                 server.start(function () {
 

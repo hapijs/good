@@ -2,7 +2,6 @@
 
 var ChildProcess = require('child_process');
 var Fs = require('fs');
-var Http = require('http');
 var Lab = require('lab');
 var Path = require('path');
 

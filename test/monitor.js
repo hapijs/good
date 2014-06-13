@@ -1,5 +1,6 @@
 // Load modules
 
+var Boom = require('boom');
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
@@ -27,25 +28,27 @@ var it = Lab.test;
 
 describe('Monitor', function () {
 
-//    after(function (done) {
-//
-//        var rmFolder = function (folderPath, next) {
-//
-//            Fs.readdir(folderPath, function (err, files) {
-//
-//                while (files && files.length) {
-//                    Fs.unlinkSync(Path.join(folderPath, files.pop()));
-//                };
-//
-//                Fs.rmdir(folderPath, next);
-//            });
-//        };
-//
-//        rmFolder(Path.join(__dirname, 'logs'), function () {
-//
-//            rmFolder(Path.join(__dirname, 'logsdir'), done);
-//        });
-//    });
+/*
+    after(function (done) {
+
+        var rmFolder = function (folderPath, next) {
+
+            Fs.readdir(folderPath, function (err, files) {
+
+                while (files && files.length) {
+                    Fs.unlinkSync(Path.join(folderPath, files.pop()));
+                };
+
+                Fs.rmdir(folderPath, next);
+            });
+        };
+
+        rmFolder(Path.join(__dirname, 'logs'), function () {
+
+            rmFolder(Path.join(__dirname, 'logsdir'), done);
+        });
+    });
+*/
 
     var makePack = function (callback) {
 
@@ -227,12 +230,11 @@ describe('Monitor', function () {
             var server = new Hapi.Server(0);
 
             var plugin = {
-                name: 'good',
                 register: require('../lib/index').register,
-                version: '0.0.1'
-            };
+                options: options
+            }
 
-            server.pack.register(plugin, options, function () {
+            server.pack.register(plugin, function () {
 
                 // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
@@ -261,17 +263,15 @@ describe('Monitor', function () {
 
             var server = new Hapi.Server(0);
             server.route({ method: 'GET', path: '/err', handler: function (request, reply) {
-
                 reply(new Hapi.error.internal('my error'))
             }});
 
             var plugin = {
-                name: 'good',
                 register: require('../lib/index').register,
-                version: '0.0.1'
-            };
+                options: options
+            }
 
-            server.pack.register(plugin, options, function () {
+            server.pack.register(plugin, function () {
 
                 server.start(function () {
 
@@ -398,12 +398,11 @@ describe('Monitor', function () {
 
                 options.subscribers['http://127.0.0.1:' + remoteServer.info.port] = { events: ['request'] };
                 var plugin = {
-                    name: 'good',
                     register: require('../lib/index').register,
-                    version: '0.0.1'
-                };
+                    options: options
+                }
 
-                server.pack.register(plugin, options, function () {
+                server.pack.register(plugin, function () {
 
                     server.start(function () {
 
@@ -826,14 +825,13 @@ describe('Monitor', function () {
             makePack(function (pack, server) {
 
                 var monitor = new Monitor(pack, options);
-
                 expect(monitor._eventQueues.log).to.exist;
+                console.log(monitor._eventQueues.log);
 
                 server.log('ERROR', 'included in output');
                 monitor._broadcastFile();
 
                 setTimeout(function () {
-
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
@@ -842,7 +840,6 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[1].data).to.equal('another error');
-
                         done();
                     }, 20);
                 }, 10);
