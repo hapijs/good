@@ -1,6 +1,5 @@
 // Load modules
 
-var Boom = require('boom');
 var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
@@ -246,10 +245,10 @@ describe('Monitor', function () {
                         expect(string).to.contain('test');
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
                 });
-                // reset console.log back to normal
-                console.log = trapConsole;
-                done();
             });
         });
 
