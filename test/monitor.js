@@ -825,7 +825,6 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack, options);
                 expect(monitor._eventQueues.log).to.exist;
-                console.log(monitor._eventQueues.log);
 
                 server.log('ERROR', 'included in output');
                 monitor._broadcastFile();
