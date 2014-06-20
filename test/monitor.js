@@ -243,11 +243,10 @@ describe('Monitor', function () {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
+                        console.log = trapConsole;
+                        done();
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
-                    // reset console.log back to normal
-                    console.log = trapConsole;
-                    done();
                 });
             });
         });
@@ -280,11 +279,10 @@ describe('Monitor', function () {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
+                        console.log = trapConsole;
+                        done();
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
-                    // reset console.log back to normal
-                    console.log = trapConsole;
-                    done();
                 });
             });
         });
