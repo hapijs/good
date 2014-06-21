@@ -83,6 +83,19 @@ describe('Monitor', function () {
         done();
     });
 
+    it('has no options', function (done) {
+
+        makePack(function (pack, server) {
+
+            var fn = function () {
+
+                var monitor = new Monitor(pack);
+            };
+            expect(fn).to.not.throw(Error);
+            done();
+        });
+    });
+
     it('throws an error if opsInterval is too small', function (done) {
 
         var options = {
@@ -136,6 +149,25 @@ describe('Monitor', function () {
             };
 
             expect(fn).throws(Error, 'Invalid monitor.requestsEvent configuration');
+            done();
+        });
+    });
+
+    it('requestsEvent is a response', function (done) {
+
+        var options = {
+            subscribers: {},
+            requestsEvent: 'response'
+        };
+
+        makePack(function (pack, server) {
+
+            var fn = function () {
+
+                var monitor = new Monitor(pack, options);
+            };
+
+            expect(fn).not.to.throw(Error);
             done();
         });
     });
