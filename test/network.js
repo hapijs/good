@@ -57,6 +57,31 @@ describe('Network Monitor', function () {
         done();
     });
 
+    it('handles no tags', function (done) {
+
+        var server = {
+            info: { port: 80 },
+            _connections: {
+                'ip:123': {},
+                'ip:1234': {}
+            }
+        };
+        var emitter = new Events.EventEmitter();
+        var network = new NetworkMonitor.Monitor(emitter);
+
+        var request = { server: server, url: { pathname: '/' } };
+        emitter.emit('request', request, {});
+        emitter.emit('request', request, {});
+
+        network.requests(function (err, result) {
+
+            expect(result['80']).to.not.exist;
+        });
+
+        done();
+    });
+
+
     it('tracks requests and concurrents total since last check', function (done) {
 
         var server = {
