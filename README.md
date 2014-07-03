@@ -51,7 +51,7 @@ var options = {
     }
 };
 
-server.pack.require('good', options, function (err) {
+server.pack.register('good', options, function (err) {
 
     if (!err) {
         // Plugin loaded successfully
