@@ -311,9 +311,11 @@ describe('Monitor', function () {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
+                        // reset console.log
                         console.log = trapConsole;
                         done();
                     };
+
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
                 });
             });
@@ -1462,6 +1464,31 @@ describe('Monitor', function () {
                 monitor._broadcastHttp = function () {
 
                     done();
+                };
+
+                monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
+            });
+        });
+
+        it('broadcastInterval not 0', function (done) {
+
+            var options = {
+                subscribers: {
+                    'http://localhost:1023/': ['log']
+                },
+                broadcastInterval: 5
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+                var cnt = 0;
+
+                monitor._broadcastHttp = function () {
+                    cnt++;
+                    if (cnt === 2) {
+                        done();
+                    }
                 };
 
                 monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
