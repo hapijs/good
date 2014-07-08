@@ -27,28 +27,6 @@ var it = Lab.test;
 
 describe('Monitor', function () {
 
-/*
-    after(function (done) {
-
-        var rmFolder = function (folderPath, next) {
-
-            Fs.readdir(folderPath, function (err, files) {
-
-                while (files && files.length) {
-                    Fs.unlinkSync(Path.join(folderPath, files.pop()));
-                };
-
-                Fs.rmdir(folderPath, next);
-            });
-        };
-
-        rmFolder(Path.join(__dirname, 'logs'), function () {
-
-            rmFolder(Path.join(__dirname, 'logsdir'), done);
-        });
-    });
-*/
-
     var makePack = function (callback) {
 
         var holder = null;
