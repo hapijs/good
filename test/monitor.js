@@ -24,6 +24,7 @@ var after = Lab.after;
 var describe = Lab.experiment;
 var it = Lab.test;
 
+var clog = console.log;
 
 describe('Monitor', function () {
 
@@ -1100,6 +1101,7 @@ describe('Monitor', function () {
             var dest1 = Path.join(folderPath, 'requestlog.log');
             var dest2 = Path.join(folderPath, 'opslog.log');
 
+            clog(dest1);
             options.subscribers[dest1] = { events: ['request'] };
             options.subscribers[dest2] = { events: ['ops'] };
 
@@ -1113,10 +1115,13 @@ describe('Monitor', function () {
                     setTimeout(function () {
 
                         var file1 = Fs.readFileSync(dest1);
-                        var formatted1 = file1.toString().split('\n');
+                        var formatted1 = file1.toString().split('\n').join(',');
                         var file2 = Fs.readFileSync(dest2);
-                        var formatted2 = file2.toString().split('\n');
+                        var formatted2 = file2.toString().split('\n').join(',');
 
+                        formatted1 = formatted1.replace(/'/, '');
+                        formatted2 = formatted2.replace(/'/, '');
+                        clog('[' + formatted1 + ']');
                         var result1 = JSON.parse('[' + formatted1 + ']');
                         var result2 = JSON.parse('[' + formatted2 + ']');
 
