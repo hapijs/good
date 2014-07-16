@@ -27,26 +27,6 @@ var it = Lab.test;
 
 describe('Monitor', function () {
 
-//    after(function (done) {
-//
-//        var rmFolder = function (folderPath, next) {
-//
-//            Fs.readdir(folderPath, function (err, files) {
-//
-//                while (files && files.length) {
-//                    Fs.unlinkSync(Path.join(folderPath, files.pop()));
-//                };
-//
-//                Fs.rmdir(folderPath, next);
-//            });
-//        };
-//
-//        rmFolder(Path.join(__dirname, 'logs'), function () {
-//
-//            rmFolder(Path.join(__dirname, 'logsdir'), done);
-//        });
-//    });
-
     var makePack = function (callback) {
 
         var holder = null;
@@ -79,6 +59,19 @@ describe('Monitor', function () {
 
         expect(fn).throws(Error, 'Monitor must be instantiated using new');
         done();
+    });
+
+    it('has no options', function (done) {
+
+        makePack(function (pack, server) {
+
+            var fn = function () {
+
+                var monitor = new Monitor(pack);
+            };
+            expect(fn).to.not.throw(Error);
+            done();
+        });
     });
 
     it('throws an error if opsInterval is too small', function (done) {
@@ -134,6 +127,25 @@ describe('Monitor', function () {
             };
 
             expect(fn).throws(Error, 'Invalid monitor.requestsEvent configuration');
+            done();
+        });
+    });
+
+    it('requestsEvent is a response', function (done) {
+
+        var options = {
+            subscribers: {},
+            requestsEvent: 'response'
+        };
+
+        makePack(function (pack, server) {
+
+            var fn = function () {
+
+                var monitor = new Monitor(pack, options);
+            };
+
+            expect(fn).not.to.throw(Error);
             done();
         });
     });
@@ -227,12 +239,11 @@ describe('Monitor', function () {
             var server = new Hapi.Server(0);
 
             var plugin = {
-                name: 'good',
                 register: require('../lib/index').register,
-                version: '0.0.1'
-            };
+                options: options
+            }
 
-            server.pack.register(plugin, options, function () {
+            server.pack.register(plugin, function () {
 
                 // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
@@ -242,12 +253,11 @@ describe('Monitor', function () {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
+                        console.log = trapConsole;
+                        done();
                     };
                     Http.get('http://127.0.0.1:' + server.info.port + '/?q=test');
                 });
-                // reset console.log back to normal
-                console.log = trapConsole;
-                done();
             });
         });
 
@@ -261,17 +271,15 @@ describe('Monitor', function () {
 
             var server = new Hapi.Server(0);
             server.route({ method: 'GET', path: '/err', handler: function (request, reply) {
-
                 reply(new Hapi.error.internal('my error'))
             }});
 
             var plugin = {
-                name: 'good',
                 register: require('../lib/index').register,
-                version: '0.0.1'
-            };
+                options: options
+            }
 
-            server.pack.register(plugin, options, function () {
+            server.pack.register(plugin, function () {
 
                 server.start(function () {
 
@@ -281,11 +289,12 @@ describe('Monitor', function () {
 
                         expect(string).to.not.contain('undefined');
                         expect(string).to.contain('test');
+                        // reset console.log
+                        console.log = trapConsole;
+                        done();
                     };
+
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
-                    // reset console.log back to normal
-                    console.log = trapConsole;
-                    done();
                 });
             });
         });
@@ -398,12 +407,11 @@ describe('Monitor', function () {
 
                 options.subscribers['http://127.0.0.1:' + remoteServer.info.port] = { events: ['request'] };
                 var plugin = {
-                    name: 'good',
                     register: require('../lib/index').register,
-                    version: '0.0.1'
-                };
+                    options: options
+                }
 
-                server.pack.register(plugin, options, function () {
+                server.pack.register(plugin, function () {
 
                     server.start(function () {
 
@@ -826,14 +834,12 @@ describe('Monitor', function () {
             makePack(function (pack, server) {
 
                 var monitor = new Monitor(pack, options);
-
                 expect(monitor._eventQueues.log).to.exist;
 
                 server.log('ERROR', 'included in output');
                 monitor._broadcastFile();
 
                 setTimeout(function () {
-
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
@@ -842,7 +848,6 @@ describe('Monitor', function () {
 
                         var result = JSON.parse('[' + formatted + ']');
                         expect(result[1].data).to.equal('another error');
-
                         done();
                     }, 20);
                 }, 10);
@@ -1437,6 +1442,31 @@ describe('Monitor', function () {
                 monitor._broadcastHttp = function () {
 
                     done();
+                };
+
+                monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
+            });
+        });
+
+        it('broadcastInterval not 0', function (done) {
+
+            var options = {
+                subscribers: {
+                    'http://localhost:1023/': ['log']
+                },
+                broadcastInterval: 5
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+                var cnt = 0;
+
+                monitor._broadcastHttp = function () {
+                    cnt++;
+                    if (cnt === 2) {
+                        done();
+                    }
                 };
 
                 monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
