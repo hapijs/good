@@ -51,12 +51,16 @@ var options = {
     }
 };
 
-server.pack.require('good', options, function (err) {
-
-    if (!err) {
-        // Plugin loaded successfully
-    }
+server.pack.register({
+    plugin: require('good'),
+    options: options
+}, function (err) {
+   if (err) {
+      console.log(err);
+      return;
+   }
 });
+
 ```
 
 Disabling console output:
