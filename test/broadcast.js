@@ -136,7 +136,7 @@ describe('Broadcast', function () {
 
                 stream.write(nextData);
                 stream.end();
-            }, 250);
+            }, 300);
         });
     });
 
@@ -194,7 +194,7 @@ describe('Broadcast', function () {
                         Fs.writeFileSync(logPath3, nextData);
                     });
                 });
-            }, 250);
+            }, 300);
         });
     });
 
@@ -347,7 +347,7 @@ describe('Broadcast', function () {
         setTimeout(function () {
 
             stream.write(nextData);
-        }, 250);
+        }, 300);
     });
 
     it('handles connection errors to remote server', function (done) {
@@ -392,7 +392,7 @@ describe('Broadcast', function () {
             setTimeout(function () {
 
                 stream.write(nextData);
-            }, 250);
+            }, 300);
         });
     });
 
@@ -470,7 +470,7 @@ describe('Broadcast', function () {
             setTimeout(function () {
 
                 stream.write(nextData);
-            }, 250);
+            }, 300);
         });
     });
     after(cleanup);
