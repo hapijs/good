@@ -2,7 +2,7 @@
   "name": "good",
   "description": "Server and process monitoring plugin",
   "version": "2.2.0",
-  "repository": "git://github.com/spumko/good",
+  "repository": "git://github.com/hapijs/good",
   "main": "index",
   "keywords": [
     "process",
@@ -36,7 +36,7 @@
   "licenses": [
     {
       "type": "BSD",
-      "url": "http://github.com/spumko/good/raw/master/LICENSE"
+      "url": "http://github.com/hapijs/good/raw/master/LICENSE"
     }
   ]
 }
