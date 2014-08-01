@@ -1,9 +1,11 @@
 <a href="https://github.com/spumko"><img src="https://raw.github.com/spumko/spumko/master/images/from.png" align="right" /></a>
 ![good Logo](https://raw.github.com/spumko/good/master/images/good.png)
 
-[**hapi**](https://github.com/spumko/hapi) process monitoring
+[**hapi**](https://github.com/hapijs/hapi) process monitoring
 
 [![Build Status](https://secure.travis-ci.org/spumko/good.png)](http://travis-ci.org/spumko/good)
+
+Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
 
 The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
 
