@@ -1,9 +1,8 @@
-<a href="https://github.com/spumko"><img src="https://raw.github.com/spumko/spumko/master/images/from.png" align="right" /></a>
 ![good Logo](https://raw.github.com/spumko/good/master/images/good.png)
 
 [**hapi**](https://github.com/hapijs/hapi) process monitoring
 
-[![Build Status](https://secure.travis-ci.org/spumko/good.png)](http://travis-ci.org/spumko/good)
+[![Build Status](https://secure.travis-ci.org/hapijs/good.png)](http://travis-ci.org/hapijs/good)
 
 Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
 
@@ -16,7 +15,7 @@ The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling 
 - General events (log) - logging information not bound to a specific request such as system errors, background processing,
   configuration errors, etc. Described in [General Events Logging](#general-events-logging).
 - Internal errors (error) - request responses that have a status code of 500. Described in the
-  [server events documentation](http://spumko.github.io/resource/api/#server-events).
+  [server events documentation](https://github.com/hapijs/hapi/blob/master/docs/Reference.md#server-events).
 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination
 as general events are a process-wide facility and will result in duplicated log events. To override some or all of the defaults,
