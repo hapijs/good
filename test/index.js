@@ -30,7 +30,12 @@ describe('Plugin', function () {
             alwaysMeasureOps: true
         };
 
-        server.pack.require('..', options, function (err) {
+        var plugin = {
+           plugin: require('..'),
+           options: options
+        };
+
+        server.pack.register(plugin, function (err) {
 
             expect(err).to.not.exist;
 
