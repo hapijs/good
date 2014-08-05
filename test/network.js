@@ -25,6 +25,63 @@ var it = Lab.test;
 
 describe('Network Monitor', function () {
 
+    it('handle no port info', function (done) {
+
+        var server = {
+            _connections: {
+                'ip:123': {},
+                'ip:1234': {}
+            }
+        };
+
+        var emitter = new Events.EventEmitter();
+        var network = new NetworkMonitor.Monitor(emitter);
+
+        var tags = ['hapi', 'received'];
+        var tagsMap = Hoek.mapToObject(tags);
+        var request = { server: server, info: { received: Date.now() - 1 }, url: { pathname: '/' }, response: { statusCode: 200 }, getLog: function () { return []; } };
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('response', request);
+
+        network.concurrents(function (err, result) {
+
+            expect(result['0']).to.equal(2);
+        });
+
+        network.requests(function (err, result) {
+
+            expect(result['0'].total).to.equal(2);
+        });
+
+        done();
+    });
+
+    it('handles no tags', function (done) {
+
+        var server = {
+            info: { port: 80 },
+            _connections: {
+                'ip:123': {},
+                'ip:1234': {}
+            }
+        };
+        var emitter = new Events.EventEmitter();
+        var network = new NetworkMonitor.Monitor(emitter);
+
+        var request = { server: server, url: { pathname: '/' } };
+        emitter.emit('request', request, {});
+        emitter.emit('request', request, {});
+
+        network.requests(function (err, result) {
+
+            expect(result['80']).to.not.exist;
+        });
+
+        done();
+    });
+
+
     it('tracks requests and concurrents total since last check', function (done) {
 
         var server = {
@@ -164,7 +221,12 @@ describe('Network Monitor', function () {
             };
             options.subscribers['http://127.0.0.1:' + goodServer.info.port] = ['ops'];
 
-            server.pack.require('../', options, function () {
+            var plugin = {
+                plugin: require('..'),
+                options: options
+            };
+
+            server.pack.register(plugin, function () {
 
                 server.start(function () {
 
