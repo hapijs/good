@@ -9,6 +9,7 @@ var Fs = require('fs');
 var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 var Net = require('net');
+var Async = require('async');
 
 
 // Declare internals
@@ -295,6 +296,45 @@ describe('Monitor', function () {
                     };
 
                     Http.get('http://127.0.0.1:' + server.info.port + '/err');
+                });
+            });
+        });
+
+        it('display events for objects that can not be stringified', function (done) {
+            var options = {
+                subscribers: {
+                    'console': { events: ['log'] }
+                }
+            };
+
+            var server = new Hapi.Server(0);
+            server.route({ method: 'GET', path: '/log', handler: function (request, reply) {
+                var t = {};
+                t.value = t;
+                request.server.log(['log'], t);
+                reply('ok');
+            }});
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function () {
+
+                server.start(function () {
+
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
+
+                        expect(string).to.contain('JSON Error: Converting circular structure to JSON');
+                        // reset console.log
+                        console.log = trapConsole;
+                        done();
+                    };
+
+                    Http.get('http://127.0.0.1:' + server.info.port + '/log');
                 });
             });
         });
@@ -1422,6 +1462,42 @@ describe('Monitor', function () {
                 });
             });
         });
+
+        it('emits an error event when something goes wrong', function (done) {
+
+            var options = {
+                subscribers: {},
+                opsInterval: 100,
+                alwaysMeasureOps: true
+            };
+
+            makePack(function (pack, server) {
+
+                var parallel = Async.parallel;
+
+                Async.parallel = function (methods, callback) {
+
+                    var _callback = function (error, results) {
+
+                        callback(error, results);
+
+                        expect(error).to.exist;
+                        monitor.stop();
+                        Async.parallel = parallel;
+                        done();
+                    };
+
+                    methods.createError = function (callback) {
+
+                        return callback(new Error('there was an error during processing'));
+                    }
+
+                    parallel(methods, _callback);
+                }
+
+                var monitor = new Monitor(pack, options);
+            });
+        });
     });
 
     describe('#_handle', function () {
@@ -1798,4 +1874,29 @@ describe('Monitor', function () {
             });
         });
     });
+
+    describe('#_eventsFilter', function () {
+
+        it('successfully returns a filter array', function (done) {
+
+            var result = Monitor.prototype._eventsFilter(['log'], [{
+                tags: ['log', 'error']
+            }]);
+
+            expect(result).to.exist;
+            expect(result.length).to.equal(1);
+            done();
+        });
+
+        it('gracefully handles "undefined" tags', function (done) {
+
+            var result = Monitor.prototype._eventsFilter(['log'], [{
+                tags: undefined
+            }]);
+
+            expect(result).to.exist;
+            expect(result.length).to.equal(0);
+            done();
+        });
+    })
 });
