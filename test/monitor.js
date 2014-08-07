@@ -1463,7 +1463,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('emits an error event when something goes wrong', function (done) {
+        it('gracefully handles error conditions', function (done) {
 
             var options = {
                 subscribers: {},
