@@ -703,6 +703,108 @@ describe('Monitor', function () {
         });
     });
 
+    describe('#_broadcastGraphite', function () {
+
+        it('does not do anything if there are no subscribers', function (done) {
+
+            var options = {
+                subscribers: {}
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._broadcastGraphite()).to.not.exist;
+                done();
+            });
+        });
+
+        it('broadcasts all events when no tags are provided', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['log'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._subscriberQueues.console).to.exist;
+                expect(monitor._eventQueues.log).to.exist;
+
+                Hoek.consoleFunc = function (string) {
+
+                    Hoek.consoleFunc = console.log;
+                    expect(string).to.contain('included in output');
+                    monitor.stop();
+                    done();
+                };
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastGraphite();
+            });
+        });
+
+        it('does not fail when a remote subscriber is unavailable', function (done) {
+
+            var options = {
+                subscribers: {
+                    'graphite://notfound:1234/': { events: ['ops'] }
+                }
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                expect(monitor._eventQueues.ops).to.exist;
+
+                server.log('ERROR', 'included in output');
+                monitor._broadcastGraphite();
+
+                setTimeout(function () {
+                    done();
+                }, 100);
+            });
+        });
+
+        it('sends all events to a remote server subscriber', function (done) {
+            var count = 0;
+
+            var remoteServer = Net.createServer(function (c) {
+                c.on('data', function (data) {
+                    count = count + 1;
+                    var d = data.toString();
+                    if (count == 2) {
+                        done();
+                    }
+                });
+            });
+
+            remoteServer.listen(function () {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                options.subscribers['graphite://127.0.0.1:' + remoteServer.address().port] = { events: ['log'] };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    expect(monitor._eventQueues.log).to.exist;
+
+                    server.log('ERROR', 'included in output');
+                    monitor._broadcastGraphite();
+                });
+            });
+        });
+    });
+
     describe('#_broadcastFile', function () {
 
         before(function (done) {
