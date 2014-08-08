@@ -19,7 +19,7 @@
     "hoek": "2.x.x",
     "nipple": "2.x.x",
     "async": "0.8.x",
-    "optimist": "0.6.x",
+    "yargs": "1.x.x",
     "json-stringify-safe": "5.0.x"
   },
   "peerDependencies": {
