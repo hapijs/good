@@ -4,7 +4,7 @@
 
 var Hoek = require('hoek');
 var Fs = require('fs');
-var Optimist = require('optimist');
+var Yargs = require('yargs');
 var Http = require('http');
 var Url = require('url');
 
@@ -14,7 +14,7 @@ var Url = require('url');
 var internals = {};
 
 
-internals.argv = Optimist.usage('Usage: $0 -l log.json -u url -n Concurrent Requests')
+internals.argv = Yargs.usage('Usage: $0 -l log.json -u url -n Concurrent Requests')
                     .demand(['l', 'u'])
                     .argv;
 
