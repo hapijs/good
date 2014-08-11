@@ -85,10 +85,24 @@ var options = {
 };
 ```
 
-Log file subscribers can either be a file or a directory.  When logging to a file (there isn't a trailing slash) then the files will be written with the file name in the provided path.  Otherwise, when the subscriber is a directory the log files will be named with a timestamp and placed in the directory.  All log files will have .001, .002, and .003 formatted extensions.  Below is an example of file and directory subscribers:
+Log file subscribers can either be a file or a directory.  When logging to a file (there isn't a trailing slash) then the files will be written with the file name in the provided path.  Otherwise, when the subscriber is a directory the log files will be named with a timestamp and placed in the directory.
+
+Below is an example of file and directory subscribers when maxLogSize is not set (default).
 
 ```javascript
 var options = {
+    subscribers: {
+        '/logs/good_log': { tags: ['error'], events: ['log'] },     // Creates good_log file in /logs/
+        '/logs/': { events: ['request'] }                           // Creates {timestamp} file in /logs/
+    }
+};
+```
+
+If maxLogSize is set to be greater than 0 then all log files will have .00x formatted extensions.  Below is an example of file and directory subscribers:
+
+```javascript
+var options = {
+    maxLogSize: 3,
     subscribers: {
         '/logs/good_log': { tags: ['error'], events: ['log'] },     // Creates good_log.001 file in /logs/
         '/logs/': { events: ['request'] }                           // Creates {timestamp}.001 file in /logs/
@@ -111,7 +125,7 @@ When **good** broadcasts data to a remote endpoint it sends json that has the fo
 
 Good includes a _'replay'_ script that is capable of replaying any request events found in a log file.  Below is the command to use to execute _'replay'_:
 
-`replay -l log.json -h host -n #_of_concurrent_requests`
+`replay -l log.json -u http://host -n #_of_concurrent_requests`
 
 ### Redis Logging
 
