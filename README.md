@@ -102,7 +102,7 @@ If maxLogSize is set to be greater than 0 then all log files will have .00x form
 
 ```javascript
 var options = {
-    maxLogSize: 3,
+    maxLogSize: 1024 * 1024 * 1024, // 1 gig
     subscribers: {
         '/logs/good_log': { tags: ['error'], events: ['log'] },     // Creates good_log.001 file in /logs/
         '/logs/': { events: ['request'] }                           // Creates {timestamp}.001 file in /logs/
