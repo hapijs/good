@@ -13,7 +13,7 @@ The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling 
 - System and process performance (ops) - CPU, memory, disk, and other metrics.
 - Requests logging (request) - framework and application generated logs generated during the lifecycle of each incoming request.
 - General events (log) - logging information not bound to a specific request such as system errors, background processing,
-  configuration errors, etc. Described in [General Events Logging](#general-events-logging).
+  configuration errors, etc.
 - Internal errors (error) - request responses that have a status code of 500. Described in the
   [server events documentation](https://github.com/hapijs/hapi/blob/master/docs/Reference.md#server-events).
 
