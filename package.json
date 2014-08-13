@@ -13,15 +13,16 @@
     "plugin"
   ],
   "engines": {
-    "node": "0.10.x"
+    "node": ">=0.10.x"
   },
   "dependencies": {
-    "async": "0.8.x",
     "hoek": "2.x.x",
     "joi": "^4.6.2",
     "json-stringify-safe": "5.0.x",
     "nipple": "2.x.x",
-    "yargs": "1.3.x"
+    "async": "0.9.x",
+    "yargs": "1.3.x",
+    "json-stringify-safe": "5.0.x"
   },
   "peerDependencies": {
     "hapi": ">=2.x.x"
