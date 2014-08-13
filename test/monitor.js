@@ -71,7 +71,7 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack);
             };
-            expect(fn).to.not.throw(Error);
+            expect(fn).to.not.throw();
             done();
         });
     });
@@ -90,7 +90,7 @@ describe('Monitor', function () {
                 var monitor = new Monitor(pack, options);
             };
 
-            expect(fn).throws(Error, 'Invalid monitor.opsInterval configuration');
+            expect(fn).to.throw(Error, /opsInterval must be larger than or equal to 100/gi);
             done();
         });
     });
@@ -117,8 +117,43 @@ describe('Monitor', function () {
     it('throws an error if requestsEvent is not response or tail', function (done) {
 
         var options = {
-            subscribers: {},
             requestsEvent: 'test'
+        };
+
+        makePack(function (pack, server) {
+
+            var fn = function () {
+                var monitor = new Monitor(pack, options);
+            };
+
+            expect(fn).to.throw(Error, /requestsEvent must be one of response, tail/gi);
+            done();
+        });
+    });
+
+    it('throws an error if extra options are passed in', function (done) {
+
+        var options = {
+            subscriptionz: ['ops', 'error']
+        };
+
+        makePack(function (pack, server) {
+            var fn = function () {
+                var monitor = new Monitor(pack, options);
+            };
+
+            expect(fn).to.throw(Error, /invalid monitorOptions options/gi);
+            done();
+        });
+
+    });
+
+    it('throws an error if unsupported events are passed in', function (done) {
+
+        var options = {
+            subscribers: {
+                console: ['disconnect', 'request']
+            }
         };
 
         makePack(function (pack, server) {
@@ -128,9 +163,10 @@ describe('Monitor', function () {
                 var monitor = new Monitor(pack, options);
             };
 
-            expect(fn).throws(Error, 'Invalid monitor.requestsEvent configuration');
+            expect(fn).to.throw(Error, /position 0 fails because value must be one of ops, request, log, error/gi);
             done();
         });
+
     });
 
     it('requestsEvent is a response', function (done) {
