@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "hoek": "2.x.x",
-    "joi": "^4.6.2",
+    "joi": "4.x.x",
     "json-stringify-safe": "5.0.x",
     "wreck": "3.x.x",
     "async": "0.9.x",
