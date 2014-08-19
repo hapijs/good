@@ -1706,7 +1706,7 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {},
-                logAllRequestHeaders: true
+                logRequestHeaders: true
             };
 
             makePack(function (pack, server) {

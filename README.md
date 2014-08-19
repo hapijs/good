@@ -35,7 +35,7 @@ set `options` to an object with the following optional settings:
   Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array
   into the subscribers "console" configuration.
 - `extraFields` - an object containing extra fields to be included on the broadcast log message.
-- `logAllRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
+- `logRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
   
 For example:
 
