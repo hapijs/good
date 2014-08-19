@@ -1701,6 +1701,40 @@ describe('Monitor', function () {
                 done();
             });
         });
+
+        it('logs all headers when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logAllRequestHeaders: true
+            };
+
+            makePack(function (pack, server) {
+
+                var request = {
+                    raw: {
+                        req: {
+                            headers: {
+                                'foo': 'bar'
+                            }
+                        },
+                        res: {
+
+                        }
+                    },
+                    info: {},
+                    server: server,
+                    getLog: function () {}
+                };
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._request()(request);
+
+                expect(event.headers['foo']).to.equal('bar');
+                done();
+            });
+        });
     });
 
     describe('#_display', function () {
