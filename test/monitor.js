@@ -1956,6 +1956,126 @@ describe('Monitor', function () {
                     done();
                 });
             });
+
+            it('post', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'post',
+                        statusCode: 200
+                    }];
+
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
+
+                        expect(string).to.contain('[1;33mpost');
+                    };
+                    monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
+                });
+            });
+
+            it('put', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'put',
+                        statusCode: 200
+                    }];
+
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
+
+                        expect(string).to.contain('[1;36mput');
+                    };
+                    monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
+                });
+            });
+
+            it('delete', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'delete',
+                        statusCode: 200
+                    }];
+
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
+
+                        expect(string).to.contain('[1;31mdelete');
+                    };
+                    monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
+                });
+            });
+
+            it('other', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'other',
+                        statusCode: 200
+                    }];
+
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
+
+                        expect(string).to.contain('[1;34mother');
+                    };
+                    monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
+                });
+            });
         });
     });
 
