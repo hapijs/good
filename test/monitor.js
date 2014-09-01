@@ -1923,7 +1923,40 @@ describe('Monitor', function () {
                     done();
                 });
             });
-        })
+        });
+
+        describe('print http verb', function() {
+
+              it('get', function (done) {
+
+                var options = {
+                    subscribers: {}
+                };
+
+                makePack(function (pack, server) {
+
+                    var monitor = new Monitor(pack, options);
+
+                    var events = [{
+                        event: 'request',
+                        instance: 'testInstance',
+                        method: 'get',
+                        statusCode: 200
+                    }];
+
+                    // trap console output so it doesnt show up in stdout
+                    var trapConsole = console.log;
+                    console.log = function(string) {
+
+                        expect(string).to.contain('[1;32mget');
+                    };
+                    monitor._display(events);
+                    // reset console.log back to normal
+                    console.log = trapConsole;
+                    done();
+                });
+            });
+        });
     });
 
     describe('#_log', function () {
