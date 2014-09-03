@@ -1448,6 +1448,32 @@ describe('Monitor', function () {
             });
         });
 
+        it('log pid for ops if options are set', function (done) {
+
+            var results = {
+                osload: 1,
+                osmem: 20,
+                osup: 50
+            };
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._ops()(results);
+
+                expect(event.os.load).to.equal(1);
+                expect(event.os.mem).to.equal(20);
+                expect(event.pid).to.exist;
+                done();
+            });
+        });
+
         it('emits ops data', function (done) {
 
             var options = {
@@ -1775,6 +1801,38 @@ describe('Monitor', function () {
                 done();
             });
         });
+
+        it('logs pid for request when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var request = {
+                    raw: {
+                        req: {
+                            headers: {
+                                'user-agent': 'test'
+                            }
+                        },
+                        res: {
+                        }
+                    },
+                    info: {},
+                    server: server,
+                    getLog: function () {}
+                };
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._request()(request);
+                expect(event.pid).to.exist;
+                done();
+            });
+        });
     });
 
     describe('#_display', function () {
@@ -1966,6 +2024,41 @@ describe('Monitor', function () {
         })
     });
 
+    describe('#_error', function () {
+
+        it('logs pid for error when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var request = {
+                    raw: {
+                        req: {
+                            headers: {
+                                'user-agent': 'test'
+                            }
+                        },
+                        res: {
+                        }
+                    },
+                    info: {},
+                    server: server,
+                    getLog: function () {}
+                };
+
+                var monitor = new Monitor(pack, options);
+
+                var error = monitor._error()(request, { message: 'testerror', stack: 'thestack'} );
+                expect(error.pid).to.exist;
+                done();
+            });
+        });
+    });
+
     describe('#_log', function () {
 
         it('returns wrapped events', function (done) {
@@ -1981,6 +2074,25 @@ describe('Monitor', function () {
                 var event = monitor._log()({});
 
                 expect(event.event).to.equal('log');
+                done();
+            });
+        });
+
+        it('logs pid for log when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._log()({});
+
+                expect(event.event).to.equal('log');
+                expect(event.pid).to.exist;
                 done();
             });
         });

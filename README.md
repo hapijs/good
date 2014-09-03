@@ -38,6 +38,7 @@ set `options` to an object with the following optional settings:
 - `logRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
 - `logRequestPayload` - determines if the request payload will be logged. Defaults to _false_
 - `logResponsePayload` - determines if the response payload will be logged. Defaults to _false_
+- `logPid` - determines if the pid will be logged. Defaults to _false_
   
 For example:
 
