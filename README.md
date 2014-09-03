@@ -36,6 +36,8 @@ set `options` to an object with the following optional settings:
   into the subscribers "console" configuration.
 - `extraFields` - an object containing extra fields to be included on the broadcast log message.
 - `logRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
+- `logRequestPayload` - determines if the request payload will be logged. Defaults to _false_
+- `logResponsePayload` - determines if the response payload will be logged. Defaults to _false_
   
 For example:
 
