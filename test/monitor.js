@@ -10,6 +10,7 @@ var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 var Net = require('net');
 var Async = require('async');
+var Wreck = require('wreck');
 
 
 // Declare internals
@@ -336,6 +337,54 @@ describe('Monitor', function () {
                 });
             });
         });
+
+        it('displays payload events correctly', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                },
+                logRequestPayload: true,
+                logResponsePayload: true
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.route({
+                method: 'POST',
+                path: '/test',
+                handler: function (request, reply) {
+                    server.stop({timeout: 1});
+                    reply({bar: 'foo'});
+                }
+            });
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function (err) {
+
+               if (err) {
+                   console.log('did not register plugin: ' + err);
+               }
+            });
+
+            server.start(function () {
+
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
+                    expect(string).to.contain('response payload: {"bar":"foo"}');
+                    // reset console.log
+                    console.log = trapConsole;
+                    done();
+                };
+                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                Wreck.request('POST', server.info.uri + '/test', payload);
+            });
+        });
+
 
         it('display events for objects that can not be stringified', function (done) {
             var options = {
