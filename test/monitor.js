@@ -1762,46 +1762,6 @@ describe('Monitor', function () {
             });
         });
 
-        it('logs request payload when option is set', function (done) {
-
-            var options = {
-                subscribers: {},
-                logRequestPayload: true,
-                logResponsePayload: true
-            };
-
-            makePack(function (pack, server) {
-
-                var request = {
-                    raw: {
-                        req: {
-                            headers: {
-                                'user-agent': 'test'
-                            },
-                            payload: {
-                                'foo': 'bar'
-                            }
-                        },
-                        res: {
-                            payload: {
-                                'bar': 'foo'
-                            }
-                        }
-                    },
-                    info: {},
-                    server: server,
-                    getLog: function () {}
-                };
-
-                var monitor = new Monitor(pack, options);
-
-                var event = monitor._request()(request);
-                expect(event.requestPayload.foo).to.equal('bar');
-                expect(event.responsePayload.bar).to.equal('foo');
-                done();
-            });
-        });
-
         it('logs pid for request when option is set', function (done) {
 
             var options = {
