@@ -10,6 +10,7 @@ var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 var Net = require('net');
 var Async = require('async');
+var SafeStringify = require('json-stringify-safe');
 var Wreck = require('wreck');
 
 
@@ -375,12 +376,65 @@ describe('Monitor', function () {
                 // trap console output so it doesnt show up in stdout
                 var trapConsole = console.log;
                 console.log = function(string) {
+
                     expect(string).to.contain('response payload: {"bar":"foo"}');
                     // reset console.log
                     console.log = trapConsole;
                     done();
                 };
                 var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                Wreck.request('POST', server.info.uri + '/test', payload);
+            });
+        });
+
+        it('lloyd displays payload events correctly circular', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                },
+                logRequestPayload: true,
+                logResponsePayload: true
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.route({
+                method: 'POST',
+                path: '/test',
+                handler: function (request, reply) {
+                    server.stop({timeout: 1});
+                    reply({bar: 'foo'});
+                }
+            });
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function (err) {
+
+               if (err) {
+                   console.log('did not register plugin: ' + err);
+               }
+            });
+
+            server.start(function () {
+
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
+
+                    console.error(string);
+                    expect(string).to.contain('{"foo":"bar","obj":"[Circular ~]"}');
+                    // reset console.log
+                    console.log = trapConsole;
+                    done();
+                };
+                var circObj = { foo: 'bar' };
+                circObj.obj = circObj;
+                var payload = circObj; 
+                console.log(SafeStringify(payload));
                 Wreck.request('POST', server.info.uri + '/test', payload);
             });
         });
