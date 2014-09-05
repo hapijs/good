@@ -387,7 +387,7 @@ describe('Monitor', function () {
             });
         });
 
-        it('lloyd displays payload events correctly circular', function (done) {
+        it('displays payload events correctly circular', function (done) {
 
             var options = {
                 subscribers: {
@@ -402,8 +402,8 @@ describe('Monitor', function () {
                 method: 'POST',
                 path: '/test',
                 handler: function (request, reply) {
-                    server.stop({timeout: 1});
-                    reply({bar: 'foo'});
+              
+                    reply(request.raw.req);
                 }
             });
 
@@ -425,16 +425,14 @@ describe('Monitor', function () {
                 var trapConsole = console.log;
                 console.log = function(string) {
 
-                    console.error(string);
-                    expect(string).to.contain('{"foo":"bar","obj":"[Circular ~]"}');
+                    //console.error(string);
+                    expect(string).to.contain('response payload: ');
+                    expect(string).to.contain('[Circular ~]');
                     // reset console.log
                     console.log = trapConsole;
                     done();
                 };
-                var circObj = { foo: 'bar' };
-                circObj.obj = circObj;
-                var payload = circObj; 
-                console.log(SafeStringify(payload));
+                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
                 Wreck.request('POST', server.info.uri + '/test', payload);
             });
         });
