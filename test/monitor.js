@@ -10,6 +10,8 @@ var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 var Net = require('net');
 var Async = require('async');
+var SafeStringify = require('json-stringify-safe');
+var Wreck = require('wreck');
 
 
 // Declare internals
@@ -336,6 +338,105 @@ describe('Monitor', function () {
                 });
             });
         });
+
+        it('displays payload events correctly', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                },
+                logRequestPayload: true,
+                logResponsePayload: true
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.route({
+                method: 'POST',
+                path: '/test',
+                handler: function (request, reply) {
+                    server.stop({timeout: 1});
+                    reply({bar: 'foo'});
+                }
+            });
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function (err) {
+
+               if (err) {
+                   console.log('did not register plugin: ' + err);
+               }
+            });
+
+            server.start(function () {
+
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
+
+                    expect(string).to.contain('response payload: {"bar":"foo"}');
+                    // reset console.log
+                    console.log = trapConsole;
+                    done();
+                };
+                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                Wreck.request('POST', server.info.uri + '/test', payload);
+            });
+        });
+
+        it('displays payload events correctly circular', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                },
+                logRequestPayload: true,
+                logResponsePayload: true
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.route({
+                method: 'POST',
+                path: '/test',
+                handler: function (request, reply) {
+              
+                    reply(request.raw.req);
+                }
+            });
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function (err) {
+
+               if (err) {
+                   console.log('did not register plugin: ' + err);
+               }
+            });
+
+            server.start(function () {
+
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
+
+                    //console.error(string);
+                    expect(string).to.contain('response payload: ');
+                    expect(string).to.contain('[Circular ~]');
+                    // reset console.log
+                    console.log = trapConsole;
+                    done();
+                };
+                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                Wreck.request('POST', server.info.uri + '/test', payload);
+            });
+        });
+
 
         it('display events for objects that can not be stringified', function (done) {
             var options = {
@@ -1758,46 +1859,6 @@ describe('Monitor', function () {
                 var event = monitor._request()(request);
 
                 expect(event.headers['foo']).to.equal('bar');
-                done();
-            });
-        });
-
-        it('logs request payload when option is set', function (done) {
-
-            var options = {
-                subscribers: {},
-                logRequestPayload: true,
-                logResponsePayload: true
-            };
-
-            makePack(function (pack, server) {
-
-                var request = {
-                    raw: {
-                        req: {
-                            headers: {
-                                'user-agent': 'test'
-                            },
-                            payload: {
-                                'foo': 'bar'
-                            }
-                        },
-                        res: {
-                            payload: {
-                                'bar': 'foo'
-                            }
-                        }
-                    },
-                    info: {},
-                    server: server,
-                    getLog: function () {}
-                };
-
-                var monitor = new Monitor(pack, options);
-
-                var event = monitor._request()(request);
-                expect(event.requestPayload.foo).to.equal('bar');
-                expect(event.responsePayload.bar).to.equal('foo');
                 done();
             });
         });
