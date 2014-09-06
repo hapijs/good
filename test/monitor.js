@@ -10,6 +10,8 @@ var Monitor = require('../lib/monitor');
 var Dgram = require('dgram');
 var Net = require('net');
 var Async = require('async');
+var SafeStringify = require('json-stringify-safe');
+var Wreck = require('wreck');
 
 
 // Declare internals
@@ -336,6 +338,105 @@ describe('Monitor', function () {
                 });
             });
         });
+
+        it('displays payload events correctly', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                },
+                logRequestPayload: true,
+                logResponsePayload: true
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.route({
+                method: 'POST',
+                path: '/test',
+                handler: function (request, reply) {
+                    server.stop({timeout: 1});
+                    reply({bar: 'foo'});
+                }
+            });
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function (err) {
+
+               if (err) {
+                   console.log('did not register plugin: ' + err);
+               }
+            });
+
+            server.start(function () {
+
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
+
+                    expect(string).to.contain('response payload: {"bar":"foo"}');
+                    // reset console.log
+                    console.log = trapConsole;
+                    done();
+                };
+                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                Wreck.request('POST', server.info.uri + '/test', payload);
+            });
+        });
+
+        it('displays payload events correctly circular', function (done) {
+
+            var options = {
+                subscribers: {
+                    'console': { events: ['request'] }
+                },
+                logRequestPayload: true,
+                logResponsePayload: true
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.route({
+                method: 'POST',
+                path: '/test',
+                handler: function (request, reply) {
+              
+                    reply(request.raw.req);
+                }
+            });
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: options
+            }
+
+            server.pack.register(plugin, function (err) {
+
+               if (err) {
+                   console.log('did not register plugin: ' + err);
+               }
+            });
+
+            server.start(function () {
+
+                // trap console output so it doesnt show up in stdout
+                var trapConsole = console.log;
+                console.log = function(string) {
+
+                    //console.error(string);
+                    expect(string).to.contain('response payload: ');
+                    expect(string).to.contain('[Circular ~]');
+                    // reset console.log
+                    console.log = trapConsole;
+                    done();
+                };
+                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                Wreck.request('POST', server.info.uri + '/test', payload);
+            });
+        });
+
 
         it('display events for objects that can not be stringified', function (done) {
             var options = {
@@ -1448,6 +1549,32 @@ describe('Monitor', function () {
             });
         });
 
+        it('log pid for ops if options are set', function (done) {
+
+            var results = {
+                osload: 1,
+                osmem: 20,
+                osup: 50
+            };
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._ops()(results);
+
+                expect(event.os.load).to.equal(1);
+                expect(event.os.mem).to.equal(20);
+                expect(event.pid).to.exist;
+                done();
+            });
+        });
+
         it('emits ops data', function (done) {
 
             var options = {
@@ -1732,6 +1859,38 @@ describe('Monitor', function () {
                 var event = monitor._request()(request);
 
                 expect(event.headers['foo']).to.equal('bar');
+                done();
+            });
+        });
+
+        it('logs pid for request when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var request = {
+                    raw: {
+                        req: {
+                            headers: {
+                                'user-agent': 'test'
+                            }
+                        },
+                        res: {
+                        }
+                    },
+                    info: {},
+                    server: server,
+                    getLog: function () {}
+                };
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._request()(request);
+                expect(event.pid).to.exist;
                 done();
             });
         });
@@ -2079,6 +2238,41 @@ describe('Monitor', function () {
         });
     });
 
+    describe('#_error', function () {
+
+        it('logs pid for error when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var request = {
+                    raw: {
+                        req: {
+                            headers: {
+                                'user-agent': 'test'
+                            }
+                        },
+                        res: {
+                        }
+                    },
+                    info: {},
+                    server: server,
+                    getLog: function () {}
+                };
+
+                var monitor = new Monitor(pack, options);
+
+                var error = monitor._error()(request, { message: 'testerror', stack: 'thestack'} );
+                expect(error.pid).to.exist;
+                done();
+            });
+        });
+    });
+
     describe('#_log', function () {
 
         it('returns wrapped events', function (done) {
@@ -2094,6 +2288,25 @@ describe('Monitor', function () {
                 var event = monitor._log()({});
 
                 expect(event.event).to.equal('log');
+                done();
+            });
+        });
+
+        it('logs pid for log when option is set', function (done) {
+
+            var options = {
+                subscribers: {},
+                logPid: true
+            };
+
+            makePack(function (pack, server) {
+
+                var monitor = new Monitor(pack, options);
+
+                var event = monitor._log()({});
+
+                expect(event.event).to.equal('log');
+                expect(event.pid).to.exist;
                 done();
             });
         });
