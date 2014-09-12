@@ -377,6 +377,7 @@ describe('Monitor', function () {
                 var trapConsole = console.log;
                 console.log = function(string) {
 
+	                expect(string).to.contain('request payload: {"foo":"bar"}');
                     expect(string).to.contain('response payload: {"bar":"foo"}');
                     // reset console.log
                     console.log = trapConsole;
