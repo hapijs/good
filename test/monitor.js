@@ -382,8 +382,7 @@ describe('Monitor', function () {
                     console.log = trapConsole;
                     done();
                 };
-                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
-                Wreck.request('POST', server.info.uri + '/test', payload);
+                Wreck.request('POST', server.info.uri + '/test', {payload: JSON.stringify({ foo: "bar" })});
             });
         });
 
@@ -432,8 +431,7 @@ describe('Monitor', function () {
                     console.log = trapConsole;
                     done();
                 };
-                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
-                Wreck.request('POST', server.info.uri + '/test', payload);
+                Wreck.request('POST', server.info.uri + '/test', { payload: JSON.stringify({ foo: "bar" }) });
             });
         });
 
