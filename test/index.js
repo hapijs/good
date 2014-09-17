@@ -2,6 +2,7 @@
 
 var Lab = require('lab');
 var Hapi = require('hapi');
+var GoodReporter = require('good-reporter');
 
 
 // Declare internals
@@ -26,10 +27,21 @@ describe('Plugin', function () {
         var server = new Hapi.Server();
 
         var options = {
-            subscribers: {},
-            opsInterval: 100,
-            alwaysMeasureOps: true
+            opsInterval: 100
         };
+        var one = new GoodReporter({
+            events: {
+                ops:[]
+            }
+        });
+
+        one.report = function (callback) {
+
+            return callback(null);
+        };
+
+        options.subscribers = [one];
+
 
         var plugin = {
            plugin: require('..'),
@@ -48,5 +60,3 @@ describe('Plugin', function () {
         });
     });
 });
-
-
