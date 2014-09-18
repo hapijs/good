@@ -237,7 +237,7 @@ describe('Network Monitor', function () {
             callback(null);
         };
 
-        options.subscribers = [one];
+        options.reporters = [one];
         options.opsInterval = 1000;
 
         var plugin = {

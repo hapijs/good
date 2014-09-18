@@ -40,7 +40,7 @@ describe('Plugin', function () {
             return callback(null);
         };
 
-        options.subscribers = [one];
+        options.reporters = [one];
 
 
         var plugin = {

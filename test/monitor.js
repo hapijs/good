@@ -12,21 +12,6 @@ var Http = require('http');
 
 var internals = {};
 
-internals.makeBroadcaster = function (options, report) {
-
-    options = options || {};
-    options.events = options.events || {
-        request: [],
-        ops: [],
-        log: [],
-        error: []
-    };
-    var broadcaster = new GoodReporter(options);
-    broadcaster.report = report;
-
-    return broadcaster;
-}
-
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
@@ -164,18 +149,16 @@ describe('Monitor', function () {
             var monitor;
             var options = {
                 requestsEvent: 'response',
-                subscribers: []
+                reporters: []
             };
 
 
-            options.subscribers.push(new GoodReporter());
-            options.subscribers.push({
-               broadcaster: GoodReporter
+            options.reporters.push(new GoodReporter());
+            options.reporters.push({
+               reporter: GoodReporter
             });
 
             makePack(function (pack, server) {
-
-
 
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
@@ -216,7 +199,7 @@ describe('Monitor', function () {
 
             two.remote = true;
 
-            options.subscribers = [one, two];
+            options.reporters = [one, two];
 
             makePack(function (pack, server) {
 
@@ -246,7 +229,7 @@ describe('Monitor', function () {
                 return callback(new Error('mock error'));
             };
 
-            options.subscribers = [one];
+            options.reporters = [one];
 
             makePack(function (pack, server) {
 
@@ -277,7 +260,7 @@ describe('Monitor', function () {
                 return callback(null);
             };
 
-            options.subscribers = [one, two];
+            options.reporters = [one, two];
 
             makePack(function (pack, server) {
 
@@ -301,7 +284,7 @@ describe('Monitor', function () {
 
     describe('#stop', function () {
 
-        it('cleans up open timeouts, removes event handlers, and stops all of the broadcasters', function (done) {
+        it('cleans up open timeouts, removes event handlers, and stops all of the reporters', function (done) {
 
             var monitor;
             var options = {};
@@ -325,7 +308,7 @@ describe('Monitor', function () {
                 }, 10);
             };
 
-            options.subscribers = [one, two];
+            options.reporters = [one, two];
 
             makePack(function (pack, server) {
 
@@ -378,7 +361,7 @@ describe('Monitor', function () {
                 }, 10);
             };
 
-            options.subscribers = [one, two];
+            options.reporters = [one, two];
 
             makePack(function (pack, server) {
 
@@ -475,7 +458,7 @@ describe('Monitor', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    subscribers: [one, two, three],
+                    reporters: [one, two, three],
                     opsInterval: 100
                 }
             };
@@ -538,7 +521,7 @@ describe('Monitor', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    subscribers: [one],
+                    reporters: [one],
                     extendedRequests: true,
                     logRequestHeaders: true,
                     logRequestPayload: true,
@@ -637,7 +620,7 @@ describe('Monitor', function () {
 
     describe('#_sendMessages', function () {
 
-        it('#_sendMessages logs an error if it occurs, but does not prevent other reporters from sending', function (done) {
+        it('logs an error if it occurs, but does not prevent other reporters from sending', function (done) {
 
             var one = new GoodReporter();
             var two = new GoodReporter();
@@ -678,7 +661,7 @@ describe('Monitor', function () {
             makePack(function (pack, server) {
 
                 var monitor = new Monitor(pack, {
-                   subscribers: reporters
+                   reporters: reporters
                 });
 
                 monitor._sendMessages(reporters);
