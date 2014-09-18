@@ -1,12 +1,11 @@
 // Load modules
 
-var Lab = require('lab');
-var Hapi = require('hapi');
-var Monitor = require('../lib/monitor');
-var Async = require('async');
-var GoodReporter = require('good-reporter');
 var Http = require('http');
-
+var Async = require('async');
+var Hapi = require('hapi');
+var Lab = require('lab');
+var GoodReporter = require('good-reporter');
+var Monitor = require('../lib/monitor');
 
 // Declare internals
 
@@ -238,7 +237,7 @@ describe('Monitor', function () {
                 monitor.start(function (error) {
 
                     expect(error).to.exist;
-                    expect(error.message).to.equal('Error starting _reporters Error: mock error');
+                    expect(error.message).to.equal('mock error');
 
                     done();
                 });
@@ -580,6 +579,12 @@ describe('Monitor', function () {
                 };
                 var monitor = new Monitor(plugin, options);
                 var ops = false;
+                var log = console.error;
+
+                console.error = function (error) {
+
+                    expect(error.message).to.equal('there was an error during processing');
+                };
 
                 var parallel = Async.parallel;
 
@@ -593,6 +598,8 @@ describe('Monitor', function () {
                         expect(error.message).to.equal('there was an error during processing');
                         expect(ops).to.equal(false);
                         Async.parallel = parallel;
+                        console.error = log;
+                        delete methods.createError;
                         done();
                     };
 
