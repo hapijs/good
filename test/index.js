@@ -29,7 +29,7 @@ describe('Plugin', function () {
         };
         var one = new GoodReporter({
             events: {
-                ops:[]
+                ops: '*'
             }
         });
 

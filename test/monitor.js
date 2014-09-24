@@ -427,20 +427,20 @@ describe('good', function () {
 
             var one = new GoodReporter({
                 events: {
-                    log: [],
-                    request: []
+                    log: '*',
+                    request: '*'
                 }
             });
 
             var two = new GoodReporter({
                 events: {
-                    error: []
+                    error: '*'
                 }
             });
 
             var three = new GoodReporter({
                events: {
-                   ops: []
+                   ops: '*'
                }
             });
 
@@ -518,8 +518,8 @@ describe('good', function () {
 
             var one = new GoodReporter({
                 events: {
-                    log: [],
-                    request: []
+                    log: '*',
+                    request: '*'
                 }
             });
 
