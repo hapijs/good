@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "async": "0.9.x",
-    "good-file": "^0.x.x",
-    "good-reporter": "^0.x.x",
+    "good-file": "^1.0.0",
+    "good-reporter": "^1.x.x",
     "hoek": "2.x.x",
     "items": "^1.0.2",
     "joi": "4.x.x",
