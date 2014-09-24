@@ -14,8 +14,6 @@ var internals = {};
 
 var lab = exports.lab = Lab.script();
 var expect = Lab.expect;
-var before = lab.before;
-var after = lab.after;
 var describe = lab.describe;
 var it = lab.it;
 

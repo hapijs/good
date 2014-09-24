@@ -19,8 +19,6 @@ var internals = {};
 
 var lab = exports.lab = Lab.script();
 var expect = Lab.expect;
-var before = lab.before;
-var after = lab.after;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -266,7 +264,7 @@ describe('Network Monitor', function () {
         });
     });
 
-    it('#_onResponse sets the set count, total, and max time on each port', function (done) {
+    it('_onResponse() sets the set count, total, and max time on each port', function (done) {
 
         var request1 = {
             server: {

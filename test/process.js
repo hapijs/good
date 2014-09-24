@@ -13,15 +13,13 @@ var internals = {};
 
 var lab = exports.lab = Lab.script();
 var expect = Lab.expect;
-var before = lab.before;
-var after = lab.after;
 var describe = lab.describe;
 var it = lab.it;
 
 
 describe('Process Monitor', function () {
 
-    describe('#memory', function () {
+    describe('memory()', function () {
 
         it('passes the current memory usage to the callback', function (done) {
 
@@ -35,7 +33,7 @@ describe('Process Monitor', function () {
         });
     });
 
-    describe('#delay', function () {
+    describe('delay()', function () {
 
         it('passes the current event queue delay to the callback', function (done) {
 

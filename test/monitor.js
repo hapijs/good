@@ -15,13 +15,11 @@ var internals = {};
 
 var lab = exports.lab = Lab.script();
 var expect = Lab.expect;
-var before = lab.before;
-var after = lab.after;
 var describe = lab.describe;
 var it = lab.it;
 
 
-describe('Monitor', function () {
+describe('good', function () {
 
     var makePack = function (callback) {
 
@@ -46,7 +44,7 @@ describe('Monitor', function () {
         });
     };
 
-    describe('#constructor', function () {
+    describe('Monitor()', function () {
 
         it('throws an error constructed without new', function (done) {
 
@@ -154,7 +152,8 @@ describe('Monitor', function () {
 
             options.reporters.push(new GoodReporter());
             options.reporters.push({
-               reporter: GoodReporter
+                reporter: GoodReporter,
+                args: ['testArgument', { log: true }]
             });
 
             makePack(function (pack, server) {
@@ -170,7 +169,7 @@ describe('Monitor', function () {
         });
     });
 
-    describe('#start', function() {
+    describe('start()', function() {
 
         it('calls the start methods of all the reporters', function (done) {
 
@@ -196,14 +195,10 @@ describe('Monitor', function () {
                 }, 10);
             };
 
-            two.remote = true;
-
             options.reporters = [one, two];
 
             makePack(function (pack, server) {
-
-
-
+                
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
@@ -263,8 +258,6 @@ describe('Monitor', function () {
 
             makePack(function (pack, server) {
 
-
-
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
@@ -281,7 +274,7 @@ describe('Monitor', function () {
         });
     });
 
-    describe('#stop', function () {
+    describe('stop()', function () {
 
         it('cleans up open timeouts, removes event handlers, and stops all of the reporters', function (done) {
 
@@ -311,8 +304,6 @@ describe('Monitor', function () {
 
             makePack(function (pack, server) {
 
-
-
                 monitor = new Monitor(pack, options);
                 monitor.start(function (err) {
 
@@ -338,6 +329,7 @@ describe('Monitor', function () {
         });
 
         it('logs an error if it occurs during stop', function (done) {
+
             var monitor;
             var options = {};
 
@@ -363,8 +355,6 @@ describe('Monitor', function () {
             options.reporters = [one, two];
 
             makePack(function (pack, server) {
-
-
 
                 monitor = new Monitor(pack, options);
                 monitor.start(function (err) {
@@ -394,6 +384,27 @@ describe('Monitor', function () {
                         done();
                     });
                 });
+            });
+        });
+
+        it('is called on the "stop" server event', function (done) {
+
+            var plugin = {
+                register: require('../lib/index').register
+            };
+
+            var server = new Hapi.Server('127.0.0.1', 0);
+            server.pack.register(plugin, function () {
+
+                var called = false;
+                server.plugins.good.monitor.stop = function () {
+
+                    called = true;
+                    expect(called).to.equal(true);
+                    done();
+                };
+
+                server.stop();
             });
         });
     });
@@ -625,7 +636,7 @@ describe('Monitor', function () {
     });
 
 
-    describe('#_sendMessages', function () {
+    describe('_sendMessages()', function () {
 
         it('logs an error if it occurs, but does not prevent other reporters from sending', function (done) {
 
@@ -634,7 +645,6 @@ describe('Monitor', function () {
             var hitCounter = 0;
 
             one.report = function (callback) {
-
 
                 setTimeout(function() {
 
@@ -660,7 +670,6 @@ describe('Monitor', function () {
 
                 hitCounter++;
                 callback(new Error('mock error'));
-
             };
 
             var reporters = [one, two];
@@ -672,9 +681,7 @@ describe('Monitor', function () {
                 });
 
                 monitor._sendMessages(reporters);
-
             });
         });
     });
-
 });
