@@ -23,6 +23,7 @@
     "items": "^1.0.2",
     "joi": "4.x.x",
     "json-stringify-safe": "^5.x.x",
+    "moment": "^2.x.x",
     "wreck": "5.x.x"
   },
   "peerDependencies": {
