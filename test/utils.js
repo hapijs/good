@@ -14,16 +14,13 @@ var internals = {};
 
 var lab = exports.lab = Lab.script();
 var expect = Lab.expect;
-var before = lab.before;
-var after = lab.after;
 var describe = lab.describe;
 var it = lab.it;
 
 
-describe('Utils', function () {
+describe('utils', function () {
 
-    describe('#inheritAsync', function () {
-
+    describe('inheritAsync()', function () {
 
         it('successfully creates an object wrapper', function (done) {
 
@@ -32,9 +29,9 @@ describe('Utils', function () {
                 success: function() {
                     return true;
                 }
-            }
+            };
 
-            Utils.inheritAsync(Function, source)
+            Utils.inheritAsync(Function, source);
 
             obj.success(function (error, result) {
 
@@ -52,9 +49,9 @@ describe('Utils', function () {
                 success: function() {
                     throw new Error('not successful');
                 }
-            }
+            };
 
-            Utils.inheritAsync(Function, source)
+            Utils.inheritAsync(Function, source);
 
             obj.success(function (error, result) {
 

@@ -16,13 +16,14 @@
     "node": ">=0.10.x"
   },
   "dependencies": {
-    "hoek": "2.x.x",
-    "joi": "4.x.x",
-    "json-stringify-safe": "5.0.x",
-    "wreck": "5.x.x",
     "async": "0.9.x",
-    "yargs": "1.3.x",
-    "json-stringify-safe": "5.0.x"
+    "good-file": "^1.0.0",
+    "good-reporter": "^1.x.x",
+    "hoek": "2.x.x",
+    "items": "^1.0.2",
+    "joi": "4.x.x",
+    "json-stringify-safe": "^5.x.x",
+    "wreck": "5.x.x"
   },
   "peerDependencies": {
     "hapi": ">=2.x.x"
