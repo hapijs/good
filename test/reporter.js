@@ -300,7 +300,7 @@ describe('GoodConsole', function () {
         var time = new Date(1396207735000);
         var result = GoodConsole.timeString(time);
 
-        expect(result).to.equal('140330/152855.000');
+        expect(result).to.equal('140330/192855.000');
         done();
     });
 });
