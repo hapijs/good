@@ -276,6 +276,28 @@ describe('good', function () {
                 });
             });
         });
+
+        it('validates the incomming reporter objects', function (done) {
+
+            var monitor;
+            var options = {};
+
+            var one = new GoodReporter();
+            var two;
+
+            options.reporters = [one, two];
+
+            makePack(function (pack, server) {
+
+                expect(function( ){
+
+                    monitor = new Monitor(pack, options);
+                    monitor.start(function () {});
+                }).to.throw('Every reporter object must be a GoodReporter.');
+
+                done();
+            });
+        });
     });
 
     describe('stop()', function () {
