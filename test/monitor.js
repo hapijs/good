@@ -267,7 +267,7 @@ describe('good', function () {
 
                     expect(error).to.not.exist;
 
-                    expect(monitor.events.listeners('ops').length).to.equal(1);
+                    expect(monitor.listeners('ops').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('internalError').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('log').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('request').length).to.equal(1);
@@ -314,10 +314,10 @@ describe('good', function () {
                     expect(hitCount).to.equal(2);
 
                     expect(state.opsInterval._repeat).to.equal(false);
-                    expect(monitor.events.listeners('log').length).to.equal(0);
-                    expect(monitor.events.listeners('ops').length).to.equal(0);
-                    expect(monitor.events.listeners('internalError').length).to.equal(0);
-                    expect(monitor.events.listeners('tail').length).to.equal(0);
+                    expect(monitor._plugin.events.listeners('log').length).to.equal(0);
+                    expect(monitor.listeners('ops').length).to.equal(0);
+                    expect(monitor._plugin.events.listeners('internalError').length).to.equal(0);
+                    expect(monitor._plugin.events.listeners('tail').length).to.equal(0);
 
                     done();
                 });
@@ -555,7 +555,7 @@ describe('good', function () {
                     parallel(methods, _callback);
                 };
 
-                monitor.events.on('ops', function (event) {
+                monitor.on('ops', function (event) {
 
                     ops = true;
                 });
