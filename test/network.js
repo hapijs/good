@@ -216,23 +216,19 @@ describe('Network Monitor', function () {
             }
         });
 
-        one.report = function (callback) {
+        one._report = function (event, eventData) {
 
-            if (this._eventQueue.length) {
-                var log = this._eventQueue[0].load.requests;
+            var log = eventData.load.requests;
 
-                expect(this._eventQueue.length).to.equal(1);
-                expect(log[staticPort]).to.deep.equal({
-                    total: 1,
-                    disconnects: 1,
-                    statusCodes: {
-                        '200': 1
-                    }
-                });
+            expect(log[staticPort]).to.deep.equal({
+                total: 1,
+                disconnects: 1,
+                statusCodes: {
+                    '200': 1
+                }
+            });
 
-                return done();
-            }
-            callback(null);
+            return done();
         };
 
         options.reporters = [one];

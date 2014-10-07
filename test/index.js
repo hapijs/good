@@ -33,9 +33,10 @@ describe('Plugin', function () {
             }
         });
 
-        one.report = function (callback) {
+        one._report = function (event, eventData) {
 
-            return callback(null);
+            expect(event).to.equal('ops');
+            expect(eventData.event).to.equal('ops');
         };
 
         options.reporters = [one];
