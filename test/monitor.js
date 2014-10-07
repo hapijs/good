@@ -380,7 +380,7 @@ describe('good', function () {
 
             var three = new GoodReporter({
                events: {
-                   ops: '*'
+                   log: '*'
                }
             });
 
@@ -425,14 +425,13 @@ describe('good', function () {
                         setTimeout(function () {
 
                             expect(res.statusCode).to.equal(200);
-                            expect(events.length).to.equal(5);
+                            expect(events.length).to.equal(4);
                             expect(events[0].event).to.equal('log');
                             expect(events[1].event).to.equal('request');
                             expect(events[2].event).to.equal('error');
-                            expect(events[3].event).to.equal('ops');
 
                             done();
-                        }, 300);
+                        }, 500);
                     });
                 });
             });
