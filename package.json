@@ -18,12 +18,13 @@
   "dependencies": {
     "async": "0.9.x",
     "good-file": "^1.0.0",
-    "good-reporter": "^1.x.x",
+    "good-reporter": "^1.0.0",
     "hoek": "2.x.x",
     "items": "^1.0.2",
     "joi": "4.x.x",
-    "json-stringify-safe": "^5.x.x",
-    "wreck": "5.x.x"
+    "json-stringify-safe": "^5.0.0",
+    "moment": "^2.0.0",
+    "wreck": "^5.0.0"
   },
   "peerDependencies": {
     "hapi": ">=2.x.x"

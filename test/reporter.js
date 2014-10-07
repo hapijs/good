@@ -167,7 +167,7 @@ describe('GoodConsole', function () {
 
                 console.log = function (value) {
 
-                    expect(value).to.equal(timeString + ', request, localhost: [1;33mpost[0m /data {"name":"adam"} (150ms) response payload: {"foo":"bar","value":1}');
+                    expect(value).to.equal(timeString + ', request, localhost: [1;33mpost[0m /data {"name":"adam"}  (150ms) response payload: {"foo":"bar","value":1}');
                 };
 
                 event.timestamp = now;
@@ -293,5 +293,14 @@ describe('GoodConsole', function () {
             reporter.queue('test', event);
             reporter.report(done);
         });
+    });
+
+    it('timeString() correctly formats the time', function (done) {
+
+        var time = new Date(1396207735000);
+        var result = GoodConsole.timeString(time);
+
+        expect(result).to.equal('140330/192855.000');
+        done();
     });
 });
