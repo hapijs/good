@@ -180,17 +180,19 @@ describe('good', function () {
             var two = new GoodReporter();
             var hitCount = 0;
 
-            one.start = function (callback) {
+            one.start = function (emitter, callback) {
 
                 hitCount++;
+                expect(emitter).to.exist;
                 return callback(null);
             };
 
-            two.start = function (callback) {
+            two.start = function (emitter, callback) {
 
                 setTimeout(function () {
 
                     hitCount++;
+                    expect(emitter).to.exist;
                     callback(null);
                 }, 10);
             };
@@ -218,8 +220,9 @@ describe('good', function () {
             var one = new GoodReporter();
 
 
-            one.start = function (callback) {
+            one.start = function (emitter, callback) {
 
+                expect(emitter).to.exist;
                 return callback(new Error('mock error'));
             };
 
@@ -248,9 +251,10 @@ describe('good', function () {
             var two = new GoodReporter();
             var hitCount = 0;
 
-            one.start = two.start =  function (callback) {
+            one.start = two.start =  function (emitter, callback) {
 
                 hitCount++;
+                expect(emitter).to.exist;
                 return callback(null);
             };
 
@@ -263,7 +267,7 @@ describe('good', function () {
 
                     expect(error).to.not.exist;
 
-                    expect(monitor.listeners('ops').length).to.equal(1);
+                    expect(monitor.events.listeners('ops').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('internalError').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('log').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('request').length).to.equal(1);
@@ -285,19 +289,14 @@ describe('good', function () {
             var two = new GoodReporter();
             var hitCount = 0;
 
-            one.stop = function (callback) {
+            one.stop = function () {
 
                 hitCount++;
-                return callback(null);
             };
 
-            two.stop = function (callback) {
-
-                setTimeout(function () {
-
-                    hitCount++;
-                    callback(null);
-                }, 10);
+            two.stop = function () {
+                hitCount++;
+                setTimeout(function () { }, 10);
             };
 
             options.reporters = [one, two];
@@ -309,80 +308,18 @@ describe('good', function () {
 
                     expect(err).to.not.exist;
 
-                    monitor.stop(function (error) {
+                    monitor.stop();
 
-                        expect(error).to.not.exist;
+                    var state = monitor._state;
+                    expect(hitCount).to.equal(2);
 
-                        var state = monitor._state;
-                        expect(hitCount).to.equal(2);
+                    expect(state.opsInterval._repeat).to.equal(false);
+                    expect(monitor.events.listeners('log').length).to.equal(0);
+                    expect(monitor.events.listeners('ops').length).to.equal(0);
+                    expect(monitor.events.listeners('internalError').length).to.equal(0);
+                    expect(monitor.events.listeners('tail').length).to.equal(0);
 
-                        expect(state.opsInterval._repeat).to.equal(false);
-                        expect(monitor._plugin.events.listeners('log').length).to.equal(0);
-                        expect(monitor.listeners('ops').length).to.equal(0);
-                        expect(monitor._plugin.events.listeners('internalError').length).to.equal(0);
-                        expect(monitor._plugin.events.listeners('tail').length).to.equal(0);
-
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('logs an error if it occurs during stop', function (done) {
-
-            var monitor;
-            var options = {};
-
-            var one = new GoodReporter();
-            var two = new GoodReporter();
-            var hitCount = 0;
-
-            one.stop = function (callback) {
-
-                hitCount++;
-                return callback(null);
-            };
-
-            two.stop = function (callback) {
-
-                setTimeout(function () {
-
-                    hitCount++;
-                    callback(new Error('mock error'));
-                }, 10);
-            };
-
-            options.reporters = [one, two];
-
-            makePack(function (pack, server) {
-
-                monitor = new Monitor(pack, options);
-                monitor.start(function (err) {
-
-                    expect(err).to.not.exist;
-
-                    var log = console.error;
-                    console.error = function (error) {
-
-                        console.error = log;
-                        expect(error.message).to.equal('mock error');
-                    };
-
-                    monitor.stop(function (error) {
-
-                        expect(error).to.not.exist;
-
-                        var state = monitor._state;
-                        expect(hitCount).to.equal(2);
-
-                        expect(state.opsInterval._repeat).to.equal(false);
-                        expect(monitor._plugin.events.listeners('log').length).to.equal(0);
-                        expect(monitor.listeners('ops').length).to.equal(0);
-                        expect(monitor._plugin.events.listeners('internalError').length).to.equal(0);
-                        expect(monitor._plugin.events.listeners('tail').length).to.equal(0);
-
-                        done();
-                    });
+                    done();
                 });
             });
         });
@@ -392,18 +329,21 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register
             };
+            var stop = Monitor.prototype.stop;
+            var called = false;
+
+            Monitor.prototype.stop = function () {
+
+                called = true;
+                expect(called).to.equal(true);
+                Monitor.prototype.stop = stop;
+                done();
+            };
 
             var server = new Hapi.Server('127.0.0.1', 0);
             server.pack.register(plugin, function () {
 
-                var called = false;
-                server.plugins.good.monitor.stop = function () {
-
-                    called = true;
-                    expect(called).to.equal(true);
-                    done();
-                };
-
+                // .stop emits the "stop" event
                 server.stop();
             });
         });
@@ -444,25 +384,27 @@ describe('good', function () {
                }
             });
 
-            one.report = function (callback) {
+            var events = [];
 
-                return callback(null);
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
             };
 
-            two.report = function (callback) {
+            two._report = function (event, eventData) {
 
                 setTimeout(function () {
 
-                    return callback(null);
+                    events.push(eventData);
                 }, 10);
             };
 
-            three.report = function (callback) {
+            three._report = function (event, eventData) {
 
                 setTimeout(function () {
 
-                    return callback(null);
-                }, 10);
+                    events.push(eventData);
+                }, 20);
             };
 
             var plugin = {
@@ -477,28 +419,21 @@ describe('good', function () {
 
                 server.start(function () {
 
-                    setTimeout(function () {
+                    Http.get('http://127.0.0.1:' + server.info.port + '/?q=test', function (res) {
 
-                        Http.get('http://127.0.0.1:' + server.info.port + '/?q=test', function (res) {
-
-                            var eventsOne = one._eventQueue;
-                            var eventsTwo = two._eventQueue;
-                            var eventsThree = three._eventQueue;
+                        // Give the reporters time to report
+                        setTimeout(function () {
 
                             expect(res.statusCode).to.equal(200);
-                            expect(eventsOne.length).to.equal(2);
-                            expect(eventsOne[0].event).to.equal('log');
-                            expect(eventsOne[1].event).to.equal('request');
-
-                            expect(eventsTwo.length).to.equal(1);
-                            expect(eventsTwo[0].event).to.equal('error');
-
-                            expect(eventsThree.length).to.equal(1);
-                            expect(eventsThree[0].event).to.equal('ops');
+                            expect(events.length).to.equal(5);
+                            expect(events[0].event).to.equal('log');
+                            expect(events[1].event).to.equal('request');
+                            expect(events[2].event).to.equal('error');
+                            expect(events[3].event).to.equal('ops');
 
                             done();
-                        });
-                    }, 150);
+                        }, 300);
+                    });
                 });
             });
         });
@@ -518,14 +453,14 @@ describe('good', function () {
 
             var one = new GoodReporter({
                 events: {
-                    log: '*',
                     request: '*'
                 }
             });
+            one._eventQueue = [];
 
-            one.report = function (callback) {
+            one._report = function (event, eventData) {
 
-                return callback(null);
+                one._eventQueue.push(eventData);
             };
 
             var plugin = {
@@ -554,11 +489,10 @@ describe('good', function () {
                     }, function (res) {
 
                         var eventsOne = one._eventQueue;
-                        var request = eventsOne[1];
+                        var request = eventsOne[0];
 
                         expect(res.statusCode).to.equal(200);
-                        expect(eventsOne.length).to.equal(2);
-                        expect(eventsOne[0].event).to.equal('log');
+                        expect(eventsOne.length).to.equal(1);
 
                         expect(request.event).to.equal('request');
                         expect(request.log).to.exist;
@@ -622,7 +556,7 @@ describe('good', function () {
                     parallel(methods, _callback);
                 };
 
-                monitor.on('ops', function (event) {
+                monitor.events.on('ops', function (event) {
 
                     ops = true;
                 });
@@ -631,56 +565,6 @@ describe('good', function () {
 
                     expect(error).to.not.exist;
                 });
-            });
-        });
-    });
-
-
-    describe('_sendMessages()', function () {
-
-        it('logs an error if it occurs, but does not prevent other reporters from sending', function (done) {
-
-            var one = new GoodReporter();
-            var two = new GoodReporter();
-            var hitCounter = 0;
-
-            one.report = function (callback) {
-
-                setTimeout(function() {
-
-                    hitCounter++;
-                    expect(hitCounter).to.equal(2);
-
-                    callback(null);
-                    done();
-                }, 5);
-            };
-
-            two.report = function (callback) {
-
-                var log = console.error;
-
-                console.error = function (value) {
-
-                    console.error = log;
-
-                    expect(value).to.exist;
-                    expect(value.message).to.equal('mock error');
-                };
-
-                hitCounter++;
-                callback(new Error('mock error'));
-            };
-
-            var reporters = [one, two];
-
-            makePack(function (pack, server) {
-
-                var monitor = new Monitor(pack, {
-                   reporters: reporters
-                });
-
-                monitor._sendMessages(reporters);
             });
         });
     });

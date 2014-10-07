@@ -17,14 +17,14 @@
   },
   "dependencies": {
     "async": "0.9.x",
-    "good-file": "^1.0.0",
-    "good-reporter": "^1.0.0",
+    "good-file": "2.x.x",
+    "good-reporter": "2.x.x",
     "hoek": "2.x.x",
-    "items": "^1.0.2",
+    "items": "1.x.x",
     "joi": "4.x.x",
-    "json-stringify-safe": "^5.0.0",
-    "moment": "^2.0.0",
-    "wreck": "^5.0.0"
+    "json-stringify-safe": "5.0.x",
+    "moment": "2.0.x",
+    "wreck": "5.x.x"
   },
   "peerDependencies": {
     "hapi": ">=2.x.x"
