@@ -106,7 +106,7 @@ This will now _only_ log "log" events that have the "error" _or_ "medium" tag at
 
 ## List of Reporters
 
-This will be a list of known good-reporters that are either under the hapijs umbrella or are well-tested and documented third party reporters
+This is a list of known good-reporters that are either under the hapijs umbrella or are well-tested and documented third party reporters
 - [good-udp](https://github.com/hapijs/good-udp)
 - [good-file](https://github.com/hapijs/good-file)
 - [good-http](https://github.com/hapijs/good-udp)
