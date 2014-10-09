@@ -293,7 +293,7 @@ describe('good', function () {
 
                     monitor = new Monitor(pack, options);
                     monitor.start(function () {});
-                }).to.throw('Every reporter object must be a GoodReporter.');
+                }).to.throw('Every reporter object must have a start and stop function.');
 
                 done();
             });
