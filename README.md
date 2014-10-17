@@ -29,6 +29,8 @@ set `options` to an object with the following optional settings:
 - `logRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
 - `logRequestPayload` - determines if the request payload will be logged. Defaults to _false_
 - `logResponsePayload` - determines if the response payload will be logged. Defaults to _false_
+- `httpAgents` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
+- `httpsAgents` - the list of `httpsAgents` to report socket information about. Can be a single `http.Agent` or an array of agents. Defaults to `Https.globalAgent`.
 - `reporters` - defaults to a single console reporter that is listening for "request" and "log" events. An array of instantiated objects that implement the [good-reporter](https://github.com/hapijs/good-reporter) interface or an object with the following keys:
     - `reporter` - a constructor function generally via `require`, ie `require('good-file')`
     - `args` - an array of arguments that will be passed into the constructor named by `reporter`. Each reporter has different arguments for the constructor, check the documentation for more information.
