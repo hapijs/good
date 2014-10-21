@@ -1527,10 +1527,10 @@ describe('Monitor', function () {
                     methods.createError = function (callback) {
 
                         return callback(new Error('there was an error during processing'));
-                    }
+                    };
 
                     parallel(methods, _callback);
-                }
+                };
 
                 var monitor = new Monitor(pack, options);
             });
@@ -1543,21 +1543,29 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {
-                    'http://localhost:1023/': ['log']
+                    'http://localhost:1023/': ['log'],
+                    'console': ['log']
                 },
                 broadcastInterval: 0
             };
 
             makePack(function (pack, server) {
 
+                var log = console.log;
+                console.log = function () {};
                 var monitor = new Monitor(pack, options);
 
                 monitor._broadcastHttp = function () {
 
-                    done();
+                    // Needed because logging to console can happen after
+                    setImmediate(function () {
+
+                        console.log = log;
+                        done();
+                    });
                 };
 
-                monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
+                monitor._handle('log')({ timestamp: new Date('1-1-2014').getTime(), tags: ['test'], data: 'test' });
             });
         });
 
@@ -1565,7 +1573,8 @@ describe('Monitor', function () {
 
             var options = {
                 subscribers: {
-                    'http://localhost:1023/': ['log']
+                    'http://localhost:1023/': ['log'],
+                    'console': ['log']
                 },
                 broadcastInterval: 5
             };
@@ -1574,15 +1583,19 @@ describe('Monitor', function () {
 
                 var monitor = new Monitor(pack, options);
                 var cnt = 0;
+                var log = console.log;
+                console.log = function () {};
 
                 monitor._broadcastHttp = function () {
+
                     cnt++;
                     if (cnt === 2) {
+                        console.log = log;
                         done();
                     }
                 };
 
-                monitor._handle('log')({ timestamp: Date.now(), tags: ['test'], data: 'test' });
+                monitor._handle('log')({ timestamp: new Date('10-20-2014').getTime(), tags: ['test'], data: 'test' });
             });
         });
 
