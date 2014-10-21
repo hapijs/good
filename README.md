@@ -30,7 +30,9 @@ set `options` to an object with the following optional settings:
 - `logRequestPayload` - determines if the request payload will be logged. Defaults to _false_
 - `logResponsePayload` - determines if the response payload will be logged. Defaults to _false_
 - `reporters` - defaults to a single console reporter that is listening for "request" and "log" events. An array of instantiated objects that implement the [good-reporter](https://github.com/hapijs/good-reporter) interface or an object with the following keys:
-    - `reporter` - a constructor function generally via `require`, ie `require('good-file')`
+    - `reporter` - indicates the reporter object to create. Can be one of two values
+        - a constructor function generally via `require`, ie `require('good-file')`
+        - a module name to `require`. Uses the built-in Node `require` function so you can pass a module name or a path. The supplied module must implement the good-reporter interface. Note: if you want the built-in console reporter, pass "good-console".
     - `args` - an array of arguments that will be passed into the constructor named by `reporter`. Each reporter has different arguments for the constructor, check the documentation for more information.
 
   
