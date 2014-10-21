@@ -1,4 +1,6 @@
 // Load modules
+var Fs = require('fs');
+var Path = require('path');
 var Util = require('util');
 var Hoek = require('hoek');
 var Lab = require('lab');
@@ -77,6 +79,15 @@ describe('GoodConsole', function () {
 
             var reporter = GoodConsole();
         }).to.throw('GoodConsole must be created with new');
+        done();
+    });
+
+    it('timeString() correctly formats the time', function (done) {
+
+        var time = new Date(1396207735000);
+        var result = GoodConsole.timeString(time);
+
+        expect(result).to.equal('140330/192855.000');
         done();
     });
 
@@ -339,14 +350,5 @@ describe('GoodConsole', function () {
                 ee.emit('report', 'test', event);
             });
         });
-    });
-
-    it('timeString() correctly formats the time', function (done) {
-
-        var time = new Date(1396207735000);
-        var result = GoodConsole.timeString(time);
-
-        expect(result).to.equal('140330/192855.000');
-        done();
     });
 });

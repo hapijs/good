@@ -35,7 +35,6 @@ describe('Plugin', function () {
 
         one._report = function (event, eventData) {
 
-            console.dir(eventData)
             expect(event).to.equal('ops');
             expect(eventData.event).to.equal('ops');
             expect(eventData.host).to.exist;

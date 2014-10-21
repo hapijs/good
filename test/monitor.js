@@ -1,5 +1,5 @@
 // Load modules
-
+var Fs = require('fs');
 var Http = require('http');
 var Async = require('async');
 var Hapi = require('hapi');
@@ -163,6 +163,36 @@ describe('good', function () {
 
                     expect(error).to.not.exist;
                     expect(monitor._reporters.length).to.equal(2);
+                    done();
+                });
+            });
+        });
+
+        it('supports passing a module name or path for the reporter function', function (done) {
+
+            var monitor;
+            var options = {
+                requestsEvent: 'response',
+                reporters: [{
+                    reporter: 'good-file',
+                    args: ['testArgument', { log: true }]
+                }, {
+                    reporter: 'good-console'
+                }]
+            };
+
+            makePack(function (pack, server) {
+
+                monitor = new Monitor(pack, options);
+                monitor.start(function (error) {
+
+                    expect(error).to.not.exist;
+                    var reporters = monitor._reporters;
+                    expect(reporters.length).to.equal(2);
+                    expect(reporters[0]._settings.log).to.be.true;
+
+                    Fs.unlinkSync(reporters[0]._currentStream.path);
+
                     done();
                 });
             });
