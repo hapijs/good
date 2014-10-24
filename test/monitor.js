@@ -208,6 +208,52 @@ describe('Monitor', function () {
         });
     });
 
+    it('properly prints event timestamps', function (done) {
+
+        var options = {
+            broadcastInterval: 5
+        };
+
+        makePack(function (pack, server) {
+
+            var monitor = new Monitor(pack, options);
+            var events = [{
+                event: 'test',
+                timestamp: 1414162141480,
+                data: 'event 1',
+                tags: []
+            }, {
+                event: 'test',
+                timestamp: 1388590822000,
+                data: 'event 2',
+                tags: []
+            }];
+            var log = console.log;
+            var count = 0;
+
+            console.log = function (value) {
+
+                count++;
+
+                if (count === 1) {
+                    expect(value).to.contain('event 1');
+                }
+                else {
+                    expect(value).to.contain('event 2');
+
+                    console.log = log;
+
+                    monitor.stop();
+                    done();
+                }
+
+            };
+            monitor._display(events);
+        });
+
+
+    });
+
     describe('#_broadcastConsole', function () {
 
         it('filters out events that don\'t contain the subscribers tag', function (done) {
