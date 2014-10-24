@@ -34,7 +34,12 @@ set `options` to an object with the following optional settings:
   The subscriptions that are available are _ops_, _request_, _log_ and _error_. The destination can be a URI, file or directory path, and _console_.
   Defaults to a console subscriber for _ops_, _request_, and _log_ events. To disable the console output for the server instance pass an empty array
   into the subscribers "console" configuration.
-
+- `extraFields` - an object containing extra fields to be included on the broadcast log message.
+- `logRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
+- `logRequestPayload` - determines if the request payload will be logged. Defaults to _false_
+- `logResponsePayload` - determines if the response payload will be logged. Defaults to _false_
+- `logPid` - determines if the pid will be logged. Defaults to _false_
+  
 For example:
 
 ```javascript
@@ -119,6 +124,16 @@ When **good** broadcasts data to a remote endpoint it sends json that has the fo
 - `appVer` - the version of **good**
 - `timestamp` - the current time of the server
 - `events` - an array of the events that are subscribed to
+- ... and any extra fields specified in the options
+
+```javascript
+var options = {
+  extraFields: {
+    'identifier': 'myapplication-logs'
+    'build': '0.1.0'
+  }
+}
+```
 
 
 ### Replaying request logs

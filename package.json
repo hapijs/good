@@ -1,8 +1,11 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "2.2.3",
-  "repository": "git://github.com/hapijs/good",
+  "version": "2.3.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hapijs/good"
+  },
   "main": "index",
   "keywords": [
     "process",
@@ -19,10 +22,9 @@
     "hoek": "2.x.x",
     "joi": "4.x.x",
     "json-stringify-safe": "5.0.x",
-    "wreck": "3.x.x",
+    "wreck": "5.x.x",
     "async": "0.9.x",
-    "yargs": "1.3.x",
-    "json-stringify-safe": "5.0.x"
+    "yargs": "1.3.x"
   },
   "peerDependencies": {
     "hapi": ">=2.x.x"
@@ -39,6 +41,26 @@
     {
       "type": "BSD",
       "url": "http://github.com/hapijs/good/raw/master/LICENSE"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Van Nguyen",
+      "email": "the.gol.effect@gmail.com"
+    },
+    {
+      "name": "Eran Hammer",
+      "email": "eran@hammer.io",
+      "url": "http://hueniverse.com"
+    },
+    {
+      "name": "Wyatt Preul",
+      "email": "wpreul@gmail.com",
+      "url": "http://jsgeek.com"
+    },
+    {
+      "name": "Lloyd Benson",
+      "email": "lloyd.benson@gmail.com"
     }
   ]
 }
