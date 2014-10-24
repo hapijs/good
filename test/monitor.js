@@ -428,7 +428,7 @@ describe('Monitor', function () {
                     console.log = trapConsole;
                     done();
                 };
-                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                var payload = JSON.stringify({ payload: { foo: "bar" } });
                 Wreck.request('POST', server.info.uri + '/test', payload);
             });
         });
@@ -448,7 +448,7 @@ describe('Monitor', function () {
                 method: 'POST',
                 path: '/test',
                 handler: function (request, reply) {
-              
+
                     reply(request.raw.req);
                 }
             });
@@ -478,7 +478,7 @@ describe('Monitor', function () {
                     console.log = trapConsole;
                     done();
                 };
-                var payload = JSON.stringify({ payload: { foo: "bar" } }); 
+                var payload = JSON.stringify({ payload: { foo: "bar" } });
                 Wreck.request('POST', server.info.uri + '/test', payload);
             });
         });
