@@ -21,6 +21,7 @@ Applications with multiple server instances, each with its own monitor should on
 as general events are a process-wide facility and will result in duplicated log events. To override some or all of the defaults,
 set `options` to an object with the following optional settings:
 
+- `xforward` - logs remote ip using request.raw.headers['x-forwarded-for'] instead of request.info.remoteAddress. Defaults to _false_. Falls back to request.info.remoteAddress if x-forwarded-for is empty or not set in the request header.
 - `extendedRequests` - determines if the full request log is sent or only the event summary. Defaults to _false_.
 - `httpAgents` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
 - `httpsAgents` - the list of `httpsAgents` to report socket information about. Can be a single `http.Agent` or an array of agents. Defaults to `Https.globalAgent`.
