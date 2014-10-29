@@ -1,7 +1,7 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "2.4.2",
+  "version": "2.5.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/hapijs/good"
@@ -41,26 +41,6 @@
     {
       "type": "BSD",
       "url": "http://github.com/hapijs/good/raw/master/LICENSE"
-    }
-  ],
-  "contributors": [
-    {
-      "name": "Van Nguyen",
-      "email": "the.gol.effect@gmail.com"
-    },
-    {
-      "name": "Eran Hammer",
-      "email": "eran@hammer.io",
-      "url": "http://hueniverse.com"
-    },
-    {
-      "name": "Wyatt Preul",
-      "email": "wpreul@gmail.com",
-      "url": "http://jsgeek.com"
-    },
-    {
-      "name": "Lloyd Benson",
-      "email": "lloyd.benson@gmail.com"
     }
   ]
 }
