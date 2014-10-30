@@ -112,6 +112,33 @@ describe('Network Monitor', function () {
         done();
     });
 
+    it('handles undefined connections', function (done) {
+
+        var server = {
+            info: { port: 80 }
+        };
+        var emitter = new Events.EventEmitter();
+        var network = new NetworkMonitor.Monitor(emitter);
+
+        var tags = ['hapi', 'received'];
+        var tagsMap = Hoek.mapToObject(tags);
+        var request = { server: server, url: { pathname: '/' } };
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+        emitter.emit('request', request, { tags: tags }, tagsMap);
+
+        network.requests(function (err, result) {
+
+            expect(result['80'].total).to.equal(2);
+        });
+
+        network.concurrents(function (err, result) {
+
+            expect(result['80']).to.equal(0);
+        });
+
+        done();
+    });
+
     it('tracks requests by server', function (done) {
 
         var server1 = {
