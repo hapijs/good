@@ -6,6 +6,6 @@ var Yargs = require('yargs');
 var Cli = require('../lib/cli');
 
 
-var argv = Yargs.usage('Usage: $0 -c config.json -l file.log -u url -i broadcastInterval -p usePreviousIndex').argv;
+var argv = Yargs.usage('Usage: $0 -c config.json -l file.log -u url -i broadcastInterval -p usePreviousIndex -w wait -r retries').argv;
 Cli.start(argv);
 

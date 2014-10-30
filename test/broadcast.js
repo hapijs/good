@@ -474,5 +474,32 @@ describe('Broadcast', function () {
             }, 300);
         });
     });
+
+    it('retries if an error occurs', function (done) {
+
+        var broadcast = null;
+        var server = Hapi.createServer('127.0.0.1', 0);
+        var hit = 0;
+
+        var url = server.info.uri;
+        url = 'http://localhost:1';
+        broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-l', './test/fixtures/test_01.log', '-u', url, '-i', 5, '-p', 0, '-r', 5]);
+        broadcast.stderr.on('data', function (data) {
+
+            expect(data.toString()).to.equal('{ [Error: connect ECONNREFUSED]\n  code: \'ECONNREFUSED\',\n  errno: \'ECONNREFUSED\',\n  syscall: \'connect\' }\n');
+        });
+
+        broadcast.stdout.on('data', function (data) {
+
+            hit++;
+            data = data.toString().trim();
+            expect(data).to.equal('Error uploading logs. Retrying in 1000 milliseconds...');
+            if (hit === 5) {
+                broadcast.kill('SIGUSR2');
+                done();
+            }
+        });
+    });
+
     after(cleanup);
 });
