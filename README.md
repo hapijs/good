@@ -23,7 +23,7 @@ set `options` to an object with the following optional settings:
 
 - `extendedRequests` - determines if the full request log is sent or only the event summary. Defaults to _false_.
 - `httpAgents` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
-- `httpsAgents` - the list of `httpsAgents` to report socket information about. Can be a single `http.Agent` or an array of agents. Defaults to `Https.globalAgent`.
+- `httpsAgents` - the list of `httpsAgents` to report socket information about. Can be a single `https.Agent` or an array of agents. Defaults to `Https.globalAgent`.
 - `logRequestHeaders` - determines if all request headers will be logged. Defaults to _false_
 - `logRequestPayload` - determines if the request payload will be logged. Defaults to _false_
 - `logResponsePayload` - determines if the response payload will be logged. Defaults to _false_
