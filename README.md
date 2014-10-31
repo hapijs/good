@@ -51,7 +51,7 @@ var options = {
     reporters: [{
         reporter: Good.GoodConsole
     }, {
-        reporter: Good.GoodFile,
+        reporter: require('good-file'),
         args: ['./test/fixtures/awesome_log', {
             events: {
                 ops: '*'
@@ -90,7 +90,7 @@ This example does the following:
 2. Sets up the [`GoodFile`](https://github.com/hapijs/good-file) reporter to listen for "ops" events and log them to `./test/fixtures/awesome_log` according to the file rules listed in the good-file documentation.
 3. Sets up the [`GoodHttp`](https://github.com/hapijs/good-http) reporter to listen for error events and POSTs them to `http://prod.logs:3000`
 
-Both `GoodConsole` and `GoodFile` are exposed on the `Good` object. If these are the only two reporter you plan to use, you do not need any further reporter objects.
+`GoodConsole` is exposed on the `Good` object. Any other reporters will require additional modules.
 
 Log messages are created with tags. Usually a log will include a tag to indicate if it is related to an error or info along with where the message originates. If, for example, the console should only output error's that were logged you can use the following configuration:
 

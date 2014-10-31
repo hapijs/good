@@ -174,8 +174,7 @@ describe('good', function () {
             var options = {
                 requestsEvent: 'response',
                 reporters: [{
-                    reporter: 'good-file',
-                    args: ['testArgument', { log: true }]
+                    reporter: '../lib/reporter'
                 }, {
                     reporter: 'good-console'
                 }]
@@ -189,10 +188,6 @@ describe('good', function () {
                     expect(error).to.not.exist;
                     var reporters = monitor._reporters;
                     expect(reporters.length).to.equal(2);
-                    expect(reporters[0]._settings.log).to.be.true;
-
-                    Fs.unlinkSync(reporters[0]._currentStream.path);
-
                     done();
                 });
             });
