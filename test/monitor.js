@@ -106,10 +106,10 @@ describe('good', function () {
             });
         });
 
-        it('throws an error if requestsEvent is not response or tail', function (done) {
+        it('throws an error if responseEvent is not response or tail', function (done) {
 
             var options = {
-                requestsEvent: 'test'
+                responseEvent: 'test'
             };
 
             makePack(function (pack, server) {
@@ -118,15 +118,15 @@ describe('good', function () {
                     var monitor = new Monitor(pack, options);
                 };
 
-                expect(fn).to.throw(Error, /requestsEvent must be one of response, tail/gi);
+                expect(fn).to.throw(Error, /responseEvent must be one of response, tail/gi);
                 done();
             });
         });
 
-        it('requestsEvent is a response', function (done) {
+        it('responseEvent is a response', function (done) {
 
             var options = {
-                requestsEvent: 'response'
+                responseEvent: 'response'
             };
 
             makePack(function (pack, server) {
@@ -145,7 +145,7 @@ describe('good', function () {
 
             var monitor;
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: []
             };
 
@@ -172,7 +172,7 @@ describe('good', function () {
 
             var monitor;
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: [{
                     reporter: 'good-file',
                     args: ['testArgument', { log: true }]
@@ -420,7 +420,7 @@ describe('good', function () {
             var one = new GoodReporter({
                 events: {
                     log: '*',
-                    request: '*'
+                    response: '*'
                 }
             });
 
@@ -504,7 +504,7 @@ describe('good', function () {
 
             var one = new GoodReporter({
                 events: {
-                    request: '*'
+                    response: '*'
                 }
             });
             one._eventQueue = [];
