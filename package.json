@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "async": "0.9.x",
-    "good-file": "2.0.x",
     "good-reporter": "2.x.x",
     "hoek": "2.x.x",
     "joi": "4.x.x",
