@@ -23,8 +23,8 @@ describe('Process Monitor', function () {
 
         it('passes the current memory usage to the callback', function (done) {
 
-            var monitor = new ProcessMonitor.Monitor();
-            monitor.memory(function (err, mem) {
+            var monitor = ProcessMonitor;
+            monitor.memoryUsage(function (err, mem) {
 
                 expect(err).not.to.exist;
                 expect(mem).to.exist;
@@ -37,7 +37,7 @@ describe('Process Monitor', function () {
 
         it('passes the current event queue delay to the callback', function (done) {
 
-            var monitor = new ProcessMonitor.Monitor();
+            var monitor = ProcessMonitor;
             monitor.delay(function (err, delay) {
 
                 expect(err).not.to.exist;

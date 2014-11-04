@@ -20,45 +20,18 @@ var it = lab.it;
 
 describe('utils', function () {
 
-    describe('inheritAsync()', function () {
+    describe('makeContinuation()', function () {
 
-        it('successfully creates an object wrapper', function (done) {
+        it('successfully creates a continuation function', function (done) {
 
-            var obj = new Function();
-            var source = {
-                success: function() {
-                    return true;
-                }
-            };
-
-            Utils.inheritAsync(Function, source);
-
-            obj.success(function (error, result) {
-
-                expect(error).to.not.exist;
-                expect(result).to.equal(true);
-
-                done();
+            var method = Utils.makeContinuation(function() {
+                return true;
             });
-        });
 
-        it('successfully returns an error', function (done) {
+            method(function (err, value) {
 
-            var obj = new Function();
-            var source = {
-                success: function() {
-                    throw new Error('not successful');
-                }
-            };
-
-            Utils.inheritAsync(Function, source);
-
-            obj.success(function (error, result) {
-
-                expect(error).to.exist;
-                expect(error.message).to.equal('not successful');
-                expect(result).to.not.exist;
-
+                expect(err).to.not.exist;
+                expect(value).to.be.true;
                 done();
             });
         });
