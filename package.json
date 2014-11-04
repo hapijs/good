@@ -1,7 +1,7 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "repository": "git://github.com/hapijs/good",
   "main": "index",
   "keywords": [
@@ -17,8 +17,7 @@
   },
   "dependencies": {
     "async": "0.9.x",
-    "good-file": "2.0.x",
-    "good-reporter": "2.x.x",
+    "good-reporter": "3.x.x",
     "hoek": "2.x.x",
     "joi": "4.x.x",
     "json-stringify-safe": "5.0.x",

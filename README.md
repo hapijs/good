@@ -49,20 +49,14 @@ var server = new Hapi.Server();
 var options = {
     opsInterval: 1000,
     reporters: [{
-        reporter: Good.GoodConsole
+        reporter: require('good-console'),
+        args:[{ log: '*', request: '*' }]
     }, {
-        reporter: Good.GoodFile,
-        args: ['./test/fixtures/awesome_log', {
-            events: {
-                ops: '*'
-            }
-        }]
+        reporter: require('good-file'),
+        args: ['./test/fixtures/awesome_log', { ops: '*' }]
     }, {
         reporter: require('good-http'),
-        args: ['http://prod.logs:3000', {
-            events: {
-                error: '*'
-            },
+        args: ['http://prod.logs:3000', { error: '*' } , {
             threshold: 20,
             wreck: {
                 headers: { 'x-api-key' : 12345 }
@@ -90,19 +84,13 @@ This example does the following:
 2. Sets up the [`GoodFile`](https://github.com/hapijs/good-file) reporter to listen for "ops" events and log them to `./test/fixtures/awesome_log` according to the file rules listed in the good-file documentation.
 3. Sets up the [`GoodHttp`](https://github.com/hapijs/good-http) reporter to listen for error events and POSTs them to `http://prod.logs:3000`
 
-Both `GoodConsole` and `GoodFile` are exposed on the `Good` object. If these are the only two reporter you plan to use, you do not need any further reporter objects.
-
 Log messages are created with tags. Usually a log will include a tag to indicate if it is related to an error or info along with where the message originates. If, for example, the console should only output error's that were logged you can use the following configuration:
 
 ```javascript
 var options = {
     reporters: [{
-        reporter: Good.GoodConsole,
-        args: [{
-            events: {
-                log: ['error', 'medium']
-            }
-        }]
+        reporter: require('good-console'),
+        args: [{ log: ['error', 'medium'] }]
     }]
 };
 ```
@@ -115,3 +103,4 @@ This is a list of known good-reporters that are either under the hapijs umbrella
 - [good-udp](https://github.com/hapijs/good-udp)
 - [good-file](https://github.com/hapijs/good-file)
 - [good-http](https://github.com/hapijs/good-http)
+- [good-console](https://github.com/hapijs/good-console)

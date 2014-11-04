@@ -238,9 +238,7 @@ describe('Network Monitor', function () {
 
         var options = {};
         var one = new GoodReporter({
-            events: {
-                ops: '*'
-            }
+            ops: '*'
         });
 
         one._report = function (event, eventData) {
