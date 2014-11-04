@@ -24,7 +24,7 @@ describe('System Monitor', function () {
 
         it('returns an object with the current memory usage', function (done) {
 
-            var monitor = new SystemMonitor.Monitor();
+            var monitor = SystemMonitor;
 
             monitor.mem(function (err, mem) {
 
