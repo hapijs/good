@@ -57,19 +57,6 @@ describe('good', function () {
             done();
         });
 
-        it('has no options', function (done) {
-
-            makePack(function (pack, server) {
-
-                var fn = function () {
-
-                    var monitor = new Monitor(pack);
-                };
-                expect(fn).to.not.throw();
-                done();
-            });
-        });
-
         it('throws an error if opsInterval is too small', function (done) {
 
             var options = {
@@ -91,7 +78,10 @@ describe('good', function () {
         it('does not throw an error when opsInterval is more than 100', function (done) {
 
             var options = {
-                opsInterval: 100
+                opsInterval: 100,
+                reporters: [{
+                    reporter: new GoodReporter({})
+                }]
             };
 
             makePack(function (pack, server) {
@@ -109,7 +99,10 @@ describe('good', function () {
         it('throws an error if requestsEvent is not response or tail', function (done) {
 
             var options = {
-                requestsEvent: 'test'
+                requestsEvent: 'test',
+                reporters: [{
+                    reporter: new GoodReporter({})
+                }]
             };
 
             makePack(function (pack, server) {
@@ -126,7 +119,10 @@ describe('good', function () {
         it('requestsEvent is a response', function (done) {
 
             var options = {
-                requestsEvent: 'response'
+                requestsEvent: 'response',
+                reporters: [{
+                    reporter: new GoodReporter({})
+                }]
             };
 
             makePack(function (pack, server) {
@@ -152,8 +148,7 @@ describe('good', function () {
 
             options.reporters.push(new GoodReporter());
             options.reporters.push({
-                reporter: GoodReporter,
-                args: ['testArgument', { log: true }]
+                reporter: GoodReporter
             });
 
             makePack(function (pack, server) {
@@ -174,10 +169,11 @@ describe('good', function () {
             var options = {
                 requestsEvent: 'response',
                 reporters: [{
-                    reporter: 'good-file',
-                    args: ['testArgument', { log: true }]
+                    reporter: 'good-reporter',
+                    args: [{ log: '*' }, { colors: true }]
                 }, {
-                    reporter: 'good-console'
+                    reporter: '../node_modules/good-reporter',
+                    args: [{ log: '*' }, { colors: false }]
                 }]
             };
 
@@ -189,10 +185,6 @@ describe('good', function () {
                     expect(error).to.not.exist;
                     var reporters = monitor._reporters;
                     expect(reporters.length).to.equal(2);
-                    expect(reporters[0]._settings.log).to.be.true;
-
-                    Fs.unlinkSync(reporters[0]._currentStream.path);
-
                     done();
                 });
             });
@@ -379,7 +371,12 @@ describe('good', function () {
         it('is called on the "stop" server event', function (done) {
 
             var plugin = {
-                register: require('../lib/index').register
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [{
+                        reporter: GoodReporter
+                    }]
+                }
             };
             var stop = Monitor.prototype.stop;
             var called = false;
@@ -418,22 +415,16 @@ describe('good', function () {
             });
 
             var one = new GoodReporter({
-                events: {
-                    log: '*',
-                    request: '*'
-                }
+                log: '*',
+                request: '*'
             });
 
             var two = new GoodReporter({
-                events: {
-                    error: '*'
-                }
+                error: '*'
             });
 
             var three = new GoodReporter({
-               events: {
-                   log: '*'
-               }
+               log: '*'
             });
 
             var events = [];
@@ -503,9 +494,7 @@ describe('good', function () {
             });
 
             var one = new GoodReporter({
-                events: {
-                    request: '*'
-                }
+                request: '*'
             });
             one._eventQueue = [];
 
@@ -571,7 +560,10 @@ describe('good', function () {
             makePack(function (plugin, server) {
 
                 var options = {
-                    opsInterval: 100
+                    opsInterval: 100,
+                    reporters: [{
+                        reporter: GoodReporter
+                    }]
                 };
                 var monitor = new Monitor(plugin, options);
                 var ops = false;
