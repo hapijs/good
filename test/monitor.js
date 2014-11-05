@@ -18,6 +18,14 @@ var Wreck = require('wreck');
 
 var internals = {};
 
+internals.getFileContents = function (path) {
+
+    var file = Fs.readFileSync(path);
+    var formatted = file.toString().split('\n').slice(0, -1);
+
+    return JSON.parse('[' + formatted + ']');
+};
+
 
 // Test shortcuts
 
@@ -996,10 +1004,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest);
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest);
                         expect(result[0].data).to.equal('included in output');
 
                         done();
@@ -1032,10 +1037,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest);
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest);
                         expect(result[0].data).to.equal('included in output');
 
                         done();
@@ -1067,10 +1069,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest);
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest);
                         expect(result[1].data).to.equal('another error');
                         done();
                     }, 20);
@@ -1107,10 +1106,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.002');
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest + '.002');
                         expect(result[0].data).to.equal('included in output');
 
                         done();
@@ -1148,10 +1144,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.002');
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest + '.002');
                         expect(result[0].data).to.equal('included in output');
 
                         done();
@@ -1190,9 +1183,7 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest + '.002');
-                        var formatted = file.toString().split('\n');
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest + '.002');
 
                         expect(result[0].data).to.equal('here is one more error');
 
@@ -1243,10 +1234,7 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest);
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest);
                         expect(result[0].data).to.equal('included in output');
                         expect(result.length).to.equal(17);
 
@@ -1299,10 +1287,7 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest1);
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest1);
                         expect(result[0].data).to.equal('included in output');
                         expect(result.length).to.be.greaterThan(12);
 
@@ -1341,13 +1326,8 @@ describe('Monitor', function () {
 
                     setTimeout(function () {
 
-                        var file1 = Fs.readFileSync(dest1);
-                        var formatted1 = file1.toString().split('\n');
-                        var file2 = Fs.readFileSync(dest2);
-                        var formatted2 = file2.toString().split('\n');
-
-                        var result1 = JSON.parse('[' + formatted1 + ']');
-                        var result2 = JSON.parse('[' + formatted2 + ']');
+                        var result1 = internals.getFileContents(dest1);
+                        var result2 = internals.getFileContents(dest2);
 
                         expect(result1[0].event).to.equal('request');
                         expect(result2[0].event).to.equal('ops');
@@ -1382,10 +1362,7 @@ describe('Monitor', function () {
 
                 setTimeout(function () {
 
-                    var file = Fs.readFileSync(dest);
-                    var formatted = file.toString().split('\n');
-
-                    var result = JSON.parse('[' + formatted + ']');
+                    var result = internals.getFileContents(dest);
                     expect(result[0].data).to.equal('included in output');
                     expect(result[1].data).to.equal('another error');
 
@@ -1421,10 +1398,8 @@ describe('Monitor', function () {
                 setTimeout(function () {
 
                     var files = Fs.readdirSync(folderPath);
-                    var file = Fs.readFileSync(Path.join(folderPath, files[0]));
-                    var formatted = file.toString().split('\n');
 
-                    var result = JSON.parse('[' + formatted + ']');
+                    var result = internals.getFileContents(Path.join(folderPath, files[0]));
                     expect(result[0].data).to.equal('included in output');
                     expect(result[1].data).to.equal('another error');
 
@@ -1462,10 +1437,7 @@ describe('Monitor', function () {
                     server.log('ERROR', 'and another error');
                     setTimeout(function () {
 
-                        var file = Fs.readFileSync(dest);
-                        var formatted = file.toString().split('\n');
-
-                        var result = JSON.parse('[' + formatted + ']');
+                        var result = internals.getFileContents(dest);
                         expect(result[0].data).to.exist;
                         expect(result[0].data).to.equal('included in output');
                         expect(result[1].data).to.equal('another error');
@@ -1497,7 +1469,7 @@ describe('Monitor', function () {
 
                     callback(new Error());
                     Fs.readdir = readdir;
-                }
+                };
 
                 server.log('ERROR', 'another error');
                 done();
