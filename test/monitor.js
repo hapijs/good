@@ -1523,6 +1523,7 @@ describe('Monitor', function () {
                 subscribers: {},
                 maxLogSize: 100
             };
+            var logError = console.error;
 
             var dest = Path.join(folderPath, 'mylogpath/');
 
@@ -1533,6 +1534,13 @@ describe('Monitor', function () {
             options.subscribers[dest] = { events: ['log'] };
 
             makePack(function (pack, server) {
+
+                console.error = function (value) {
+
+                    console.error = logError;
+
+                    expect(value).to.exist;
+                };
 
                 var monitor = new Monitor(pack, options);
 
