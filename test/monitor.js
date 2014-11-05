@@ -1452,10 +1452,12 @@ describe('Monitor', function () {
 
             var folderPath = Path.join(__dirname, 'logs');
             var options = {
-                subscribers: {}
+                subscribers: {},
+                maxLogSize: 1
             };
 
             var dest = Path.join(folderPath, 'mylog6.log');
+            var logError = console.error;
 
             options.subscribers[dest] = { events: ['log'] };
 
@@ -1467,12 +1469,17 @@ describe('Monitor', function () {
                 var readdir = Fs.readdir;
                 Fs.readdir = function (path, callback) {
 
-                    callback(new Error());
                     Fs.readdir = readdir;
+                    callback(new Error());
+                };
+                console.error = function (err) {
+
+                    console.error = logError;
+                    expect(err).to.exist;
+                    done();
                 };
 
                 server.log('ERROR', 'another error');
-                done();
             });
         });
 
