@@ -104,3 +104,4 @@ This is a list of known good-reporters that are either under the hapijs umbrella
 - [good-file](https://github.com/hapijs/good-file)
 - [good-http](https://github.com/hapijs/good-http)
 - [good-console](https://github.com/hapijs/good-console)
+- [good-influxdb](https://github.com/totherik/good-influxdb)
