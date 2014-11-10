@@ -1,7 +1,8 @@
 // Load modules
 
-var Lab = require('lab');
+var Code = require('code');
 var Fs = require('fs');
+var Lab = require('lab');
 var Utils = require('../lib/utils');
 
 
@@ -13,7 +14,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -30,7 +31,7 @@ describe('utils', function () {
 
             method(function (err, value) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(value).to.be.true;
                 done();
             });

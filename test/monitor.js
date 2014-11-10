@@ -1,8 +1,9 @@
 // Load modules
-var Fs = require('fs');
-var Http = require('http');
 var Async = require('async');
+var Code = require('code');
+var Fs = require('fs');
 var Hapi = require('hapi');
+var Http = require('http');
 var Lab = require('lab');
 var GoodReporter = require('good-reporter');
 var Monitor = require('../lib/monitor');
@@ -14,7 +15,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -38,8 +39,8 @@ describe('good', function () {
         var server = new Hapi.Server();
         server.pack.register(plugin, function (err) {
 
-            expect(err).to.not.exist;
-            expect(holder).to.exist;
+            expect(err).to.not.exist();
+            expect(holder).to.exist();
             callback(holder, server);
         });
     };
@@ -91,7 +92,7 @@ describe('good', function () {
                     var monitor = new Monitor(pack, options);
                 };
 
-                expect(fn).not.to.throw(Error);
+                expect(fn).not.to.throw();
                 done();
             });
         });
@@ -132,7 +133,7 @@ describe('good', function () {
                     var monitor = new Monitor(pack, options);
                 };
 
-                expect(fn).not.to.throw(Error);
+                expect(fn).not.to.throw();
                 done();
             });
         });
@@ -156,7 +157,7 @@ describe('good', function () {
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     expect(monitor._reporters.length).to.equal(2);
                     done();
                 });
@@ -182,7 +183,7 @@ describe('good', function () {
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     var reporters = monitor._reporters;
                     expect(reporters.length).to.equal(2);
                     done();
@@ -205,7 +206,7 @@ describe('good', function () {
             one.start = function (emitter, callback) {
 
                 hitCount++;
-                expect(emitter).to.exist;
+                expect(emitter).to.exist();
                 return callback(null);
             };
 
@@ -214,7 +215,7 @@ describe('good', function () {
                 setTimeout(function () {
 
                     hitCount++;
-                    expect(emitter).to.exist;
+                    expect(emitter).to.exist();
                     callback(null);
                 }, 10);
             };
@@ -226,7 +227,7 @@ describe('good', function () {
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                     expect(monitor._reporters.length).to.equal(2);
                     expect(hitCount).to.equal(2);
                     done();
@@ -244,7 +245,7 @@ describe('good', function () {
 
             one.start = function (emitter, callback) {
 
-                expect(emitter).to.exist;
+                expect(emitter).to.exist();
                 return callback(new Error('mock error'));
             };
 
@@ -256,7 +257,7 @@ describe('good', function () {
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
-                    expect(error).to.exist;
+                    expect(error).to.exist();
                     expect(error.message).to.equal('mock error');
 
                     done();
@@ -276,7 +277,7 @@ describe('good', function () {
             one.start = two.start =  function (emitter, callback) {
 
                 hitCount++;
-                expect(emitter).to.exist;
+                expect(emitter).to.exist();
                 return callback(null);
             };
 
@@ -287,7 +288,7 @@ describe('good', function () {
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
 
                     expect(monitor.listeners('ops').length).to.equal(1);
                     expect(monitor._plugin.events.listeners('internalError').length).to.equal(1);
@@ -350,7 +351,7 @@ describe('good', function () {
                 monitor = new Monitor(pack, options);
                 monitor.start(function (err) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
 
                     monitor.stop();
 
@@ -535,14 +536,13 @@ describe('good', function () {
                         expect(eventsOne.length).to.equal(1);
 
                         expect(request.event).to.equal('request');
-                        expect(request.log).to.exist;
-                        expect(request.log).to.be.an('array');
-                        expect(request.headers).to.exist;
+                        expect(request.log).to.exist();
+                        expect(request.log).to.be.an.array();
+                        expect(request.headers).to.exist();
                         expect(request.requestPayload).to.deep.equal({
                             data: 'example payload'
                         });
                         expect(request.responsePayload).to.equal('done');
-
                         done();
                     });
 
@@ -582,7 +582,7 @@ describe('good', function () {
 
                         callback(error, results);
 
-                        expect(error).to.exist;
+                        expect(error).to.exist();
                         expect(error.message).to.equal('there was an error during processing');
                         expect(ops).to.equal(false);
                         Async.parallel = parallel;
@@ -606,7 +606,7 @@ describe('good', function () {
 
                 monitor.start(function (error) {
 
-                    expect(error).to.not.exist;
+                    expect(error).to.not.exist();
                 });
             });
         });

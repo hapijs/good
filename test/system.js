@@ -1,7 +1,8 @@
 // Load modules
 
-var Lab = require('lab');
+var Code = require('code');
 var Fs = require('fs');
+var Lab = require('lab');
 var SystemMonitor = require('../lib/system');
 
 
@@ -13,7 +14,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -28,10 +29,10 @@ describe('System Monitor', function () {
 
             monitor.mem(function (err, mem) {
 
-                expect(err).not.to.exist;
-                expect(mem).to.exist;
-                expect(mem.total).to.exist;
-                expect(mem.free).to.exist;
+                expect(err).not.to.exist();
+                expect(mem).to.exist();
+                expect(mem.total).to.exist();
+                expect(mem.free).to.exist();
                 done();
             });
         });
