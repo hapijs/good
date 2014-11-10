@@ -1,9 +1,10 @@
 // Load modules
+var Code = require('code');
+var GoodReporter = require('good-reporter');
+var Hapi = require('hapi');
 var Http = require('http');
 var Https = require('https');
 var Lab = require('lab');
-var Hapi = require('hapi');
-var GoodReporter = require('good-reporter');
 
 
 
@@ -15,7 +16,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -40,7 +41,7 @@ describe('Plugin', function () {
 
             expect(event).to.equal('ops');
             expect(eventData.event).to.equal('ops');
-            expect(eventData.host).to.exist;
+            expect(eventData.host).to.exist();
         };
 
         options.reporters = [one];
@@ -53,11 +54,11 @@ describe('Plugin', function () {
 
         server.pack.register(plugin, function (err) {
 
-            expect(err).to.not.exist;
+            expect(err).to.not.exist();
 
             server.plugins.good.monitor.once('ops', function (event) {
 
-                expect(event.osload).to.exist;
+                expect(event.osload).to.exist();
                 done();
             });
         });
@@ -98,12 +99,12 @@ describe('Plugin', function () {
 
         server.pack.register(plugin, function (err) {
 
-            expect(err).to.not.exist;
+            expect(err).to.not.exist();
 
             server.plugins.good.monitor.once('ops', function (event) {
 
-                expect(event.host).to.exist;
-                expect(event.sockets).to.exist;
+                expect(event.host).to.exist();
+                expect(event.sockets).to.exist();
                 expect(event.sockets.http.total).to.equal(5);
 
                 done();

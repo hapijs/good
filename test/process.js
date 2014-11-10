@@ -1,5 +1,6 @@
 // Load modules
 
+var Code = require('code');
 var Lab = require('lab');
 var ProcessMonitor = require('../lib/process');
 
@@ -12,7 +13,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -26,8 +27,8 @@ describe('Process Monitor', function () {
             var monitor = ProcessMonitor;
             monitor.memoryUsage(function (err, mem) {
 
-                expect(err).not.to.exist;
-                expect(mem).to.exist;
+                expect(err).not.to.exist();
+                expect(mem).to.exist();
                 done();
             });
         });
@@ -40,8 +41,8 @@ describe('Process Monitor', function () {
             var monitor = ProcessMonitor;
             monitor.delay(function (err, delay) {
 
-                expect(err).not.to.exist;
-                expect(delay).to.exist;
+                expect(err).not.to.exist();
+                expect(delay).to.exist();
                 done();
             });
         });

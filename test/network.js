@@ -1,11 +1,12 @@
 // Load modules
 
-var Http = require('http');
+var Code = require('code');
 var Events = require('events');
-var Stream = require('stream');
-var Lab = require('lab');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Http = require('http');
+var Lab = require('lab');
+var Stream = require('stream');
 var NetworkMonitor = require('../lib/network');
 var GoodReporter = require('good-reporter');
 
@@ -18,7 +19,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -75,7 +76,7 @@ describe('Network Monitor', function () {
 
         network.requests(function (err, result) {
 
-            expect(result['80']).to.not.exist;
+            expect(result['80']).to.not.exist();
         });
 
         done();
