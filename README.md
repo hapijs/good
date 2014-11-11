@@ -97,10 +97,15 @@ var options = {
 
 This will now _only_ log "log" events that have the "error" _or_ "medium" tag attached to them. Any "log" events without one of those tags will be ignored. Please see the documentation of the [good-reporter](https://github.com/hapijs/good-reporter) interface for more information about tags and event filtering.
 
-## List of Reporters
+## Reporters
 
-This is a list of known good-reporters that are either under the hapijs umbrella or are well-tested and documented third party reporters
+### Officially supported by hapijs
+This is a list of good-reporters under the hapijs umbrella:
 - [good-udp](https://github.com/hapijs/good-udp)
 - [good-file](https://github.com/hapijs/good-file)
 - [good-http](https://github.com/hapijs/good-http)
 - [good-console](https://github.com/hapijs/good-console)
+
+### Community powered
+Here are some additional reporters that are available from the hapijs community:
+- [good-influxdb](https://github.com/totherik/good-influxdb)
