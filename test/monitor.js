@@ -605,8 +605,8 @@ describe('good', function () {
                         expect(eventsOne.length).to.equal(1);
 
                         expect(request.event).to.equal('error');
-                        expect(request.errorObject).to.exist;
-                        expect(request.errorObject).to.be.an.object;
+                        expect(request.errorObject).to.exist();
+                        expect(request.errorObject).to.be.an.object();
                         expect(request.errorObject.message).to.equal('Uncaught error: An error occurred');
 
                         done();
