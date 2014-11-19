@@ -6,11 +6,11 @@ var Http = require('http');
 var Https = require('https');
 var Lab = require('lab');
 
-
-
 // Declare internals
 
-var internals = {};
+var internals = {
+    agent: new Https.Agent({ maxSockets: 6 })
+};
 
 
 // Test shortcuts
@@ -73,19 +73,24 @@ describe('Plugin', function () {
             path: '/',
             handler: function (request, reply) {
 
-                Https.get('https://www.google.com');
+                Https.get({
+                    hostname: 'www.google.com',
+                    port: 433,
+                    path: '/',
+                    agent: internals.agent
+                });
             }
         });
 
         var options = {
-            opsInterval: 1000
+            opsInterval: 1000,
+            httpsAgents: internals.agent
         };
         var one = new GoodReporter({
             events: {
                 ops: '*'
             }
         });
-        var hitCount = 0;
 
         one._report = function () {};
 
@@ -105,17 +110,14 @@ describe('Plugin', function () {
 
                 expect(event.host).to.exist();
                 expect(event.sockets).to.exist();
-                expect(event.sockets.http.total).to.equal(5);
+                expect(event.sockets.https.total).to.equal(6);
 
                 done();
             });
 
-            server.start(function() {
-
-                for (var i = 0; i < 10; ++i) {
-                    Http.get(server.info.uri + '/');
-                }
-            });
+            for (var i = 0; i < 10; ++i) {
+               server.inject({ url: '/'});
+            }
         });
     });
 });
