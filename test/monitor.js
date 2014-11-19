@@ -223,7 +223,7 @@ describe('good', function () {
             options.reporters = [one, two];
 
             makePack(function (pack, server) {
-                
+
                 monitor = new Monitor(pack, options);
                 monitor.start(function (error) {
 
@@ -543,6 +543,72 @@ describe('good', function () {
                             data: 'example payload'
                         });
                         expect(request.responsePayload).to.equal('done');
+                        done();
+                    });
+
+                    req.write(JSON.stringify({
+                        data: 'example payload'
+                    }));
+                    req.end();
+
+                });
+            });
+        });
+
+        it('provides additional information about "error" events using "logErrorObject"', function (done) {
+          var server = new Hapi.Server('127.0.0.1', 0, { debug : false });
+            server.route({
+                method: 'POST',
+                path: '/',
+                handler: function (request, reply) {
+
+                    throw new Error('An error occurred');
+                }
+            });
+
+            var one = new GoodReporter({
+                error: '*'
+            });
+            one._eventQueue = [];
+
+            one._report = function (event, eventData) {
+
+                one._eventQueue.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    logErrorObject: true
+                }
+            };
+
+            server.pack.register(plugin, function () {
+
+                server.start(function () {
+
+                    var req = Http.request({
+                        hostname: '127.0.0.1',
+                        port: server.info.port,
+                        method: 'POST',
+                        path: '/?q=test',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }, function (res) {
+
+                        var eventsOne = one._eventQueue;
+                        var request = eventsOne[0];
+
+                        expect(res.statusCode).to.equal(500);
+                        expect(eventsOne.length).to.equal(1);
+
+                        expect(request.event).to.equal('error');
+                        expect(request.errorObject).to.exist();
+                        expect(request.errorObject).to.be.an.object();
+                        expect(request.errorObject.message).to.equal('Uncaught error: An error occurred');
+
                         done();
                     });
 
