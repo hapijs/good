@@ -41,7 +41,6 @@ set `options` to an object with the following optional settings:
 For example:
 
 ```javascript
-var Good = require('good');
 var Hapi = require('hapi');
 
 var server = new Hapi.Server();
