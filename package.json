@@ -24,7 +24,7 @@
     "moment": "2.8.x"
   },
   "peerDependencies": {
-    "hapi": ">=2.x.x && <= 7.x.x"
+    "hapi": ">= 8.x.x"
   },
   "devDependencies": {
     "code": "1.x.x",

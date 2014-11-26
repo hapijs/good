@@ -1,14 +1,18 @@
 // Load modules
 
-var Code = require('code');
 var Events = require('events');
+var Http = require('http');
+var Https = require('https');
+var Stream = require('stream');
+
+
+var Async = require('async');
+var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Http = require('http');
 var Lab = require('lab');
-var Stream = require('stream');
 var NetworkMonitor = require('../lib/network');
-var GoodReporter = require('good-reporter');
+
 
 
 // Declare internals
@@ -26,181 +30,207 @@ var it = lab.it;
 
 describe('Network Monitor', function () {
 
-    it('handle no port info', function (done) {
+    it('reports on network activity', function (done) {
 
-        var server = {
-            _connections: {
-                'ip:123': {},
-                'ip:1234': {}
-            }
-        };
+        var server = new Hapi.Server();
+        server.connection({ host: 'localhost' });
+        server.connection({ host: 'localhost' });
 
-        var emitter = new Events.EventEmitter();
-        var network = new NetworkMonitor.Monitor(emitter);
-
-        var tags = ['hapi', 'received'];
-        var tagsMap = Hoek.mapToObject(tags);
-        var request = { server: server, info: { received: Date.now() - 1 }, url: { pathname: '/' }, response: { statusCode: 200 }, getLog: function () { return []; } };
-        emitter.emit('request', request, { tags: tags }, tagsMap);
-        emitter.emit('request', request, { tags: tags }, tagsMap);
-        emitter.emit('response', request);
-
-        network.concurrents(function (err, result) {
-
-            expect(result['0']).to.equal(2);
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) { reply(); }
         });
 
-        network.requests(function (err, result) {
+        var network = new NetworkMonitor.Monitor(server);
+        var agent = new Http.Agent({ maxSockets: Infinity });
+        var usedPorts = [];
 
-            expect(result['0'].total).to.equal(2);
+        server.start(function () {
+
+            server.connections.forEach(function (conn) {
+
+                usedPorts.push(conn.info.port);
+
+                for (var i = 0; i < 20; ++i) {
+                    Http.get({
+                        path: '/',
+                        host: conn.info.host,
+                        port: conn.info.port,
+                        agent: agent
+                    }, Hoek.ignore);
+                }
+            });
+
+           setTimeout(function () {
+
+               expect(network._requests).to.have.length(2);
+
+               var port = usedPorts.shift();
+
+               while(port) {
+
+                   expect(network._requests[port]).to.exist();
+                   expect(network._requests[port].total).to.equal(20);
+                   expect(network._requests[port].statusCodes[200]).to.equal(20);
+
+                   expect(network._responseTimes[port]).to.exist();
+
+                   port = usedPorts.shift();
+               }
+
+               done();
+           }, 500);
         });
-
-        done();
     });
 
-    it('handles no tags', function (done) {
+    it('resets stored statistics', function (done) {
 
-        var server = {
-            info: { port: 80 },
-            _connections: {
-                'ip:123': {},
-                'ip:1234': {}
+        var server = new Hapi.Server();
+        server.connection({ host: 'localhost' });
+
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) {
+                reply();
             }
-        };
-        var emitter = new Events.EventEmitter();
-        var network = new NetworkMonitor.Monitor(emitter);
-
-        var request = { server: server, url: { pathname: '/' } };
-        emitter.emit('request', request, {});
-        emitter.emit('request', request, {});
-
-        network.requests(function (err, result) {
-
-            expect(result['80']).to.not.exist();
         });
 
-        done();
+        var network = new NetworkMonitor.Monitor(server);
+        var agent = new Http.Agent({maxSockets: Infinity});
+
+        server.start(function () {
+
+            for (var i = 0; i < 10; ++i) {
+                Http.get({
+                    path: '/',
+                    host: server.info.host,
+                    port: server.info.port,
+                    agent: agent
+                }, Hoek.ignore);
+            }
+
+
+            setTimeout(function () {
+
+                var port = server.info.port;
+
+                expect(network._requests[port]).to.exist();
+                expect(network._requests[port].total).to.equal(10);
+                expect(network._requests[port].statusCodes[200]).to.equal(10);
+
+                expect(network._responseTimes[port]).to.exist();
+
+                network.reset();
+
+                expect(network._requests[port]).to.deep.equal({
+                    total: 0,
+                    disconnects: 0,
+                    statusCodes: {}
+                });
+
+                expect(network._responseTimes[port]).to.deep.equal({
+                    count: 0,
+                    total: 0,
+                    max: 0
+                });
+
+                done();
+            }, 300);
+        });
     });
 
-    it('tracks requests and concurrents total since last check', function (done) {
+    it('exposes stats via async calls', function (done) {
 
-        var server = {
-            info: { port: 80 },
-            _connections: {
-                'ip:123': {},
-                'ip:1234': {}
+        var server = new Hapi.Server();
+        server.connection({ host: 'localhost' });
+
+        var network = new NetworkMonitor.Monitor(server);
+        var httpAgent = new Http.Agent({ maxSockets: Infinity });
+        var httpsAgent = new Https.Agent({ maxSockets: Infinity });
+
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) {
+
+                Https.get({
+                    hostname: 'www.google.com',
+                    port: 433,
+                    path: '/',
+                    agent: httpsAgent
+                });
             }
-        };
-        var emitter = new Events.EventEmitter();
-        var network = new NetworkMonitor.Monitor(emitter);
-
-        var tags = ['hapi', 'received'];
-        var tagsMap = Hoek.mapToObject(tags);
-        var request = { server: server, url: { pathname: '/' } };
-        emitter.emit('request', request, { tags: tags }, tagsMap);
-        emitter.emit('request', request, { tags: tags }, tagsMap);
-
-        network.requests(function (err, result) {
-
-            expect(result['80'].total).to.equal(2);
         });
 
-        network.concurrents(function (err, result) {
+        server.route({
+            method: 'GET',
+            path: '/foo',
+            handler: function (request, reply) {
 
-            expect(result['80']).to.equal(2);
-        });
+                setTimeout(function () {
 
-        done();
-    });
-
-    it('handles undefined connections', function (done) {
-
-        var server = {
-            info: { port: 80 }
-        };
-        var emitter = new Events.EventEmitter();
-        var network = new NetworkMonitor.Monitor(emitter);
-
-        var tags = ['hapi', 'received'];
-        var tagsMap = Hoek.mapToObject(tags);
-        var request = { server: server, url: { pathname: '/' } };
-        emitter.emit('request', request, { tags: tags }, tagsMap);
-        emitter.emit('request', request, { tags: tags }, tagsMap);
-
-        network.requests(function (err, result) {
-
-            expect(result['80'].total).to.equal(2);
-        });
-
-        network.concurrents(function (err, result) {
-
-            expect(result['80']).to.equal(0);
-        });
-
-        done();
-    });
-
-    it('tracks requests by server', function (done) {
-
-        var server1 = {
-            info: { port: 80 },
-            _connections: {
-                'ip:123': {}
+                    reply().code(302);
+                }, Math.floor(Math.random() * 10) + 1);
             }
-        };
-        var server2 = {
-            info: { port: 443 },
-            _connections: {
-                'ip:123': {},
-                'ip:1234': {},
-                'ip:12345': {}
+        });
+
+        server.start(function () {
+
+            for (var i = 0; i < 10; ++i) {
+                Http.get({
+                    path: '/',
+                    host: server.info.host,
+                    port: server.info.port,
+                    agent: httpAgent
+                }, Hoek.ignore);
+
+                Http.get({
+                    path: '/foo',
+                    host: server.info.host,
+                    port: server.info.port,
+                    agent: httpAgent
+                }, Hoek.ignore);
             }
-        };
 
-        var getLog = function () {
 
-            return [];
-        };
+            setTimeout(function () {
 
-        var emitter = new Events.EventEmitter();
-        var network = new NetworkMonitor.Monitor(emitter);
+                Async.parallel({
+                    requests: network.requests.bind(network),
+                    concurrents: network.concurrents.bind(network),
+                    response: network.responseTimes.bind(network),
+                    sockets: network.sockets.bind(network, [httpAgent], [httpsAgent])
+                }, function (err, results) {
 
-        var tags = ['hapi', 'received'];
-        var tagsMap = Hoek.mapToObject(tags);
-        var request1 = { server: server1, info: { received: Date.now() - 1 }, url: { pathname: '/' }, response: { statusCode: 200 }, getLog: getLog };
-        var request2 = { server: server2, info: { received: Date.now() - 2 }, url: { pathname: '/test' }, response: { statusCode: 200 }, getLog: getLog };
+                    var port = server.info.port;
 
-        emitter.emit('request', request1, { tags: tags }, tagsMap);
-        emitter.emit('request', request1, { tags: tags }, tagsMap);
-        emitter.emit('request', request2, { tags: tags }, tagsMap);
-        emitter.emit('request', request2, { tags: tags }, tagsMap);
-        emitter.emit('request', request2, { tags: tags }, tagsMap);
-        emitter.emit('response', request1);
-        request1.info.received -= 2;
-        emitter.emit('response', request1);
-        emitter.emit('response', request2);
+                    expect(err).to.not.exist();
+                    expect(results.requests[port]).to.exist();
+                    expect(results.concurrents[port]).to.exist();
 
-        network.requests(function (err, result) {
+                    var requests = results.requests[port];
 
-            expect(result['80'].total).to.equal(2);
-            expect(result['443'].total).to.equal(3);
+                    expect(requests).to.deep.equal({
+                        total: 20,
+                        disconnects: 0,
+                        statusCodes: {
+                            '302': 10
+                        }
+                    });
+
+
+                    expect(results.sockets.http.total).to.equal(20);
+                    expect(results.sockets.https.total).to.equal(10);
+
+                    expect(results.response[port].avg).to.be.at.least(1);
+                    expect(results.response[port].max).to.be.at.least(1);
+
+                    done();
+                });
+            }, 300);
         });
-
-        network.concurrents(function (err, result) {
-
-            expect(result['80']).to.equal(1);
-            expect(result['443']).to.equal(3);
-        });
-
-        network.responseTimes(function (err, result) {
-
-            expect(result['80'].max).to.be.at.least(3);
-            expect(result['80'].avg).to.be.at.least(2);
-            expect(result['443'].max).to.be.at.least(2);
-            expect(result['443'].avg).to.be.at.least(2);
-        });
-
-        done();
     });
 
     it('tracks server disconnects', function (done) {
@@ -212,7 +242,7 @@ describe('Network Monitor', function () {
 
         Hoek.inherits(TestStream, Stream.Readable);
 
-        TestStream.prototype._read = function (size) {
+        TestStream.prototype._read = function () {
 
             var self = this;
 
@@ -226,8 +256,9 @@ describe('Network Monitor', function () {
             setTimeout(function () { self.push(null); }, 50);
         };
 
-        var staticPort = 9001;
-        var server = new Hapi.Server(0, staticPort);
+        var server = new Hapi.Server();
+        server.connection({ host: 'localhost' });
+
         server.route({
             method: 'POST',
             path: '/',
@@ -237,119 +268,59 @@ describe('Network Monitor', function () {
             }
         });
 
-        var options = {};
-        var one = new GoodReporter({
-            ops: '*'
-        });
+        var network = new NetworkMonitor.Monitor(server);
 
-        one._report = function (event, eventData) {
+        server.start(function () {
 
-            var log = eventData.load.requests;
+            var options = {
+                hostname: server.info.host,
+                port: server.info.port,
+                path: '/',
+                method: 'POST'
+            };
 
-            expect(log[staticPort]).to.deep.equal({
-                total: 1,
-                disconnects: 1,
-                statusCodes: {
-                    '200': 1
-                }
+            var req = Http.request(options, function (res) {
+
+                req.destroy();
             });
 
-            return done();
-        };
-
-        options.reporters = [one];
-        options.opsInterval = 1000;
-
-        var plugin = {
-            plugin: require('..'),
-            options: options
-        };
-
-        server.pack.register(plugin, function () {
-
-            server.start(function () {
-
-                var options = {
-                    hostname: '127.0.0.1',
-                    port: staticPort,
-                    path: '/',
-                    method: 'POST'
-                };
-
-                var req = Http.request(options, function (res) {
-
-                    req.destroy();
-                });
-
-                req.end('{}');
-            });
+            req.end('{}');
         });
+
+        setTimeout(function () {
+
+            network.requests(function (err, result) {
+
+                expect(err).to.not.exist();
+                var requests = {};
+                requests[server.info.port] = { total: 1, disconnects: 1, statusCodes: { '200': 1}};
+
+                expect(result).to.deep.equal(requests);
+                server.stop(done);
+            });
+        }, 400);
+
     });
 
-    it('_onResponse() sets the set count, total, and max time on each port', function (done) {
+    it('error checks getConnections', function (done) {
 
-        var request1 = {
-            server: {
-                info: {
-                    port: 1337
-                }
-            },
-            info: {
-                received: Date.now() - 2
-            },
-            response: {
-                statusCode: 200
-            },
-            getLog: function () { return []; }
-        };
-        var request2 = {
-            server: {
-                info: {
-                    port: 31337
-                }
-            },
-            info: {
-                received: Date.now()
-            },
-            response: {
-                statusCode: 200
-            },
-            getLog: function () { return []; }
-        };
+        var ee = new Events.EventEmitter();
+        ee.connections = [{
+            listener: {
+                getConnections: function (callback) {
 
-        var context = {
-            _responseTimes: {
-                1337: null,
-                31337: {
-                    max: 10000,
-                    count: 5,
-                    total: 20
-                }
-            },
-            _requests: {
-                1337: {
-                    statusCodes: {}
-                },
-                31337: {
-                    statusCodes: {}
+                    callback(new Error('mock error'));
                 }
             }
-        };
+        }];
+        ee.ext = Hoek.ignore;
 
-        var emitter = new Events.EventEmitter();
-        var network = new NetworkMonitor.Monitor(emitter);
+        var network = new NetworkMonitor.Monitor(ee);
 
-        network._onResponse.call(context, request1);
-        network._onResponse.call(context, request2);
+        network.concurrents(function (err) {
 
-        expect(context._responseTimes[31337].max).to.equal(10000);
-        expect(context._responseTimes[31337].count).to.equal(6);
-
-        expect(context._responseTimes[1337].count).to.equal(1);
-        expect(context._requests[1337].max).to.equal(context._requests[1337].total);
-
-        done();
-
-
+            expect(err.message).to.equal('mock error');
+            done();
+        });
     });
 });

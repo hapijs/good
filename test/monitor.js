@@ -100,7 +100,7 @@ describe('good', function () {
         it('throws an error if requestsEvent is not response or tail', function (done) {
 
             var options = {
-                requestsEvent: 'test',
+                responseEvent: 'test',
                 reporters: [{
                     reporter: new GoodReporter({})
                 }]
@@ -120,7 +120,7 @@ describe('good', function () {
         it('requestsEvent is a response', function (done) {
 
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: [{
                     reporter: new GoodReporter({})
                 }]
@@ -142,7 +142,7 @@ describe('good', function () {
 
             var monitor;
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: []
             };
 
@@ -168,7 +168,7 @@ describe('good', function () {
 
             var monitor;
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: [{
                     reporter: 'good-reporter',
                     args: [{ log: '*' }, { colors: true }]
@@ -291,9 +291,9 @@ describe('good', function () {
                     expect(error).to.not.exist();
 
                     expect(monitor.listeners('ops').length).to.equal(1);
-                    expect(monitor._plugin.events.listeners('internalError').length).to.equal(1);
-                    expect(monitor._plugin.events.listeners('log').length).to.equal(1);
-                    expect(monitor._plugin.events.listeners('request').length).to.equal(1);
+                    expect(monitor._server.events.listeners('internalError').length).to.equal(1);
+                    expect(monitor._server.events.listeners('log').length).to.equal(1);
+                    expect(monitor._server.events.listeners('request').length).to.equal(1);
 
                     done();
                 });
@@ -359,10 +359,10 @@ describe('good', function () {
                     expect(hitCount).to.equal(2);
 
                     expect(state.opsInterval._repeat).to.equal(false);
-                    expect(monitor._plugin.events.listeners('log').length).to.equal(0);
+                    expect(monitor._server.events.listeners('log').length).to.equal(0);
                     expect(monitor.listeners('ops').length).to.equal(0);
-                    expect(monitor._plugin.events.listeners('internalError').length).to.equal(0);
-                    expect(monitor._plugin.events.listeners('tail').length).to.equal(0);
+                    expect(monitor._server.events.listeners('internalError').length).to.equal(0);
+                    expect(monitor._server.events.listeners('tail').length).to.equal(0);
 
                     done();
                 });

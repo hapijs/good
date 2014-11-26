@@ -26,6 +26,7 @@ describe('Plugin', function () {
     it('emits ops data', function (done) {
 
         var server = new Hapi.Server();
+
         var options = {
             opsInterval: 100,
             httpAgents: new Http.Agent(),
@@ -46,13 +47,12 @@ describe('Plugin', function () {
 
         options.reporters = [one];
 
-
         var plugin = {
-           plugin: require('..'),
+           register: require('..'),
            options: options
         };
 
-        server.pack.register(plugin, function (err) {
+        server.register(plugin, function (err) {
 
             expect(err).to.not.exist();
 
@@ -66,7 +66,9 @@ describe('Plugin', function () {
 
     it('tracks used sockets', function (done) {
 
-        var server = new Hapi.Server('localhost', 0);
+        var server = new Hapi.Server();
+
+        server.connection({ host: 'localhost'});
 
         server.route({
             method: 'GET',
@@ -98,11 +100,11 @@ describe('Plugin', function () {
 
 
         var plugin = {
-            plugin: require('..'),
+            register: require('..'),
             options: options
         };
 
-        server.pack.register(plugin, function (err) {
+        server.register(plugin, function (err) {
 
             expect(err).to.not.exist();
 
