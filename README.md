@@ -41,7 +41,6 @@ set `options` to an object with the following optional settings:
 For example:
 
 ```javascript
-var Good = require('good');
 var Hapi = require('hapi');
 
 var server = new Hapi.Server();
@@ -109,3 +108,4 @@ This is a list of good-reporters under the hapijs umbrella:
 ### Community powered
 Here are some additional reporters that are available from the hapijs community:
 - [good-influxdb](https://github.com/totherik/good-influxdb)
+- [good-loggly](https://github.com/fhemberger/good-loggly)
