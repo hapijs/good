@@ -1,14 +1,17 @@
 // Load modules
-var Async = require('async');
-var Code = require('code');
+
 var Fs = require('fs');
 var Hapi = require('hapi');
 var Http = require('http');
-var Lab = require('lab');
+
+var Async = require('async');
+var Code = require('code');
 var GoodReporter = require('good-reporter');
-var Monitor = require('../lib/monitor');
 var Hoek = require('hoek');
+var Lab = require('lab');
 var Joi = require('joi');
+
+var Monitor = require('../lib/monitor');
 
 // Declare internals
 

@@ -5,12 +5,12 @@ var Http = require('http');
 var Https = require('https');
 var Stream = require('stream');
 
-
 var Async = require('async');
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
 var Lab = require('lab');
+
 var NetworkMonitor = require('../lib/network');
 
 

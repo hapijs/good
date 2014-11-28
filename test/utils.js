@@ -1,8 +1,8 @@
 // Load modules
 
 var Code = require('code');
-var Fs = require('fs');
 var Lab = require('lab');
+
 var Utils = require('../lib/utils');
 
 
