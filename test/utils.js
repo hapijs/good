@@ -32,7 +32,7 @@ describe('utils', function () {
             method(function (err, value) {
 
                 expect(err).to.not.exist();
-                expect(value).to.be.true;
+                expect(value).to.be.true();
                 done();
             });
         });
