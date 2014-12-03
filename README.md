@@ -6,22 +6,18 @@
 
 Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
 
-The _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
+_'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
 
-
-**good** is a process monitor that listens for one or more of the below "event types":
+**good** is a process monitor that listens for one or more of the below "event types". All of these events, _except_ "ops",  map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/docs/Reference.md#server-events).
 - `ops` - System and process performance - CPU, memory, disk, and other metrics.
-- `request` - framework and application generated logs generated during the lifecycle of each incoming request. This maps to either the "response" or "tail" event emitted from hapi servers.
-- `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc.
-- `error` - request responses that have a status code of 500. Described in the [server events documentation](https://github.com/hapijs/hapi/blob/master/docs/Reference.md#server-events).
-
-With the exception of the `ops` event, all of the other events are emitted by a hapi server. The `ops` event is implemented internally by the good plugin.
+- `response` - Information about incoming requests and the response. This maps to either the "response" or "tail" event emitted from hapi servers.
+- `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the "log" event emitted from hapi servers.
+- `error` - request responses that have a status code of 500. This maps to the "request-error" hapi event.
 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination
 as general events are a process-wide facility and will result in duplicated log events. To override some or all of the defaults,
 set `options` to an object with the following optional settings:
 
-- `[extendedRequests]` - determines if the full request log is sent or only the event summary. Defaults to _false_.
 - `[httpAgents]` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
 - `[httpsAgents]` - the list of `httpsAgents` to report socket information about. Can be a single `https.Agent` or an array of agents. Defaults to `Https.globalAgent`.
 - `[logRequestHeaders]` - determines if all request headers will be logged. Defaults to _false_
@@ -42,8 +38,8 @@ For example:
 
 ```javascript
 var Hapi = require('hapi');
-
 var server = new Hapi.Server();
+server.connection({ host: 'localhost' });
 
 var options = {
     opsInterval: 1000,
@@ -64,15 +60,20 @@ var options = {
     }]
 };
 
-server.pack.register({
-    plugin: require('good'),
+server.register({
+    register: require('good'),
     options: options
 }, function (err) {
 
-   if (err) {
-      console.log(err);
-      return;
-   }
+    if (err) {
+        console.error(err);
+    }
+    else {
+        server.start(function () {
+
+            console.info('Server started at ' + server.info.uri);
+        });
+    }
 });
 
 ```
@@ -99,6 +100,7 @@ This will now _only_ log "log" events that have the "error" _or_ "medium" tag at
 ## Reporters
 
 ### Officially supported by hapijs
+
 This is a list of good-reporters under the hapijs umbrella:
 - [good-udp](https://github.com/hapijs/good-udp)
 - [good-file](https://github.com/hapijs/good-file)
