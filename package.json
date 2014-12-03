@@ -16,7 +16,7 @@
     "node": ">=0.10.x"
   },
   "dependencies": {
-    "async": "0.9.x",
+    "items": "1.x.x",
     "good-reporter": "3.x.x",
     "hoek": "2.x.x",
     "joi": "4.x.x",

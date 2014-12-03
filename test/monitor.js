@@ -1,8 +1,8 @@
 // Load modules
 
 var Http = require('http');
-var Async = require('async');
 var Hapi = require('hapi');
+var Items = require('items');
 var Code = require('code');
 var GoodReporter = require('good-reporter');
 var Hoek = require('hoek');
@@ -521,9 +521,9 @@ describe('good', function () {
                 expect(error.message).to.equal('there was an error during processing');
             };
 
-            var parallel = Async.parallel;
+            var parallel = Items.parallel.execute;
 
-            Async.parallel = function (methods, callback) {
+            Items.parallel.execute = function (methods, callback) {
 
                 var _callback = function (error, results) {
 
@@ -531,8 +531,9 @@ describe('good', function () {
 
                     expect(error).to.exist();
                     expect(error.message).to.equal('there was an error during processing');
+                    expect(results).to.not.exist();
                     expect(ops).to.be.false();
-                    Async.parallel = parallel;
+                    Items.parallel.execute = parallel;
                     console.error = log;
                     delete methods.createError;
                     done();
