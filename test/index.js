@@ -1,7 +1,6 @@
 // Load modules
 var Http = require('http');
 var Https = require('https');
-
 var Code = require('code');
 var GoodReporter = require('good-reporter');
 var Hapi = require('hapi');

@@ -4,11 +4,10 @@ var Events = require('events');
 var Http = require('http');
 var Https = require('https');
 var Stream = require('stream');
-
-var Async = require('async');
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
+var Items = require('items');
 var Lab = require('lab');
 
 var NetworkMonitor = require('../lib/network');
@@ -197,7 +196,7 @@ describe('Network Monitor', function () {
 
             setTimeout(function () {
 
-                Async.parallel({
+                Items.parallel.execute({
                     requests: network.requests.bind(network),
                     concurrents: network.concurrents.bind(network),
                     response: network.responseTimes.bind(network),
