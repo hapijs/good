@@ -2,7 +2,6 @@
 
 var Code = require('code');
 var Lab = require('lab');
-
 var SystemMonitor = require('../lib/system');
 
 

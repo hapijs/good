@@ -1,16 +1,13 @@
 // Load modules
 
-var Fs = require('fs');
-var Hapi = require('hapi');
 var Http = require('http');
-
 var Async = require('async');
+var Hapi = require('hapi');
 var Code = require('code');
 var GoodReporter = require('good-reporter');
 var Hoek = require('hoek');
 var Lab = require('lab');
 var Joi = require('joi');
-
 var Monitor = require('../lib/monitor');
 
 // Declare internals
@@ -109,6 +106,7 @@ describe('good', function () {
 
 
             var fn = function () {
+
                 var monitor = new Monitor(new Hapi.Server(), options);
             };
 
@@ -275,7 +273,7 @@ describe('good', function () {
             expect(function( ){
 
                 monitor = new Monitor(new Hapi.Server(), options);
-                monitor.start(function () {});
+                monitor.start(Hoek.ignore);
             }).to.throw('Every reporter object must have a start and stop function.');
 
             done();
