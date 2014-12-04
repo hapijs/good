@@ -20,7 +20,6 @@
     "good-reporter": "3.x.x",
     "hoek": "2.x.x",
     "joi": "4.x.x",
-    "json-stringify-safe": "5.0.x",
     "moment": "2.8.x"
   },
   "peerDependencies": {
