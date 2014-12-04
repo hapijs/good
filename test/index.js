@@ -1,16 +1,16 @@
 // Load modules
+var Http = require('http');
+var Https = require('https');
 var Code = require('code');
 var GoodReporter = require('good-reporter');
 var Hapi = require('hapi');
-var Http = require('http');
-var Https = require('https');
 var Lab = require('lab');
-
-
 
 // Declare internals
 
-var internals = {};
+var internals = {
+    agent: new Https.Agent({ maxSockets: 6 })
+};
 
 
 // Test shortcuts
@@ -26,6 +26,7 @@ describe('Plugin', function () {
     it('emits ops data', function (done) {
 
         var server = new Hapi.Server();
+
         var options = {
             opsInterval: 100,
             httpAgents: new Http.Agent(),
@@ -46,13 +47,12 @@ describe('Plugin', function () {
 
         options.reporters = [one];
 
-
         var plugin = {
-           plugin: require('..'),
+           register: require('..'),
            options: options
         };
 
-        server.pack.register(plugin, function (err) {
+        server.register(plugin, function (err) {
 
             expect(err).to.not.exist();
 
@@ -66,26 +66,33 @@ describe('Plugin', function () {
 
     it('tracks used sockets', function (done) {
 
-        var server = new Hapi.Server('localhost', 0);
+        var server = new Hapi.Server();
+
+        server.connection({ host: 'localhost'});
 
         server.route({
             method: 'GET',
             path: '/',
             handler: function (request, reply) {
 
-                Https.get('https://www.google.com');
+                Https.get({
+                    hostname: 'www.google.com',
+                    port: 433,
+                    path: '/',
+                    agent: internals.agent
+                });
             }
         });
 
         var options = {
-            opsInterval: 1000
+            opsInterval: 1000,
+            httpsAgents: internals.agent
         };
         var one = new GoodReporter({
             events: {
                 ops: '*'
             }
         });
-        var hitCount = 0;
 
         one._report = function () {};
 
@@ -93,11 +100,11 @@ describe('Plugin', function () {
 
 
         var plugin = {
-            plugin: require('..'),
+            register: require('..'),
             options: options
         };
 
-        server.pack.register(plugin, function (err) {
+        server.register(plugin, function (err) {
 
             expect(err).to.not.exist();
 
@@ -105,17 +112,14 @@ describe('Plugin', function () {
 
                 expect(event.host).to.exist();
                 expect(event.sockets).to.exist();
-                expect(event.sockets.http.total).to.equal(5);
+                expect(event.sockets.https.total).to.equal(6);
 
                 done();
             });
 
-            server.start(function() {
-
-                for (var i = 0; i < 10; ++i) {
-                    Http.get(server.info.uri + '/');
-                }
-            });
+            for (var i = 0; i < 10; ++i) {
+               server.inject({ url: '/'});
+            }
         });
     });
 });

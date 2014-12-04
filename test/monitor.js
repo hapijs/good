@@ -1,11 +1,13 @@
 // Load modules
-var Async = require('async');
-var Code = require('code');
-var Fs = require('fs');
-var Hapi = require('hapi');
+
 var Http = require('http');
-var Lab = require('lab');
+var Hapi = require('hapi');
+var Items = require('items');
+var Code = require('code');
 var GoodReporter = require('good-reporter');
+var Hoek = require('hoek');
+var Lab = require('lab');
+var Joi = require('joi');
 var Monitor = require('../lib/monitor');
 
 // Declare internals
@@ -64,16 +66,15 @@ describe('good', function () {
                 opsInterval: 50
             };
 
-            makePack(function (pack, server) {
 
-                var fn = function () {
 
-                    var monitor = new Monitor(pack, options);
-                };
+            var fn = function () {
 
-                expect(fn).to.throw(Error, /opsInterval must be larger than or equal to 100/gi);
-                done();
-            });
+                var monitor = new Monitor(new Hapi.Server(), options);
+            };
+
+            expect(fn).to.throw(Error, /opsInterval must be larger than or equal to 100/gi);
+            done();
         });
 
         it('does not throw an error when opsInterval is more than 100', function (done) {
@@ -85,64 +86,39 @@ describe('good', function () {
                 }]
             };
 
-            makePack(function (pack, server) {
+            var fn = function () {
 
-                var fn = function () {
+                var monitor = new Monitor(new Hapi.Server(), options);
+            };
 
-                    var monitor = new Monitor(pack, options);
-                };
-
-                expect(fn).not.to.throw();
-                done();
-            });
+            expect(fn).not.to.throw();
+            done();
         });
 
-        it('throws an error if requestsEvent is not response or tail', function (done) {
+        it('throws an error if responseEvent is not "response" or "tail"', function (done) {
 
             var options = {
-                requestsEvent: 'test',
+                responseEvent: 'test',
                 reporters: [{
                     reporter: new GoodReporter({})
                 }]
             };
 
-            makePack(function (pack, server) {
 
-                var fn = function () {
-                    var monitor = new Monitor(pack, options);
-                };
+            var fn = function () {
 
-                expect(fn).to.throw(Error, /requestsEvent must be one of response, tail/gi);
-                done();
-            });
-        });
-
-        it('requestsEvent is a response', function (done) {
-
-            var options = {
-                requestsEvent: 'response',
-                reporters: [{
-                    reporter: new GoodReporter({})
-                }]
+                var monitor = new Monitor(new Hapi.Server(), options);
             };
 
-            makePack(function (pack, server) {
-
-                var fn = function () {
-
-                    var monitor = new Monitor(pack, options);
-                };
-
-                expect(fn).not.to.throw();
-                done();
-            });
+            expect(fn).to.throw(Error, /responseEvent must be one of response, tail/gi);
+            done();
         });
 
         it('supports a mix of broadcaster options', function (done) {
 
             var monitor;
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: []
             };
 
@@ -152,15 +128,12 @@ describe('good', function () {
                 reporter: GoodReporter
             });
 
-            makePack(function (pack, server) {
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (error) {
 
-                monitor = new Monitor(pack, options);
-                monitor.start(function (error) {
-
-                    expect(error).to.not.exist();
-                    expect(monitor._reporters.length).to.equal(2);
-                    done();
-                });
+                expect(error).to.not.exist();
+                expect(monitor._reporters.length).to.equal(2);
+                done();
             });
         });
 
@@ -168,7 +141,7 @@ describe('good', function () {
 
             var monitor;
             var options = {
-                requestsEvent: 'response',
+                responseEvent: 'response',
                 reporters: [{
                     reporter: 'good-reporter',
                     args: [{ log: '*' }, { colors: true }]
@@ -178,16 +151,13 @@ describe('good', function () {
                 }]
             };
 
-            makePack(function (pack, server) {
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (error) {
 
-                monitor = new Monitor(pack, options);
-                monitor.start(function (error) {
-
-                    expect(error).to.not.exist();
-                    var reporters = monitor._reporters;
-                    expect(reporters.length).to.equal(2);
-                    done();
-                });
+                expect(error).to.not.exist();
+                var reporters = monitor._reporters;
+                expect(reporters.length).to.equal(2);
+                done();
             });
         });
     });
@@ -222,16 +192,13 @@ describe('good', function () {
 
             options.reporters = [one, two];
 
-            makePack(function (pack, server) {
-                
-                monitor = new Monitor(pack, options);
-                monitor.start(function (error) {
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (error) {
 
-                    expect(error).to.not.exist();
-                    expect(monitor._reporters.length).to.equal(2);
-                    expect(hitCount).to.equal(2);
-                    done();
-                });
+                expect(error).to.not.exist();
+                expect(monitor._reporters.length).to.equal(2);
+                expect(hitCount).to.equal(2);
+                done();
             });
         });
 
@@ -251,21 +218,17 @@ describe('good', function () {
 
             options.reporters = [one];
 
-            makePack(function (pack, server) {
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (error) {
 
+                expect(error).to.exist();
+                expect(error.message).to.equal('mock error');
 
-                monitor = new Monitor(pack, options);
-                monitor.start(function (error) {
-
-                    expect(error).to.exist();
-                    expect(error.message).to.equal('mock error');
-
-                    done();
-                });
+                done();
             });
         });
 
-        it('attaches events for "ops", "request", "log", and "internalError"', function (done) {
+        it('attaches events for "ops", "tail", "log", and "request-error"', function (done) {
 
             var monitor;
             var options = {};
@@ -283,24 +246,21 @@ describe('good', function () {
 
             options.reporters = [one, two];
 
-            makePack(function (pack, server) {
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (error) {
 
-                monitor = new Monitor(pack, options);
-                monitor.start(function (error) {
+                expect(error).to.not.exist();
 
-                    expect(error).to.not.exist();
+                expect(monitor.listeners('ops').length).to.equal(1);
+                expect(monitor._server.listeners('request-error').length).to.equal(1);
+                expect(monitor._server.listeners('log').length).to.equal(1);
+                expect(monitor._server.listeners('tail').length).to.equal(1);
 
-                    expect(monitor.listeners('ops').length).to.equal(1);
-                    expect(monitor._plugin.events.listeners('internalError').length).to.equal(1);
-                    expect(monitor._plugin.events.listeners('log').length).to.equal(1);
-                    expect(monitor._plugin.events.listeners('request').length).to.equal(1);
-
-                    done();
-                });
+                done();
             });
         });
 
-        it('validates the incomming reporter objects', function (done) {
+        it('validates the incoming reporter objects', function (done) {
 
             var monitor;
             var options = {};
@@ -310,16 +270,13 @@ describe('good', function () {
 
             options.reporters = [one, two];
 
-            makePack(function (pack, server) {
+            expect(function( ){
 
-                expect(function( ){
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('Every reporter object must have a start and stop function.');
 
-                    monitor = new Monitor(pack, options);
-                    monitor.start(function () {});
-                }).to.throw('Every reporter object must have a start and stop function.');
-
-                done();
-            });
+            done();
         });
     });
 
@@ -346,27 +303,25 @@ describe('good', function () {
 
             options.reporters = [one, two];
 
-            makePack(function (pack, server) {
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (err) {
 
-                monitor = new Monitor(pack, options);
-                monitor.start(function (err) {
+                expect(err).to.not.exist();
 
-                    expect(err).to.not.exist();
+                monitor.stop();
 
-                    monitor.stop();
+                var state = monitor._state;
+                expect(hitCount).to.equal(2);
 
-                    var state = monitor._state;
-                    expect(hitCount).to.equal(2);
+                expect(state.opsInterval._repeat).to.equal(false);
+                expect(monitor._server.listeners('log').length).to.equal(0);
+                expect(monitor.listeners('ops').length).to.equal(0);
+                expect(monitor._server.listeners('internalError').length).to.equal(0);
+                expect(monitor._server.listeners('tail').length).to.equal(0);
 
-                    expect(state.opsInterval._repeat).to.equal(false);
-                    expect(monitor._plugin.events.listeners('log').length).to.equal(0);
-                    expect(monitor.listeners('ops').length).to.equal(0);
-                    expect(monitor._plugin.events.listeners('internalError').length).to.equal(0);
-                    expect(monitor._plugin.events.listeners('tail').length).to.equal(0);
-
-                    done();
-                });
+                done();
             });
+
         });
 
         it('is called on the "stop" server event', function (done) {
@@ -390,8 +345,8 @@ describe('good', function () {
                 done();
             };
 
-            var server = new Hapi.Server('127.0.0.1', 0);
-            server.pack.register(plugin, function () {
+            var server = new Hapi.Server();
+            server.register(plugin, function () {
 
                 // .stop emits the "stop" event
                 server.stop();
@@ -403,31 +358,26 @@ describe('good', function () {
 
         it('sends events to all reporters when they occur', function (done) {
 
-            var server = new Hapi.Server('127.0.0.1', 0);
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+            var consoleError = console.error;
+
+            console.error = Hoek.ignore;
+
             server.route({
                 method: 'GET',
                 path: '/',
                 handler: function (request, reply) {
 
                     server.log(['test'], 'test data');
-                    server.emit('internalError', request, new Error('mock error'));
                     reply('done');
+                    throw new Error('mock error');
                 }
             });
 
-            var one = new GoodReporter({
-                log: '*',
-                request: '*'
-            });
-
-            var two = new GoodReporter({
-                error: '*'
-            });
-
-            var three = new GoodReporter({
-               log: '*'
-            });
-
+            var one = new GoodReporter({ log: '*', response: '*' });
+            var two = new GoodReporter({ error: '*' });
+            var three = new GoodReporter({ log: '*' });
             var events = [];
 
             one._report = function (event, eventData) {
@@ -459,20 +409,22 @@ describe('good', function () {
                 }
             };
 
-            server.pack.register(plugin, function () {
+            server.register(plugin, function () {
 
                 server.start(function () {
 
-                    Http.get('http://127.0.0.1:' + server.info.port + '/?q=test', function (res) {
+                    Http.get(server.info.uri + '/?q=test', function (res) {
 
                         // Give the reporters time to report
                         setTimeout(function () {
 
-                            expect(res.statusCode).to.equal(200);
+                            expect(res.statusCode).to.equal(500);
                             expect(events.length).to.equal(4);
                             expect(events[0].event).to.equal('log');
-                            expect(events[1].event).to.equal('request');
+                            expect(events[1].event).to.equal('response');
                             expect(events[2].event).to.equal('error');
+
+                            console.error = consoleError;
 
                             done();
                         }, 500);
@@ -481,9 +433,10 @@ describe('good', function () {
             });
         });
 
-        it('provides additional information about "request" events using "extendedRequests", "logRequestHeaders","logRequestPayload", and "logResponsePayload"', function (done) {
+        it('provides additional information about "response" events using "logRequestHeaders","logRequestPayload", and "logResponsePayload"', function (done) {
 
-            var server = new Hapi.Server('127.0.0.1', 0);
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
             server.route({
                 method: 'POST',
                 path: '/',
@@ -494,9 +447,7 @@ describe('good', function () {
                 }
             });
 
-            var one = new GoodReporter({
-                request: '*'
-            });
+            var one = new GoodReporter({ response: '*' });
             one._eventQueue = [];
 
             one._report = function (event, eventData) {
@@ -508,14 +459,13 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    extendedRequests: true,
                     logRequestHeaders: true,
                     logRequestPayload: true,
                     logResponsePayload: true
                 }
             };
 
-            server.pack.register(plugin, function () {
+            server.register(plugin, function () {
 
                 server.start(function () {
 
@@ -530,19 +480,19 @@ describe('good', function () {
                     }, function (res) {
 
                         var eventsOne = one._eventQueue;
-                        var request = eventsOne[0];
+                        var response = eventsOne[0];
 
                         expect(res.statusCode).to.equal(200);
                         expect(eventsOne.length).to.equal(1);
 
-                        expect(request.event).to.equal('request');
-                        expect(request.log).to.exist();
-                        expect(request.log).to.be.an.array();
-                        expect(request.headers).to.exist();
-                        expect(request.requestPayload).to.deep.equal({
+                        expect(response.event).to.equal('response');
+                        expect(response.log).to.exist();
+                        expect(response.log).to.be.an.array();
+                        expect(response.headers).to.exist();
+                        expect(response.requestPayload).to.deep.equal({
                             data: 'example payload'
                         });
-                        expect(request.responsePayload).to.equal('done');
+                        expect(response.responsePayload).to.equal('done');
                         done();
                     });
 
@@ -550,63 +500,310 @@ describe('good', function () {
                         data: 'example payload'
                     }));
                     req.end();
-
                 });
             });
         });
 
         it('does not send an "ops" event if an error occurs during information gathering', function (done) {
 
-            makePack(function (plugin, server) {
+            var options = {
+                opsInterval: 100,
+                reporters: [{
+                    reporter: GoodReporter
+                }]
+            };
+            var monitor = new Monitor(new Hapi.Server(), options);
+            var ops = false;
+            var log = console.error;
 
-                var options = {
-                    opsInterval: 100,
-                    reporters: [{
-                        reporter: GoodReporter
-                    }]
-                };
-                var monitor = new Monitor(plugin, options);
-                var ops = false;
-                var log = console.error;
+            console.error = function (error) {
 
-                console.error = function (error) {
+                expect(error.message).to.equal('there was an error during processing');
+            };
 
+            var parallel = Items.parallel.execute;
+
+            Items.parallel.execute = function (methods, callback) {
+
+                var _callback = function (error, results) {
+
+                    callback(error, results);
+
+                    expect(error).to.exist();
                     expect(error.message).to.equal('there was an error during processing');
+                    expect(results).to.not.exist();
+                    expect(ops).to.be.false();
+                    Items.parallel.execute = parallel;
+                    console.error = log;
+                    delete methods.createError;
+                    done();
                 };
 
-                var parallel = Async.parallel;
+                methods.createError = function (callback) {
 
-                Async.parallel = function (methods, callback) {
+                    return callback(new Error('there was an error during processing'));
+                };
 
-                    var _callback = function (error, results) {
+                parallel(methods, _callback);
+            };
 
-                        callback(error, results);
+            monitor.on('ops', function (event) {
 
-                        expect(error).to.exist();
-                        expect(error.message).to.equal('there was an error during processing');
-                        expect(ops).to.equal(false);
-                        Async.parallel = parallel;
-                        console.error = log;
-                        delete methods.createError;
+                ops = true;
+            });
+
+            monitor.start(function (error) {
+
+                expect(error).to.not.exist();
+            });
+        });
+
+        it('has a standard "ops" event schema', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+
+            var one = new GoodReporter({
+                ops: '*'
+            });
+
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    opsInterval: 100
+                }
+            };
+            var schema = Joi.object().keys({
+                event: Joi.string().required().allow('ops'),
+                timestamp: Joi.number().required().integer(),
+                pid: Joi.number().required().integer(),
+                host: Joi.string().required(),
+                os: Joi.object().required(),
+                proc: Joi.object().required(),
+                load: Joi.object().required()
+            }).unknown(false);
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    // Give the reporters time to report
+                    setTimeout(function () {
+
+
+                        expect(events).to.have.length(1);
+
+                        var event = events[0];
+
+                        expect(function () {
+                           Joi.assert(event, schema);
+                        }).to.not.throw();
+
                         done();
-                    };
-
-                    methods.createError = function (callback) {
-
-                        return callback(new Error('there was an error during processing'));
-                    };
-
-                    parallel(methods, _callback);
-                };
-
-                monitor.on('ops', function (event) {
-
-                    ops = true;
+                    }, 150);
                 });
+            });
+        });
 
-                monitor.start(function (error) {
+        it('has a standard "response" event schema', function (done) {
 
-                    expect(error).to.not.exist();
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost', labels: ['test', 'foo'] });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) { reply().code(201); }
+            });
+
+            var one = new GoodReporter({
+                response: '*'
+            });
+
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    opsInterval: 2000
+                }
+            };
+            var schema = Joi.object().keys({
+                event: Joi.string().required().allow('response'),
+                timestamp: Joi.number().required().integer(),
+                id: Joi.string().required(),
+                instance: Joi.string().required(),
+                labels: Joi.array(),
+                method: Joi.string().required(),
+                path: Joi.string().required(),
+                query: Joi.object(),
+                source: Joi.object().required(),
+                responseTime: Joi.number().integer().required(),
+                statusCode: Joi.number().integer().required(),
+                pid: Joi.number().integer().required(),
+                log: Joi.array().includes(Joi.object())
+            }).unknown(false);
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    server.inject({
+                        url: '/'
+                    }, function (res) {
+
+                        expect(res.statusCode).to.equal(201);
+                        expect(events).to.have.length(1);
+
+                        var event = events[0];
+
+                        expect(function () {
+                            Joi.assert(event, schema);
+                        }).to.not.throw();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('has a standard "error" event schema', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) { throw new Error('mock error'); }
+            });
+
+            var one = new GoodReporter({
+                error: '*'
+            });
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    opsInterval: 2000
+                }
+            };
+            var schema = Joi.object().keys({
+                event: Joi.string().required().allow('error'),
+                timestamp: Joi.number().required().integer(),
+                url: Joi.object().required(),
+                method: Joi.string().required(),
+                pid: Joi.number().integer().required(),
+                error: Joi.object().required()
+            }).unknown(false);
+
+            var consoleError = console.error;
+            console.error = Hoek.ignore;
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    server.inject({
+                        url: '/'
+                    }, function (res) {
+
+                        expect(res.statusCode).to.equal(500);
+                        expect(events).to.have.length(1);
+
+                        var event = events[0];
+
+                        expect(function () {
+                            Joi.assert(event, schema);
+                        }).to.not.throw();
+
+                        console.error = consoleError;
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('has a standard "log" event schema', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) {
+                    server.log(['user', 'success'], 'route route called');
+                    reply();
+                }
+            });
+
+            var one = new GoodReporter({
+                log: '*'
+            });
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    opsInterval: 2000
+                }
+            };
+            var schema = Joi.object().keys({
+                event: Joi.string().required().allow('log'),
+                timestamp: Joi.number().required().integer(),
+                tags: Joi.array().includes(Joi.string()).required(),
+                data: Joi.string().required(),
+                pid: Joi.number().integer().required()
+            }).unknown(false);
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    server.inject({
+                        url: '/'
+                    }, function (res) {
+
+                        expect(res.statusCode).to.equal(200);
+                        expect(events).to.have.length(1);
+
+                        var event = events[0];
+
+                        expect(function () {
+                            Joi.assert(event, schema);
+                        }).to.not.throw();
+
+                        done();
+                    });
                 });
             });
         });
