@@ -45,13 +45,13 @@ var options = {
     opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
-        args:[{ log: '*', request: '*' }]
+        args:[{ log: '*', response: '*' }]
     }, {
         reporter: require('good-file'),
         args: ['./test/fixtures/awesome_log', { ops: '*' }]
     }, {
         reporter: require('good-http'),
-        args: ['http://prod.logs:3000', { error: '*' } , {
+        args: [{ error: '*' }, 'http://prod.logs:3000', {
             threshold: 20,
             wreck: {
                 headers: { 'x-api-key' : 12345 }
