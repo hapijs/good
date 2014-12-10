@@ -8,7 +8,7 @@ Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
 
 _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
 
-**good** is a process monitor that listens for one or more of the below "event types". All of these events, _except_ "ops",  map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/docs/Reference.md#server-events).
+**good** is a process monitor that listens for one or more of the below "event types". All of these events, _except_ "ops",  map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/API.md#server-events).
 - `ops` - System and process performance - CPU, memory, disk, and other metrics.
 - `response` - Information about incoming requests and the response. This maps to either the "response" or "tail" event emitted from hapi servers.
 - `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the "log" event emitted from hapi servers.
