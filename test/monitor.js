@@ -716,7 +716,7 @@ describe('good', function () {
                 method: Joi.string().required(),
                 pid: Joi.number().integer().required(),
                 error: Joi.object().required()
-            }).unknown(false);
+            }).unknown();
 
             var consoleError = console.error;
             console.error = Hoek.ignore;
@@ -737,6 +737,11 @@ describe('good', function () {
                         expect(function () {
                             Joi.assert(event, schema);
                         }).to.not.throw();
+
+                        var parse = JSON.parse(JSON.stringify(event));
+
+                        expect(parse.error).to.exist();
+                        expect(parse.error.stack).to.exist();
 
                         console.error = consoleError;
 
