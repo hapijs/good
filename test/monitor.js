@@ -812,5 +812,68 @@ describe('good', function () {
                 });
             });
         });
+
+        it('prevents changing the eventData object', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) { throw new Error('mock error'); }
+            });
+
+            var one = new GoodReporter({
+                error: '*'
+            });
+            var two = new GoodReporter({
+                error: '*'
+            });
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                eventData.foo = true;
+                events.push(eventData);
+            };
+
+            two._report = function (event, eventData) {
+
+                expect(eventData.foo).to.not.exist();
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one, two],
+                    opsInterval: 2000
+                }
+            };
+
+
+            var consoleError = console.error;
+            console.error = Hoek.ignore;
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    server.inject({
+                        url: '/'
+                    }, function (res) {
+
+                        expect(res.statusCode).to.equal(500);
+                        expect(events).to.have.length(2);
+
+                        expect(events[0]).to.deep.equal(events[1]);
+                        console.error = consoleError;
+
+                        done();
+                    });
+                });
+            });
+        });
     });
 });
