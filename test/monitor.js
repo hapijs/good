@@ -824,6 +824,7 @@ describe('good', function () {
                 method: 'GET',
                 path: '/',
                 handler: function (request, reply) {
+
                     request.log(['user', 'test'], 'you called the / route');
                     reply();
                 }
@@ -871,6 +872,7 @@ describe('good', function () {
                         var event = events[0];
 
                         expect(function () {
+
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
