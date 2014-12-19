@@ -369,6 +369,7 @@ describe('good', function () {
                 path: '/',
                 handler: function (request, reply) {
 
+                    request.log('test-tag', 'log request data');
                     server.log(['test'], 'test data');
                     reply('done');
                     throw new Error('mock error');
@@ -377,7 +378,7 @@ describe('good', function () {
 
             var one = new GoodReporter({ log: '*', response: '*' });
             var two = new GoodReporter({ error: '*' });
-            var three = new GoodReporter({ log: '*' });
+            var three = new GoodReporter({ request: '*' });
             var events = [];
 
             one._report = function (event, eventData) {
@@ -423,6 +424,7 @@ describe('good', function () {
                             expect(events[0].event).to.equal('log');
                             expect(events[1].event).to.equal('response');
                             expect(events[2].event).to.equal('error');
+                            expect(events[3].event).to.equal('request');
 
                             console.error = consoleError;
 
@@ -804,6 +806,73 @@ describe('good', function () {
                         var event = events[0];
 
                         expect(function () {
+                            Joi.assert(event, schema);
+                        }).to.not.throw();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('has a standard "request" event schema', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) {
+
+                    request.log(['user', 'test'], 'you called the / route');
+                    reply();
+                }
+            });
+
+            var one = new GoodReporter({
+                request: '*'
+            });
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    opsInterval: 2000
+                }
+            };
+            var schema = Joi.object().keys({
+                event: Joi.string().required().allow('request'),
+                timestamp: Joi.number().required().integer(),
+                tags: Joi.array().includes(Joi.string()).required(),
+                data: Joi.string().required(),
+                pid: Joi.number().integer().required(),
+                id: Joi.string().required(),
+                method: Joi.string().required().allow('GET'),
+                path: Joi.string().required().allow('/')
+            }).unknown(false);
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    server.inject({
+                        url: '/'
+                    }, function (res) {
+
+                        expect(res.statusCode).to.equal(200);
+                        expect(events).to.have.length(1);
+
+                        var event = events[0];
+
+                        expect(function () {
+
                             Joi.assert(event, schema);
                         }).to.not.throw();
 

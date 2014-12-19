@@ -10,9 +10,10 @@ _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the 
 
 **good** is a process monitor that listens for one or more of the below 'event types'. All of these events, _except_ 'ops',  map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/API.md#server-events).
 - `ops` - System and process performance - CPU, memory, disk, and other metrics.
-- `response` - Information about incoming requests and the response. This maps to either the 'response' or 'tail' event emitted from hapi servers.
-- `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the 'log' event emitted from hapi servers.
-- `error` - request responses that have a status code of 500. This maps to the 'request-error' hapi event.
+- `response` - Information about incoming requests and the response. This maps to either the "response" or "tail" event emitted from hapi servers.
+- `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the "log" event emitted from hapi servers.
+- `error` - request responses that have a status code of 500. This maps to the "request-error" hapi event.
+- `request` - Request logging information. This maps to the hapi 'request' event that is emitted via `request.log()`.
 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination
 as general events are a process-wide facility and will result in duplicated log events. To override some or all of the defaults,
@@ -30,7 +31,7 @@ set `options` to an object with the following optional settings:
 - `reporters` - Defaults to *no* reporters. All reporting objects must be installed in your project. `reporters` is an array of instantiated objects that implement the [good-reporter](https://github.com/hapijs/good-reporter) interface or an object with the following keys:
     - `reporter` - indicates the reporter object to create. Can be one of two values
         - a constructor function generally via `require`, ie `require('good-file')`
-        - a module name to `require`. Uses the built-in Node `require` function so you can pass a module name or a path. The supplied module must implement the good-reporter interface. Note: if you want the built-in console reporter, pass 'good-console'.
+        - a module name to `require`. Uses the built-in Node `require` function so you can pass a module name or a path. The supplied module must implement the good-reporter interface.
     - `args` - an array of arguments that will be passed into the constructor named by `reporter`. Each reporter has different arguments for the constructor, check the documentation for more information.
 
 
@@ -104,6 +105,8 @@ Each event emitted from Good has a unique object representing the payload. This 
 1. It provides a predictable interface.
 2. It makes tracking down issues with MDB much easier because the payloads aren't just generic objects.
 3. It is more likely to be optimized because the V8 runtime has a better idea of what the structure of each object is going ot be much sooner.
+
+**All** of the below events are frozen to prevent tampering. If your reporter uses "strict mode", trying to change the value will throw an error.
 
 ### `GreatLog(event)`
 
@@ -183,6 +186,19 @@ Event object associated with the 'ops' event emitted from Good. `ops` is the agg
     - `sockets` - object with the following values:
         - `http` - socket information http connections. Each value contains the name of the socket used and the number of open connections on the socket. It also includes a `total` for total number of open http sockets.
         - `https` - socket information https connections. Each value contains the name of the socket used and the number of open connections on the socket. It also includes a `total` for total number of open https sockets.
+
+### `GreatRequest(request, event)`
+
+Event object associated with the "request" event. This is the hapi event emitter via `request.log()`. `request` and `events` are the parameters passed by hapi when emitting the "request" event.
+
+- `event` - 'request'
+- `timestamp` - timestamp of the incomming `event` object.
+- `tags` - array of strings representing any tags associated with the 'log' event.
+- `data` - the string or object mapped to `event.data`.
+- `pid` - the current process id.
+- `id` - id of the request, maps to `request.id`.
+- `method` - method used by the request. Maps to `request.method`.
+- `path` - incoming path requested. Maps to `request.path`.
 
 
 ## Reporters
