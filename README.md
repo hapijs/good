@@ -127,7 +127,7 @@ Event object associated with 'error' events. `request` and `error` are the objec
 - `pid` - the current process id.
 - `url` - url of the request that originated the error. Maps to `request.url`.
 - `method` - method of the request that originated the error. Maps to `request.method`.
-` `error` - the raw error object.
+- `error` - the raw error object.
 
 The `toJSON` method of `GreatError` has been overwritten because `Error` objects can not be stringified directly. A stringified `GreatError` will have `error.message` and `error.stack` in place of the raw `Error` object.
 
