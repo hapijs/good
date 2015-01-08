@@ -19,8 +19,7 @@
     "items": "1.x.x",
     "good-reporter": "3.x.x",
     "hoek": "2.x.x",
-    "joi": "4.x.x",
-    "moment": "2.8.x"
+    "joi": "4.x.x"
   },
   "peerDependencies": {
     "hapi": ">= 8.x.x"
@@ -31,7 +30,8 @@
     "lab": "5.x.x"
   },
   "scripts": {
-    "test": "make test-cov"
+    "test": "lab -m 5000 -t 100 -v -La code",
+    "test-cov-html": "lab -m 5000 -r html -o coverage.html -La code"
   },
   "licenses": [
     {
