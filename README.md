@@ -25,7 +25,7 @@ set `options` to an object with the following optional settings:
 - `[logRequestPayload]` - determines if the request payload will be logged. Defaults to _false_
 - `[logResponsePayload]` - determines if the response payload will be logged. Defaults to _false_
 - `[opsInterval]` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
-- `[requestsEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
+- `[responseEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
 - `reporters` - Defaults to *no* reporters. All reporting objects must be installed in your project. `reporters` is an array of instantiated objects that implement the [good-reporter](https://github.com/hapijs/good-reporter) interface or an object with the following keys:
