@@ -61,25 +61,25 @@ describe('Network Monitor', function () {
                 }
             });
 
-            setTimeout(function () {
+           setTimeout(function () {
 
-                expect(network._requests).to.have.length(2);
+               expect(network._requests).to.have.length(2);
 
-                var port = usedPorts.shift();
+               var port = usedPorts.shift();
 
-                while (port) {
+               while (port) {
 
-                    expect(network._requests[port]).to.exist();
-                    expect(network._requests[port].total).to.equal(20);
-                    expect(network._requests[port].statusCodes[200]).to.equal(20);
+                  expect(network._requests[port]).to.exist();
+                   expect(network._requests[port].total).to.equal(20);
+                   expect(network._requests[port].statusCodes[200]).to.equal(20);
 
-                    expect(network._responseTimes[port]).to.exist();
+                   expect(network._responseTimes[port]).to.exist();
 
-                    port = usedPorts.shift();
-                }
+                   port = usedPorts.shift();
+               }
 
-                done();
-            }, 500);
+               done();
+           }, 500);
         });
     });
 
@@ -336,6 +336,7 @@ describe('Network Monitor', function () {
 
         // force response to be null to mimic client disconnect
         server.on('response', function (request) {
+            
             request.response = null;
         });
 
