@@ -69,7 +69,7 @@ describe('Network Monitor', function () {
 
                while (port) {
 
-                   expect(network._requests[port]).to.exist();
+                  expect(network._requests[port]).to.exist();
                    expect(network._requests[port].total).to.equal(20);
                    expect(network._requests[port].statusCodes[200]).to.equal(20);
 
@@ -320,6 +320,50 @@ describe('Network Monitor', function () {
 
             expect(err.message).to.equal('mock error');
             done();
+        });
+    });
+
+    it('does not throw if request.response is null', function (done) {
+
+        var server = new Hapi.Server();
+        server.connection({ host: 'localhost' });
+
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) { reply(); }
+        });
+
+        // force response to be null to mimic client disconnect
+        server.on('response', function (request) {
+            
+            request.response = null;
+        });
+
+        var network = new NetworkMonitor.Monitor(server);
+        var agent = new Http.Agent({ maxSockets: Infinity });
+        var conn = server.connections[0];
+        var usedPorts = [];
+
+        server.start(function () {
+
+            Http.get({
+                path: '/',
+                host: conn.info.host,
+                port: conn.info.port,
+                agent: agent
+            }, Hoek.ignore);
+
+            setTimeout(function () {
+
+                expect(network._requests[conn.info.port]).to.exist();
+                expect(network._requests[conn.info.port].total).to.equal(1);
+                expect(network._requests[conn.info.port].statusCodes[200]).to.not.exist();
+
+                expect(network._responseTimes[conn.info.port]).to.exist();
+
+                done();
+            }, 500);
         });
     });
 });
