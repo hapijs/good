@@ -265,12 +265,13 @@ describe('good', function () {
             var monitor;
             var options = {};
 
-            var one = new GoodReporter();
-            var two;
+            var one = {
+                reporter: Hoek.ignore
+            };
 
-            options.reporters = [one, two];
+            options.reporters = [one];
 
-            expect(function( ){
+            expect(function() {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);

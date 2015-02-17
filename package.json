@@ -19,7 +19,7 @@
     "items": "1.x.x",
     "good-reporter": "3.x.x",
     "hoek": "2.x.x",
-    "joi": "4.x.x"
+    "joi": "5.x.x"
   },
   "peerDependencies": {
     "hapi": ">= 8.x.x"

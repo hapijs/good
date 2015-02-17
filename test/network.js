@@ -69,12 +69,10 @@ describe('Network Monitor', function () {
 
                while (port) {
 
-                  expect(network._requests[port]).to.exist();
+                   expect(network._requests[port]).to.exist();
                    expect(network._requests[port].total).to.equal(20);
                    expect(network._requests[port].statusCodes[200]).to.equal(20);
-
                    expect(network._responseTimes[port]).to.exist();
-
                    port = usedPorts.shift();
                }
 
@@ -336,34 +334,25 @@ describe('Network Monitor', function () {
 
         // force response to be null to mimic client disconnect
         server.on('response', function (request) {
-            
+
             request.response = null;
         });
 
         var network = new NetworkMonitor.Monitor(server);
-        var agent = new Http.Agent({ maxSockets: Infinity });
-        var conn = server.connections[0];
-        var usedPorts = [];
 
         server.start(function () {
 
             Http.get({
                 path: '/',
-                host: conn.info.host,
-                port: conn.info.port,
-                agent: agent
-            }, Hoek.ignore);
+                host: server.info.host,
+                port: server.info.port
+            }, function () {
 
-            setTimeout(function () {
-
-                expect(network._requests[conn.info.port]).to.exist();
-                expect(network._requests[conn.info.port].total).to.equal(1);
-                expect(network._requests[conn.info.port].statusCodes[200]).to.not.exist();
-
-                expect(network._responseTimes[conn.info.port]).to.exist();
-
+                expect(network._requests[server.info.port]).to.exist();
+                expect(network._requests[server.info.port].total).to.equal(1);
+                expect(network._requests[server.info.port].statusCodes).to.deep.equal({});
                 done();
-            }, 500);
+            });
         });
     });
 });
