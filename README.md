@@ -21,9 +21,9 @@ set `options` to an object with the following optional settings:
 
 - `[httpAgents]` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
 - `[httpsAgents]` - the list of `httpsAgents` to report socket information about. Can be a single `https.Agent` or an array of agents. Defaults to `Https.globalAgent`.
-- `[logRequestHeaders]` - determines if all request headers will be logged. Defaults to _false_
-- `[logRequestPayload]` - determines if the request payload will be logged. Defaults to _false_
-- `[logResponsePayload]` - determines if the response payload will be logged. Defaults to _false_
+- `[requestHeaders]` - determines if all request headers will be available to `reporter` objects. Defaults to _false_
+- `[requestPayload]` - determines if the request payload will be available to `reporter` objects. Defaults to _false_
+- `[responsePayload]` - determines if the response payload will be available to `reporter` objects. Defaults to _false_
 - `[opsInterval]` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
 - `[responseEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.

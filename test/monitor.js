@@ -24,29 +24,6 @@ var it = lab.it;
 
 describe('good', function () {
 
-    var makePack = function (callback) {
-
-        var holder = null;
-
-        var plugin = {
-            name: '--test',
-            version: '0.0.0',
-            register: function (pack, options, next) {
-
-                holder = pack;
-                next();
-            }
-        };
-
-        var server = new Hapi.Server();
-        server.pack.register(plugin, function (err) {
-
-            expect(err).to.not.exist();
-            expect(holder).to.exist();
-            callback(holder, server);
-        });
-    };
-
     describe('Monitor()', function () {
 
         it('throws an error constructed without new', function (done) {
@@ -65,8 +42,6 @@ describe('good', function () {
             var options = {
                 opsInterval: 50
             };
-
-
 
             var fn = function () {
 
@@ -436,7 +411,7 @@ describe('good', function () {
             });
         });
 
-        it('provides additional information about "response" events using "logRequestHeaders","logRequestPayload", and "logResponsePayload"', function (done) {
+        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', function (done) {
 
             var server = new Hapi.Server();
             server.connection({ host: 'localhost' });
@@ -462,9 +437,9 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    logRequestHeaders: true,
-                    logRequestPayload: true,
-                    logResponsePayload: true
+                    requestHeaders: true,
+                    requestPayload: true,
+                    responsePayload: true
                 }
             };
 
