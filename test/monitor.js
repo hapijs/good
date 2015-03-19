@@ -135,6 +135,26 @@ describe('good', function () {
                 done();
             });
         });
+
+        it('throws an error if invalid extension events are used', function (done) {
+
+            var options = {
+                responseEvent: 'tail',
+                reporters: [{
+                    reporter: new GoodReporter({})
+                }],
+                extensions: ['tail', 'request', 'ops']
+            };
+
+
+            var fn = function () {
+
+                var monitor = new Monitor(new Hapi.Server(), options);
+            };
+
+            expect(fn).to.throw(Error, 'Invalid monitorOptions options extensions at position 0 fails because value contains an invalid value');
+            done();
+        });
     });
 
     describe('start()', function() {
@@ -212,7 +232,7 @@ describe('good', function () {
             var two = new GoodReporter();
             var hitCount = 0;
 
-            one.start = two.start =  function (emitter, callback) {
+            one.start = two.start = function (emitter, callback) {
 
                 hitCount++;
                 expect(emitter).to.exist();
@@ -357,24 +377,24 @@ describe('good', function () {
             var three = new GoodReporter({ request: '*' });
             var events = [];
 
-            one._report = function (event, eventData) {
+            one._report = function (event) {
 
-                events.push(eventData);
+                events.push(event);
             };
 
-            two._report = function (event, eventData) {
+            two._report = function (event) {
 
                 setTimeout(function () {
 
-                    events.push(eventData);
+                    events.push(event);
                 }, 10);
             };
 
-            three._report = function (event, eventData) {
+            three._report = function (event) {
 
                 setTimeout(function () {
 
-                    events.push(eventData);
+                    events.push(event);
                 }, 20);
             };
 
@@ -397,11 +417,7 @@ describe('good', function () {
 
                             expect(res.statusCode).to.equal(500);
                             expect(events.length).to.equal(4);
-                            expect(events[0].event).to.equal('log');
-                            expect(events[1].event).to.equal('response');
-                            expect(events[2].event).to.equal('error');
-                            expect(events[3].event).to.equal('request');
-
+                            expect(events).to.only.include(['log', 'response', 'error', 'request']);
                             console.error = consoleError;
 
                             done();
@@ -916,6 +932,99 @@ describe('good', function () {
                         console.error = consoleError;
 
                         done();
+                    });
+                });
+            });
+        });
+
+        it('reports extension events when they occur', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) {
+
+                    // Simulare a new event that might exist down the road
+                    server._events.emit('super-secret', {
+                        id: 1,
+                        foo: 'bar'
+                    });
+
+                    server._events.emit('super-secret', null, null, null);
+
+                    reply();
+                }
+            });
+
+            var one = new GoodReporter({
+                start: '*',
+                stop: '*',
+                'request-internal': '*',
+                'super-secret': '*'
+            });
+
+            var events = [];
+
+            one._report = function (event, eventData) {
+
+                events.push(eventData);
+            };
+
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    extensions: ['start', 'stop', 'request-internal', 'super-secret']
+                }
+            };
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    server.inject({
+                        url: '/'
+                    }, function () {
+
+                        server.stop(function () {
+
+                            expect(events).to.have.length(7);
+
+                            expect(events[0]).to.deep.equal({
+                                event: 'start'
+                            });
+                            var internalEvents = [1, 4, 5];
+
+                            for (var i = 0, il = internalEvents.length; i < il; ++i) {
+                                var index = internalEvents[i];
+                                var event = events[index];
+
+                                expect(event.event).to.equal('request-internal');
+                                expect(event.request).to.be.a.string();
+                                expect(event.timestamp).to.exist();
+                                expect(event.tags).to.be.an.array();
+                                expect(event.internal).to.be.true();
+                            }
+
+                            expect(events[2]).to.deep.equal({
+                                event: 'super-secret',
+                                id: 1,
+                                foo: 'bar'
+                            });
+
+                            expect(events[3]).to.deep.equal({
+                                event: 'super-secret'
+                            });
+
+                            expect(events[6]).to.deep.equal({
+                                event: 'stop'
+                            });
+
+                            done();
+                        });
                     });
                 });
             });
