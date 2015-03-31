@@ -108,6 +108,7 @@ describe('good', function () {
 
                 expect(error).to.not.exist();
                 expect(monitor._reporters.length).to.equal(2);
+                monitor.stop();
                 done();
             });
         });
@@ -132,6 +133,7 @@ describe('good', function () {
                 expect(error).to.not.exist();
                 var reporters = monitor._reporters;
                 expect(reporters.length).to.equal(2);
+                monitor.stop();
                 done();
             });
         });
@@ -193,6 +195,7 @@ describe('good', function () {
                 expect(error).to.not.exist();
                 expect(monitor._reporters.length).to.equal(2);
                 expect(hitCount).to.equal(2);
+                monitor.stop();
                 done();
             });
         });
@@ -250,6 +253,7 @@ describe('good', function () {
                 expect(monitor._server.listeners('request-error').length).to.equal(1);
                 expect(monitor._server.listeners('log').length).to.equal(1);
                 expect(monitor._server.listeners('tail').length).to.equal(1);
+                monitor.stop();
 
                 done();
             });
@@ -530,6 +534,7 @@ describe('good', function () {
                     Items.parallel.execute = parallel;
                     console.error = log;
                     delete methods.createError;
+                    monitor.stop();
                     done();
                 };
 
@@ -592,12 +597,12 @@ describe('good', function () {
                     // Give the reporters time to report
                     setTimeout(function () {
 
-
                         expect(events).to.have.length(1);
 
                         var event = events[0];
 
                         expect(function () {
+
                            Joi.assert(event, schema);
                         }).to.not.throw();
 
@@ -801,6 +806,7 @@ describe('good', function () {
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
+                        server.stop();
                         done();
                     });
                 });
@@ -868,6 +874,7 @@ describe('good', function () {
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
+                        server.stop();
                         done();
                     });
                 });
@@ -930,6 +937,7 @@ describe('good', function () {
 
                         expect(events[0]).to.deep.equal(events[1]);
                         console.error = consoleError;
+                        server.stop();
 
                         done();
                     });
