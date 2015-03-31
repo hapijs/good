@@ -313,7 +313,7 @@ describe('good', function () {
                 var state = monitor._state;
                 expect(hitCount).to.equal(2);
 
-                expect(state.opsInterval._repeat).to.equal(false);
+                expect([false, null]).to.contain(state.opsInterval._repeat);
                 expect(monitor._server.listeners('log').length).to.equal(0);
                 expect(monitor.listeners('ops').length).to.equal(0);
                 expect(monitor._server.listeners('internalError').length).to.equal(0);
