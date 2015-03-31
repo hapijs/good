@@ -55,5 +55,13 @@ describe('utils', function () {
             expect(greatWreck.error.message).to.equal('my error');
             done();
         });
+
+        it('reports timespent in request', function (done) {
+
+            var start = Date.now() - 5;
+            var greatWreck = new Utils.GreatWreck(null, null, null, start);
+            expect(greatWreck.timeSpent).to.be.at.least(5);
+            done();
+        });
     });
 });

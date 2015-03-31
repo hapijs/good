@@ -20,7 +20,7 @@
     "good-reporter": "3.x.x",
     "hoek": "2.x.x",
     "joi": "5.x.x",
-    "wreck": "5.3.x"
+    "wreck": "5.4.x"
   },
   "peerDependencies": {
     "hapi": ">= 8.x.x"
