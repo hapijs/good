@@ -1,12 +1,14 @@
 // Load modules
 
+var Code = require('code');
+var Hapi = require('hapi');
+var Hoek = require('hoek');
 var Http = require('http');
 var Https = require('https');
-var Code = require('code');
-var GoodReporter = require('good-reporter');
-var Hapi = require('hapi');
 var Lab = require('lab');
 var Wreck = require('wreck');
+
+var GoodReporter = require('./helper');
 
 
 // Declare internals
@@ -29,25 +31,12 @@ describe('Plugin', function () {
     it('emits ops data', function (done) {
 
         var server = new Hapi.Server();
-
         var options = {
             opsInterval: 100,
             httpAgents: new Http.Agent(),
             httpsAgents: new Https.Agent()
         };
-        var one = new GoodReporter({
-            events: {
-                ops: '*'
-            }
-        });
-
-        one._report = function (event, eventData) {
-
-            expect(event).to.equal('ops');
-            expect(eventData.event).to.equal('ops');
-            expect(eventData.host).to.exist();
-        };
-
+        var one = new GoodReporter({ ops: '*' });
         options.reporters = [one];
 
         var plugin = {
@@ -62,6 +51,13 @@ describe('Plugin', function () {
             server.plugins.good.monitor.once('ops', function (event) {
 
                 expect(event.osload).to.exist();
+                expect(one.messages).to.have.length(1);
+
+                var message = one.messages[0];
+
+                expect(message.event).to.equal('ops');
+                expect(message.host).to.exist();
+
                 done();
             });
         });
@@ -91,16 +87,8 @@ describe('Plugin', function () {
             opsInterval: 1000,
             httpsAgents: internals.agent
         };
-        var one = new GoodReporter({
-            events: {
-                ops: '*'
-            }
-        });
-
-        one._report = function () {};
-
+        var one = new GoodReporter({ ops: '*' });
         options.reporters = [one];
-
 
         var plugin = {
             register: require('..'),
@@ -142,14 +130,11 @@ describe('Plugin', function () {
         };
         var one = new GoodReporter({
             wreck: '*'
-        });
+        }, null, function (event) {
 
-        one._report = function (event, eventData) {
-
-            expect(event).to.equal('wreck');
-            expect(eventData.event).to.equal('wreck');
+            expect(event.event).to.equal('wreck');
             done();
-        };
+        });
 
         options.reporters = [one];
 
@@ -164,9 +149,7 @@ describe('Plugin', function () {
 
             server.start(function () {
 
-                Wreck.get('http://127.0.0.1:' + server.info.port, function (err, res, payload) {
-
-                });
+                Wreck.get('http://127.0.0.1:' + server.info.port, Hoek.ignore);
             });
         });
     });

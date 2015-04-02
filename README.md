@@ -30,11 +30,27 @@ set `options` to an object with the following optional settings:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
 - `[extensions]` - an array of [hapi event names](https://github.com/hapijs/hapi/blob/master/API.md#server-events) to listen for and report via the good reporting mechanism. Can not be any of ['log', 'request-error', 'ops', 'request', 'response', 'tail']. **Disclaimer** This option should be used with caution. This option will allow users to listen to internal events that are not meant for public consumption. The list of available events can change with any changes to the hapi event system. Also, *none* of the official hapijs reporters have been tested against these custom events. Also, the schema for these events can not be guaranteed because the hapi results can change.
-- `reporters` - Defaults to *no* reporters. All reporting objects must be installed in your project. `reporters` is an array of instantiated objects that implement the [good-reporter](https://github.com/hapijs/good-reporter) interface or an object with the following keys:
+- `reporters` - Defaults to *no* reporters. All reporting objects must be installed in your project. `reporters` is an array of instantiated objects that implement the good-reporter interface or an object with the following keys:
     - `reporter` - indicates the reporter object to create. Can be one of two values
         - a constructor function generally via `require`, ie `require('good-file')`
         - a module name to `require`. Uses the built-in Node `require` function so you can pass a module name or a path. The supplied module must implement the good-reporter interface.
-    - `args` - an array of arguments that will be passed into the constructor named by `reporter`. Each reporter has different arguments for the constructor, check the documentation for more information.
+    - `events` - an object of key value pairs:
+        - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
+        - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
+    - `config` - an implementation specific configuration value used to instantiate the reporter
+
+## Reporter Interface
+
+A good reporter interface needs:
+- A constructor function (will always be invoked with `new`) with the following signature `function (events, config)` where:
+    - `events` - an object of key value pairs:
+        - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
+        - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
+    - `config` - an implementation specific configuration value used to instantiate the reporter
+- An `init` method with the following signature `function init (readstream, emitter, callback)` where:
+    - `readstream` - the incoming [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable) from good. This stream is always in `objectMode`.
+    - `emitter` - the good event emitter. The `emitter` will emit the following events:
+        - `stop` - always emitted when the hapi server is shutting down. Perform any tear-down logic in this event handler
 
 
 For example:
@@ -48,18 +64,20 @@ var options = {
     opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
-        args:[{ log: '*', response: '*' }]
+        events: { log: '*', response: '*' }
     }, {
         reporter: require('good-file'),
-        args: ['./test/fixtures/awesome_log', { ops: '*' }]
+        events: { ops: '*' },
+        config: './test/fixtures/awesome_log'
     }, {
-        reporter: require('good-http'),
-        args: [{ error: '*' }, 'http://prod.logs:3000', {
-            threshold: 20,
+        reporter: 'good-http',
+        events: { error: '*' },
+        config: {
+            endpoint: 'http://prod.logs:3000',
             wreck: {
                 headers: { 'x-api-key' : 12345 }
             }
-        }]
+        }
     }]
 };
 
@@ -93,7 +111,7 @@ Log messages are created with tags. Usually a log will include a tag to indicate
 var options = {
     reporters: [{
         reporter: require('good-console'),
-        args: [{ log: ['error', 'medium'] }]
+        events: { log: ['error', 'medium'] }
     }]
 };
 ```
