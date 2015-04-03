@@ -9,18 +9,20 @@ module.exports = internals.Reporter = function (events, config, datahandler) {
 
 internals.Reporter.prototype.init = function (stream, emitter, callback) {
 
+    var self = this;
+
     stream.on('data', function (data) {
 
-      if (this.events[data.event]) {
-        this.messages.push(data);
-        this.handler(data);
-      }
-    }.bind(this));
+        if (self.events[data.event]) {
+            self.messages.push(data);
+            self.handler(data);
+        }
+    });
 
     emitter.once('stop', function () {
 
-      this.stopped = true;
-    }.bind(this));
+        self.stopped = true;
+    });
 
     callback();
 };

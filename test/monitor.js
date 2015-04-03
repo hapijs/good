@@ -1,9 +1,10 @@
 // Load modules
 
+var Http = require('http');
+
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Http = require('http');
 var Items = require('items');
 var Joi = require('joi');
 var Lab = require('lab');
