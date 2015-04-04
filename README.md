@@ -64,7 +64,7 @@ var options = {
     opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
-        events: { log: '*', response: '*' }
+        args: [{ log: '*', response: '*' }]
     }, {
         reporter: require('good-file'),
         events: { ops: '*' },
