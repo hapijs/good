@@ -8,6 +8,9 @@ var Https = require('https');
 var Lab = require('lab');
 var Wreck = require('wreck');
 
+// Done for testing because Wreck is a singleton and every test run ads one event to it
+Wreck.setMaxListeners(0);
+
 var GoodReporter = require('./helper');
 
 
