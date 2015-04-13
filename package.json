@@ -16,9 +16,10 @@
     "node": ">=0.10.x"
   },
   "dependencies": {
-    "items": "1.x.x",
     "hoek": "2.x.x",
+    "items": "1.x.x",
     "joi": "5.x.x",
+    "traverse": "0.6.6",
     "wreck": "5.4.x"
   },
   "peerDependencies": {

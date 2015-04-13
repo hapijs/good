@@ -488,13 +488,22 @@ describe('good', function () {
                     reply({
                         first: 'John',
                         last: 'Smith',
-                        ssn: 'ABCDEFG',
                         ccn: '9999999999',
+                        line: 'foo',
                         userId: 555645465,
                         address: {
-                            street: '123 Main Street',
+                            line: ['123 Main street', 'Apt 200', 'Suite 100'],
+                            bar: {
+                                line: '123',
+                                extra: 123456
+                            },
                             city: 'Pittsburgh',
-                            last: 'Jones'
+                            last: 'Jones',
+                            foo: [{
+                                email: 'adam@hapijs.com',
+                                baz: 'another string',
+                                line: 'another string'
+                            }]
                         }
                     });
                 }
@@ -508,14 +517,13 @@ describe('good', function () {
                     requestPayload: true,
                     responsePayload: true,
                     filter: {
-                        ssn: 'remove',
                         last: 'censor',
                         password: 'censor',
                         email: 'remove',
                         ccn: '(\\d{4})$',
                         userId: '(645)',
-                        street: 'censor',
-                        city: '(\\w?)'
+                        city: '(\\w?)',
+                        line: 'censor'
                     }
                 }
             };
@@ -547,10 +555,19 @@ describe('good', function () {
                             last: 'XXXXX',
                             ccn: '999999XXXX',
                             userId: '555XXX465',
+                            line: 'XXX',
                             address: {
-                                street: 'XXXXXXXXXXXXXXX',
+                                line: ['XXXXXXXXXXXXXXX', 'XXXXXXX', 'XXXXXXXXX'],
+                                bar: {
+                                    line: 'XXX',
+                                    extra: 123456
+                                },
                                 city: 'Xittsburgh',
-                                last: 'XXXXX'
+                                last: 'XXXXX',
+                                foo: [{
+                                    baz: 'another string',
+                                    line: 'XXXXXXXXXXXXXX'
+                                }]
                             }
                         });
                         done();
