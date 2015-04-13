@@ -476,6 +476,112 @@ describe('good', function () {
             });
         });
 
+        it('filters payloads per the filter rules', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+            server.route({
+                method: 'POST',
+                path: '/',
+                handler: function (request, reply) {
+
+                    reply({
+                        first: 'John',
+                        last: 'Smith',
+                        ccn: '9999999999',
+                        line: 'foo',
+                        userId: 555645465,
+                        address: {
+                            line: ['123 Main street', 'Apt 200', 'Suite 100'],
+                            bar: {
+                                line: '123',
+                                extra: 123456
+                            },
+                            city: 'Pittsburgh',
+                            last: 'Jones',
+                            foo: [{
+                                email: 'adam@hapijs.com',
+                                baz: 'another string',
+                                line: 'another string'
+                            }]
+                        }
+                    });
+                }
+            });
+
+            var one = new GoodReporter({ response: '*' });
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    requestPayload: true,
+                    responsePayload: true,
+                    filter: {
+                        last: 'censor',
+                        password: 'censor',
+                        email: 'remove',
+                        ccn: '(\\d{4})$',
+                        userId: '(645)',
+                        city: '(\\w?)',
+                        line: 'censor'
+                    }
+                }
+            };
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    var req = Http.request({
+                        hostname: '127.0.0.1',
+                        port: server.info.port,
+                        method: 'POST',
+                        path: '/',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }, function (res) {
+
+                        var messages = one.messages;
+                        var response = messages[0];
+
+                        expect(res.statusCode).to.equal(200);
+                        expect(messages).to.have.length(1);
+                        expect(response.requestPayload).to.deep.equal({
+                            password: 'XXXXX'
+                        });
+                        expect(response.responsePayload).to.deep.equal({
+                            first: 'John',
+                            last: 'XXXXX',
+                            ccn: '999999XXXX',
+                            userId: '555XXX465',
+                            line: 'XXX',
+                            address: {
+                                line: ['XXXXXXXXXXXXXXX', 'XXXXXXX', 'XXXXXXXXX'],
+                                bar: {
+                                    line: 'XXX',
+                                    extra: 123456
+                                },
+                                city: 'Xittsburgh',
+                                last: 'XXXXX',
+                                foo: [{
+                                    baz: 'another string',
+                                    line: 'XXXXXXXXXXXXXX'
+                                }]
+                            }
+                        });
+                        done();
+                    });
+
+                    req.write(JSON.stringify({
+                        password: 12345,
+                        email: 'adam@hapijs.com'
+                    }));
+                    req.end();
+                });
+            });
+        });
+
         it('does not send an "ops" event if an error occurs during information gathering', function (done) {
 
             var options = {

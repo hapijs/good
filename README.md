@@ -38,6 +38,14 @@ set `options` to an object with the following optional settings:
         - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
         - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
     - `config` - an implementation specific configuration value used to instantiate the reporter
+- `[filter]` - an object with the following keys:
+    - `key` - the key of the data property to change
+    - `value` - a string that can be one of the following:
+        - "censor" - replace the text with "X"s
+        - "remove" - `delete`s the value
+        - a valid regular express string. Only supports a single group. Ex: `"(\\d{4})$"` will replace the last four digits with "X"s. Take extra care when creating this string. You will need to make sure that the resultant RegExp object is what you need.
+
+    `filter` can be used to remove potentially sensitive information (credit card numbers, social security numbers, etc.) from the log payloads before they are sent out to reporters. This setting only impacts `response` events and only if payloads are included via `requestPayload` and `responsePayload`. `filter` is intended to impact the reporting of ALL downstream reporters. If you want filtering in only one, you will need to create a customized reporter. The filtering is done recursively so if you want to "censor" `ccn`, anywhere `ccn` appears in request or response bodies will be "censor"ed. Currently, you can only filter leaf nodes; nothing with children.
 
 ## Reporter Interface
 
