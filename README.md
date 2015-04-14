@@ -152,9 +152,10 @@ Event object associated with 'error' events. `request` and `error` are the objec
 
 - `event` - 'error'
 - `timestamp` - JavaScript timestamp indicating when the 'log' event occurred.
-- `pid` - the current process id.
+- `id` - request id. Maps to `request.id`.
 - `url` - url of the request that originated the error. Maps to `request.url`.
 - `method` - method of the request that originated the error. Maps to `request.method`.
+- `pid` - the current process id.
 - `error` - the raw error object.
 
 The `toJSON` method of `GreatError` has been overwritten because `Error` objects can not be stringified directly. A stringified `GreatError` will have `error.message` and `error.stack` in place of the raw `Error` object.
