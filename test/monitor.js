@@ -664,7 +664,7 @@ describe('good', function () {
                 os: Joi.object().required(),
                 proc: Joi.object().required(),
                 load: Joi.object().required()
-            }).unknown(false);
+            });
 
             server.register(plugin, function () {
 
@@ -723,7 +723,7 @@ describe('good', function () {
                 statusCode: Joi.number().integer().required(),
                 pid: Joi.number().integer().required(),
                 log: Joi.array().includes(Joi.object())
-            }).unknown(false);
+            });
 
             server.register(plugin, function () {
 
@@ -776,7 +776,7 @@ describe('good', function () {
                 method: Joi.string().required(),
                 pid: Joi.number().integer().required(),
                 error: Joi.object().required()
-            }).unknown();
+            });
 
             var consoleError = console.error;
             console.error = Hoek.ignore;
@@ -841,7 +841,7 @@ describe('good', function () {
                 tags: Joi.array().includes(Joi.string()).required(),
                 data: Joi.string().required(),
                 pid: Joi.number().integer().required()
-            }).unknown(false);
+            });
 
             server.register(plugin, function () {
 
@@ -901,7 +901,7 @@ describe('good', function () {
                 id: Joi.string().required(),
                 method: Joi.string().required().allow('GET'),
                 path: Joi.string().required().allow('/')
-            }).unknown(false);
+            });
 
             server.register(plugin, function () {
 
