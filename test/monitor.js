@@ -772,6 +772,7 @@ describe('good', function () {
             var schema = Joi.object().keys({
                 event: Joi.string().required().allow('error'),
                 timestamp: Joi.number().required().integer(),
+                id: Joi.string().required(),
                 url: Joi.object().required(),
                 method: Joi.string().required(),
                 pid: Joi.number().integer().required(),
