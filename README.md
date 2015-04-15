@@ -36,7 +36,7 @@ set `options` to an object with the following optional settings:
         - a module name to `require`. Uses the built-in Node `require` function so you can pass a module name or a path. The supplied module must implement the good-reporter interface.
     - `events` - an object of key value pairs:
         - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
-        - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
+        - `value` - a single string or an array of strings to filter incoming events base on the event's `tag` value. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
     - `config` - an implementation specific configuration value used to instantiate the reporter
 - `[filter]` - an object with the following keys:
     - `key` - the key of the data property to change
