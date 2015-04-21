@@ -14,7 +14,7 @@ _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the 
 - `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the "log" event emitted from hapi servers.
 - `error` - request responses that have a status code of 500. This maps to the "request-error" hapi event.
 - `request` - Request logging information. This maps to the hapi 'request' event that is emitted via `request.log()`.
-- `wreck` - Wreck module request/response logging information.  
+- `wreck` - Wreck module request/response logging information.  Note: Wreck has to be in the top level package.json in order for this to work due to it being a singleton.
 
 Applications with multiple server instances, each with its own monitor should only include one _log_ subscription per destination
 as general events are a process-wide facility and will result in duplicated log events. To override some or all of the defaults,
