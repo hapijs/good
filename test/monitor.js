@@ -264,13 +264,13 @@ describe('good', function () {
 
             options.reporters = [one];
 
-            expect(function() {
+            expect(function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
             }).to.throw('reporter must specify events to filter on');
 
-            expect(function() {
+            expect(function () {
 
                 options.reporters[0].events = { log: '*' };
                 monitor = new Monitor(new Hapi.Server(), options);
@@ -696,7 +696,10 @@ describe('good', function () {
             server.route({
                 method: 'GET',
                 path: '/',
-                handler: function (request, reply) { reply().code(201); }
+                handler: function (request, reply) {
+
+                    reply().code(201);
+                }
             });
 
             var one = new GoodReporter({
@@ -739,6 +742,7 @@ describe('good', function () {
                         var event = one.messages[0];
 
                         expect(function () {
+
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
@@ -756,7 +760,10 @@ describe('good', function () {
             server.route({
                 method: 'GET',
                 path: '/',
-                handler: function (request, reply) { throw new Error('mock error'); }
+                handler: function (request, reply) {
+
+                    throw new Error('mock error');
+                }
             });
 
             var one = new GoodReporter({
@@ -796,6 +803,7 @@ describe('good', function () {
                         var event = one.messages[0];
 
                         expect(function () {
+
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
@@ -821,6 +829,7 @@ describe('good', function () {
                 method: 'GET',
                 path: '/',
                 handler: function (request, reply) {
+
                     server.log(['user', 'success'], 'route route called');
                     reply();
                 }
@@ -858,6 +867,7 @@ describe('good', function () {
                         var event = one.messages[0];
 
                         expect(function () {
+
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
@@ -937,7 +947,10 @@ describe('good', function () {
             server.route({
                 method: 'GET',
                 path: '/',
-                handler: function (request, reply) { throw new Error('mock error'); }
+                handler: function (request, reply) {
+
+                    throw new Error('mock error');
+                }
             });
 
             var one = new GoodReporter({
