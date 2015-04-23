@@ -24,7 +24,8 @@ describe('utils', function () {
 
         it('successfully creates a continuation function', function (done) {
 
-            var method = Utils.makeContinuation(function() {
+            var method = Utils.makeContinuation(function () {
+
                 return true;
             });
 
@@ -53,14 +54,6 @@ describe('utils', function () {
             var greatWreck = new Utils.GreatWreck(error);
 
             expect(greatWreck.error.message).to.equal('my error');
-            done();
-        });
-
-        it('reports timespent in request', function (done) {
-
-            var start = Date.now() - 5;
-            var greatWreck = new Utils.GreatWreck(null, null, null, start);
-            expect(greatWreck.timeSpent).to.be.at.least(5);
             done();
         });
     });

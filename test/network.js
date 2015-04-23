@@ -38,7 +38,10 @@ describe('Network Monitor', function () {
         server.route({
             method: 'GET',
             path: '/',
-            handler: function (request, reply) { reply(); }
+            handler: function (request, reply) {
+
+                reply();
+            }
         });
 
         var network = new NetworkMonitor.Monitor(server);
@@ -90,6 +93,7 @@ describe('Network Monitor', function () {
             method: 'GET',
             path: '/',
             handler: function (request, reply) {
+
                 reply();
             }
         });
@@ -249,8 +253,15 @@ describe('Network Monitor', function () {
 
             this.isDone = true;
 
-            setTimeout(function () { self.push('Hello'); }, 10);
-            setTimeout(function () { self.push(null); }, 50);
+            setTimeout(function () {
+
+                self.push('Hello');
+            }, 10);
+
+            setTimeout(function () {
+
+                self.push(null);
+            }, 50);
         };
 
         var server = new Hapi.Server();
@@ -329,7 +340,10 @@ describe('Network Monitor', function () {
         server.route({
             method: 'GET',
             path: '/',
-            handler: function (request, reply) { reply(); }
+            handler: function (request, reply) {
+
+                reply();
+            }
         });
 
         // force response to be null to mimic client disconnect
