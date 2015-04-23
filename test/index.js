@@ -151,14 +151,14 @@ describe('Plugin', function () {
 
             if (!emitted) {
                 expect(event.event).to.equal('wreck');
-                expect(event.request.protocol).to.equal('https');
+                expect(event.request.protocol).to.equal('https:');
                 expect(event.request.host).to.exist();
                 expect(event.request.path).to.equal('/');
                 emitted = true;
             }
             else {
                 expect(event.event).to.equal('wreck');
-                expect(event.request.protocol).to.equal('http');
+                expect(event.request.protocol).to.equal('http:');
                 expect(event.request.host).to.exist();
                 expect(event.request.path).to.equal('/http');
                 done();
