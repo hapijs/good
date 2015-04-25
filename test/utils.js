@@ -57,4 +57,74 @@ describe('utils', function () {
             done();
         });
     });
+
+    describe('GreatResponse()', function () {
+
+        var generateGreatResponse = function (requestPayload, responsePayload) {
+            var filterRules = {
+                password: 'censor'
+            };
+
+            var options = {
+                'requestHeaders': true,
+                'requestPayload': true,
+                'responsePayload': true
+            };
+
+            var request = {
+                id: '1429974169154:localhost:10578:i8x5ousn:10000',
+                raw: {
+                    req: {
+                        headers: {
+                            'user-agent': 'Paw/2.2.1 (Macintosh; OS X/10.10.3) GCDHTTPRequest'
+                        }
+                    },
+                    res: {
+                        statusCode: 200
+                    }
+                },
+                info: {
+                    received: 1429974169154,
+                    remoteAddress: '127.0.0.1'
+                },
+                method: 'POST',
+                path: '/',
+                query: {},
+                responseTime: 123,
+                connection: {
+                    settings: {
+                        labels: []
+                    },
+                    info: {
+                        uri: 'http://localhost:3000'
+                    }
+                },
+                payload: requestPayload,
+                response: {
+                    source: responsePayload
+                },
+                getLog: function () {
+                    return {};
+                }
+            };
+            return new Utils.GreatResponse(request, options, filterRules);
+        };
+
+        it('handles empty request payloads', function (done) {
+
+            generateGreatResponse(null, {message: 'test'});
+            generateGreatResponse({}, {message: 'test'});
+            generateGreatResponse(undefined, {message: 'test'});
+            done();
+        });
+
+        it('handles empty response payloads', function (done) {
+
+            generateGreatResponse({message: 'test'}, null);
+            generateGreatResponse({message: 'test'}, {});
+            generateGreatResponse({message: 'test'}, undefined);
+            done();
+        });
+
+    });
 });
