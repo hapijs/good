@@ -66,9 +66,9 @@ describe('utils', function () {
             };
 
             var options = {
-                'requestHeaders': true,
-                'requestPayload': true,
-                'responsePayload': true
+                requestHeaders: true,
+                requestPayload: true,
+                responsePayload: true
             };
 
             var request = {
@@ -112,17 +112,23 @@ describe('utils', function () {
 
         it('handles empty request payloads', function (done) {
 
-            generateGreatResponse(null, {message: 'test'});
-            generateGreatResponse({}, {message: 'test'});
-            generateGreatResponse(undefined, {message: 'test'});
+            var sampleResponsePayload = { message: 'test' };
+            generateGreatResponse(null, sampleResponsePayload);
+            generateGreatResponse({}, sampleResponsePayload);
+            generateGreatResponse(undefined, sampleResponsePayload);
+            generateGreatResponse('string payload', sampleResponsePayload);
+            generateGreatResponse('', sampleResponsePayload);
             done();
         });
 
         it('handles empty response payloads', function (done) {
 
-            generateGreatResponse({message: 'test'}, null);
-            generateGreatResponse({message: 'test'}, {});
-            generateGreatResponse({message: 'test'}, undefined);
+            var sampleRequestPayload = { message: 'test' };
+            generateGreatResponse(sampleRequestPayload, null);
+            generateGreatResponse(sampleRequestPayload, {});
+            generateGreatResponse(sampleRequestPayload, undefined);
+            generateGreatResponse(sampleRequestPayload, 'string payload');
+            generateGreatResponse(sampleRequestPayload, '');
             done();
         });
 
