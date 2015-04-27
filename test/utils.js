@@ -61,6 +61,7 @@ describe('utils', function () {
     describe('GreatResponse()', function () {
 
         var generateGreatResponse = function (requestPayload, responsePayload) {
+
             var filterRules = {
                 password: 'censor'
             };
@@ -104,6 +105,7 @@ describe('utils', function () {
                     source: responsePayload
                 },
                 getLog: function () {
+
                     return {};
                 }
             };
