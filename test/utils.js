@@ -135,5 +135,16 @@ describe('utils', function () {
             done();
         });
 
+        it('handles response payloads with a toString() function', function (done) {
+
+            var samplePayload = {
+                message: 'test',
+                toString: function () { }
+            };
+
+            generateGreatResponse(samplePayload, '');
+            generateGreatResponse('', samplePayload);
+            done();
+        });
     });
 });
