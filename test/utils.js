@@ -60,7 +60,7 @@ describe('utils', function () {
 
     describe('GreatResponse()', function () {
 
-        var generateGreatResponse = function (requestPayload, responsePayload) {
+        var generateGreatResponse = function (requestPayload, responsePayload, nullResponse) {
 
             var filterRules = {
                 password: 'censor'
@@ -101,7 +101,7 @@ describe('utils', function () {
                     }
                 },
                 payload: requestPayload,
-                response: {
+                response: nullResponse ? null : {
                     source: responsePayload
                 },
                 getLog: function () {
@@ -131,6 +131,7 @@ describe('utils', function () {
             generateGreatResponse(sampleRequestPayload, undefined);
             generateGreatResponse(sampleRequestPayload, 'string payload');
             generateGreatResponse(sampleRequestPayload, '');
+            generateGreatResponse(sampleRequestPayload, null, true);
             done();
         });
 
