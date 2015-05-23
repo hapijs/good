@@ -112,7 +112,7 @@ describe('Plugin', function () {
             });
 
             for (var i = 0; i < 10; ++i) {
-               server.inject({ url: '/'});
+                server.inject({ url: '/'});
             }
         });
     });

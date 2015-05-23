@@ -159,7 +159,7 @@ describe('good', function () {
         });
     });
 
-    describe('start()', function() {
+    describe('start()', function () {
 
         it('calls the init methods of all the reporters', function (done) {
 
@@ -679,7 +679,7 @@ describe('good', function () {
 
                         expect(function () {
 
-                           Joi.assert(event, schema);
+                            Joi.assert(event, schema);
                         }).to.not.throw();
 
                         done();
