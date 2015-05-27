@@ -1,4 +1,4 @@
-![good Logo](https://raw.github.com/spumko/good/master/images/good.png)
+![good Logo](images/good.png)
 
 [**hapi**](https://github.com/hapijs/hapi) process monitoring
 
