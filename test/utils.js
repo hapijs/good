@@ -139,7 +139,9 @@ describe('utils', function () {
 
             var samplePayload = {
                 message: 'test',
-                toString: function () { }
+                toString: function () {
+
+                }
             };
 
             generateGreatResponse(samplePayload, '');
