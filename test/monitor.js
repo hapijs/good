@@ -50,7 +50,7 @@ describe('good', function () {
                 var monitor = new Monitor(new Hapi.Server(), options);
             };
 
-            expect(fn).to.throw(Error, /opsInterval must be larger than or equal to 100/gi);
+            expect(fn).to.throw(Error, /"opsInterval" must be larger than or equal to 100/gi);
             done();
         });
 
@@ -87,7 +87,7 @@ describe('good', function () {
                 var monitor = new Monitor(new Hapi.Server(), options);
             };
 
-            expect(fn).to.throw(Error, /responseEvent must be one of response, tail/gi);
+            expect(fn).to.throw(Error, /"responseEvent" must be one of \[response, tail\]/gi);
             done();
         });
 
@@ -154,7 +154,7 @@ describe('good', function () {
                 var monitor = new Monitor(new Hapi.Server(), options);
             };
 
-            expect(fn).to.throw(Error, 'Invalid monitorOptions options extensions at position 0 fails because value contains an invalid value');
+            expect(fn).to.throw(Error, 'Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
             done();
         });
     });
@@ -725,7 +725,7 @@ describe('good', function () {
                 responseTime: Joi.number().integer().required(),
                 statusCode: Joi.number().integer().required(),
                 pid: Joi.number().integer().required(),
-                log: Joi.array().includes(Joi.object())
+                log: Joi.array().items(Joi.object())
             });
 
             server.register(plugin, function () {
@@ -848,7 +848,7 @@ describe('good', function () {
             var schema = Joi.object().keys({
                 event: Joi.string().required().allow('log'),
                 timestamp: Joi.number().required().integer(),
-                tags: Joi.array().includes(Joi.string()).required(),
+                tags: Joi.array().items(Joi.string()).required(),
                 data: Joi.string().required(),
                 pid: Joi.number().integer().required()
             });
@@ -906,7 +906,7 @@ describe('good', function () {
             var schema = Joi.object().keys({
                 event: Joi.string().required().allow('request'),
                 timestamp: Joi.number().required().integer(),
-                tags: Joi.array().includes(Joi.string()).required(),
+                tags: Joi.array().items(Joi.string()).required(),
                 data: Joi.string().required(),
                 pid: Joi.number().integer().required(),
                 id: Joi.string().required(),
