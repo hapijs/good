@@ -18,7 +18,7 @@
   "dependencies": {
     "hoek": "2.x.x",
     "items": "1.x.x",
-    "joi": "5.x.x",
+    "joi": "6.x.x",
     "traverse": "0.6.6",
     "wreck": "5.5.x"
   },
