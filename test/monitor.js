@@ -91,7 +91,7 @@ describe('good', function () {
             done();
         });
 
-        it('supports a mix of broadcaster options', function (done) {
+        it('supports a mix of reporter options', function (done) {
 
             var monitor;
             var options = {
@@ -131,8 +131,24 @@ describe('good', function () {
             monitor.start(function (error) {
 
                 expect(error).to.not.exist();
-                var reporters = monitor._reporters;
                 expect(monitor._dataStream.listeners('data')).to.have.length(1);
+                monitor.stop();
+                done();
+            });
+        });
+
+        it('allows starting with no reporters', function (done) {
+
+            var monitor;
+            var options = {
+                responseEvent: 'response'
+            };
+
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (error) {
+
+                expect(error).to.not.exist();
+                expect(monitor._dataStream.listeners('data')).to.have.length(0);
                 monitor.stop();
                 done();
             });
