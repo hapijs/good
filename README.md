@@ -61,6 +61,7 @@ A good reporter interface needs:
         - `stop` - always emitted when the hapi server is shutting down. Perform any tear-down logic in this event handler
 
 
+## Example Usage
 For example:
 
 ```javascript
