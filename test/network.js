@@ -99,7 +99,7 @@ describe('Network Monitor', function () {
         });
 
         var network = new NetworkMonitor.Monitor(server);
-        var agent = new Http.Agent({maxSockets: Infinity});
+        var agent = new Http.Agent({ maxSockets: Infinity });
 
         server.start(function () {
 
@@ -301,7 +301,7 @@ describe('Network Monitor', function () {
 
                 expect(err).to.not.exist();
                 var requests = {};
-                requests[server.info.port] = { total: 1, disconnects: 1, statusCodes: { '200': 1}};
+                requests[server.info.port] = { total: 1, disconnects: 1, statusCodes: { '200': 1 } };
 
                 expect(result).to.deep.equal(requests);
                 server.stop(done);

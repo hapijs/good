@@ -70,7 +70,7 @@ describe('Plugin', function () {
 
         var server = new Hapi.Server();
 
-        server.connection({ host: 'localhost'});
+        server.connection({ host: 'localhost' });
 
         server.route({
             method: 'GET',
@@ -112,7 +112,7 @@ describe('Plugin', function () {
             });
 
             for (var i = 0; i < 10; ++i) {
-                server.inject({ url: '/'});
+                server.inject({ url: '/' });
             }
         });
     });
@@ -130,15 +130,23 @@ describe('Plugin', function () {
         server.connection({ tls: tlsOptions });
         server.connection({ port: 0, labels: ['http'] });
 
-        server.route({ method: 'GET', path: '/', handler: function (request, reply) {
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: function (request, reply) {
 
-            reply('ok');
-        }});
+                reply('ok');
+            }
+        });
 
-        server.select('http').route({ method: 'GET', path: '/http', handler: function (request, reply) {
+        server.select('http').route({
+            method: 'GET',
+            path: '/http',
+            handler: function (request, reply) {
 
-            reply('ok');
-        }});
+                reply('ok');
+            }
+        });
 
         var emitted;
         var options = {
