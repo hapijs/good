@@ -47,20 +47,6 @@ set `options` to an object with the following optional settings:
 
     `filter` can be used to remove potentially sensitive information (credit card numbers, social security numbers, etc.) from the log payloads before they are sent out to reporters. This setting only impacts `response` events and only if payloads are included via `requestPayload` and `responsePayload`. `filter` is intended to impact the reporting of ALL downstream reporters. If you want filtering in only one, you will need to create a customized reporter. The filtering is done recursively so if you want to "censor" `ccn`, anywhere `ccn` appears in request or response bodies will be "censor"ed. Currently, you can only filter leaf nodes; nothing with children.
 
-## Reporter Interface
-
-A good reporter interface needs:
-- A constructor function (will always be invoked with `new`) with the following signature `function (events, config)` where:
-    - `events` - an object of key value pairs:
-        - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
-        - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
-    - `config` - an implementation specific configuration value used to instantiate the reporter
-- An `init` method with the following signature `function init (readstream, emitter, callback)` where:
-    - `readstream` - the incoming [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable) from good. This stream is always in `objectMode`.
-    - `emitter` - the good event emitter. The `emitter` will emit the following events:
-        - `stop` - always emitted when the hapi server is shutting down. Perform any tear-down logic in this event handler
-
-
 ## Example Usage
 For example:
 
@@ -247,3 +233,39 @@ Here are some additional reporters that are available from the hapijs community:
 - [good-loggly](https://github.com/fhemberger/good-loggly)
 - [good-winston](https://github.com/lancespeelmon/good-winston)
 - [hapi-good-logstash](https://github.com/atroo/hapi-good-logstash)
+
+## Reporter Interface
+
+When creating a custom good reporter, it needs to implement the following interface:
+- A constructor function (will always be invoked with `new`) with the following signature `function (events, config)` where:
+    - `events` - an object of key value pairs:
+        - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
+        - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
+    - `config` - an implementation specific configuration value used to instantiate the reporter
+- An `init` method with the following signature `function init (readstream, emitter, callback)` where:
+    - `readstream` - the incoming [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable) from good. This stream is always in `objectMode`.
+    - `emitter` - the good event emitter. The `emitter` will emit the following events:
+    - `stop` - always emitted when the hapi server is shutting down. Perform any tear-down logic in this event handler
+
+```javascript
+var Squeeze = require('good-squeeze').Squeeze;
+
+function GoodReporterExample (events, config) {
+
+    if (!(this instanceof GoodReporterExample)) {
+        return new GoodReporterExample(events, config);
+    }
+
+    this.squeeze = Squeeze(events);
+}
+
+GoodReporterExample.prototype.init = function (readstream, emitter, callback) {
+
+    readstream.pipe(this.squeeze).pipe(process.stdout);
+    emitter.on('stop', function () {
+
+        console.log('some clean up logic.');
+    });
+    callback();
+}
+```
