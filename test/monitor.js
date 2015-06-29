@@ -447,9 +447,9 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    requestHeaders: true,
-                    requestPayload: true,
-                    responsePayload: true
+                    requestHeaders: ['response'],
+                    requestPayload: ['response'],
+                    responsePayload: ['response']
                 }
             };
 
@@ -594,8 +594,8 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    requestPayload: true,
-                    responsePayload: true,
+                    requestPayload: ['response'],
+                    responsePayload: ['response'],
                     filter: {
                         last: 'censor',
                         password: 'censor',

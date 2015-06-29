@@ -40,9 +40,16 @@ describe('utils', function () {
 
     describe('GreatWreck()', function () {
 
+        var options = {
+            requestHeaders: [],
+            requestPayload: [],
+            responseHeaders: [],
+            responsePayload: []
+        };
+
         it('handles a null request and response', function (done) {
 
-            var greatWreck = new Utils.GreatWreck();
+            var greatWreck = new Utils.GreatWreck(null, null, null, new Date(), null, options, null);
             expect(greatWreck.request).to.exist();
             expect(greatWreck.response).to.exist();
             done();
@@ -51,7 +58,7 @@ describe('utils', function () {
         it('reports on errors', function (done) {
 
             var error = new Error('my error');
-            var greatWreck = new Utils.GreatWreck(error);
+            var greatWreck = new Utils.GreatWreck(error, null, null, new Date(), null, options, null);
 
             expect(greatWreck.error.message).to.equal('my error');
             done();
@@ -67,9 +74,9 @@ describe('utils', function () {
             };
 
             var options = {
-                requestHeaders: true,
-                requestPayload: true,
-                responsePayload: true
+                requestHeaders: ['response'],
+                requestPayload: ['response'],
+                responsePayload: ['response']
             };
 
             var request = {
