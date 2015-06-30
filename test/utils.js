@@ -76,7 +76,8 @@ describe('utils', function () {
             var options = {
                 requestHeaders: ['response'],
                 requestPayload: ['response'],
-                responsePayload: ['response']
+                responsePayload: ['response'],
+                responseHeaders: ['response']
             };
 
             var request = {

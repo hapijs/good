@@ -428,7 +428,7 @@ describe('good', function () {
             });
         });
 
-        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', function (done) {
+        it('provides additional information about "response" events using "requestHeaders", "responseHeaders", "requestPayload", and "responsePayload"', function (done) {
 
             var server = new Hapi.Server();
             server.connection({ host: 'localhost' });
@@ -449,6 +449,7 @@ describe('good', function () {
                     reporters: [one],
                     requestHeaders: ['response'],
                     requestPayload: ['response'],
+                    responseHeaders: ['response'],
                     responsePayload: ['response']
                 }
             };
@@ -477,6 +478,7 @@ describe('good', function () {
                         expect(response.log).to.exist();
                         expect(response.log).to.be.an.array();
                         expect(response.headers).to.exist();
+                        expect(response.responseHeaders).to.exist();
                         expect(response.requestPayload).to.deep.equal({
                             data: 'example payload'
                         });
@@ -492,69 +494,69 @@ describe('good', function () {
             });
         });
 
-        it('accepts "response" event within "requestHeaders","requestPayload", and "responsePayload" as configuration arrays', function (done) {
-
-            var server = new Hapi.Server();
-            server.connection({ host: 'localhost' });
-            server.route({
-                method: 'POST',
-                path: '/',
-                handler: function (request, reply) {
-
-                    server.log(['test'], 'test data');
-                    reply('done');
-                }
-            });
-
-            var one = new GoodReporter({ response: '*' });
-            var plugin = {
-                register: require('../lib/index').register,
-                options: {
-                    reporters: [one],
-                    requestHeaders: ['response'],
-                    requestPayload: ['response'],
-                    responsePayload: ['response']
-                }
-            };
-
-            server.register(plugin, function () {
-
-                server.start(function () {
-
-                    var req = Http.request({
-                        hostname: '127.0.0.1',
-                        port: server.info.port,
-                        method: 'POST',
-                        path: '/?q=test',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }, function (res) {
-
-                        var messages = one.messages;
-                        var response = messages[0];
-
-                        expect(res.statusCode).to.equal(200);
-                        expect(messages).to.have.length(1);
-
-                        expect(response.event).to.equal('response');
-                        expect(response.log).to.exist();
-                        expect(response.log).to.be.an.array();
-                        expect(response.headers).to.exist();
-                        expect(response.requestPayload).to.deep.equal({
-                            data: 'example payload'
-                        });
-                        expect(response.responsePayload).to.equal('done');
-                        done();
-                    });
-
-                    req.write(JSON.stringify({
-                        data: 'example payload'
-                    }));
-                    req.end();
-                });
-            });
-        });
+        // it('accepts "response" event within "requestHeaders", "responseHeaders", "requestPayload", and "responsePayload" as configuration arrays', function (done) {
+        //
+        //     var server = new Hapi.Server();
+        //     server.connection({ host: 'localhost' });
+        //     server.route({
+        //         method: 'POST',
+        //         path: '/',
+        //         handler: function (request, reply) {
+        //
+        //             server.log(['test'], 'test data');
+        //             reply('done');
+        //         }
+        //     });
+        //
+        //     var one = new GoodReporter({ response: '*' });
+        //     var plugin = {
+        //         register: require('../lib/index').register,
+        //         options: {
+        //             reporters: [one],
+        //             requestHeaders: ['response'],
+        //             requestPayload: ['response'],
+        //             responsePayload: ['response']
+        //         }
+        //     };
+        //
+        //     server.register(plugin, function () {
+        //
+        //         server.start(function () {
+        //
+        //             var req = Http.request({
+        //                 hostname: '127.0.0.1',
+        //                 port: server.info.port,
+        //                 method: 'POST',
+        //                 path: '/?q=test',
+        //                 headers: {
+        //                     'Content-Type': 'application/json'
+        //                 }
+        //             }, function (res) {
+        //
+        //                 var messages = one.messages;
+        //                 var response = messages[0];
+        //
+        //                 expect(res.statusCode).to.equal(200);
+        //                 expect(messages).to.have.length(1);
+        //
+        //                 expect(response.event).to.equal('response');
+        //                 expect(response.log).to.exist();
+        //                 expect(response.log).to.be.an.array();
+        //                 expect(response.headers).to.exist();
+        //                 expect(response.requestPayload).to.deep.equal({
+        //                     data: 'example payload'
+        //                 });
+        //                 expect(response.responsePayload).to.equal('done');
+        //                 done();
+        //             });
+        //
+        //             req.write(JSON.stringify({
+        //                 data: 'example payload'
+        //             }));
+        //             req.end();
+        //         });
+        //     });
+        // });
 
         it('filters payloads per the filter rules', function (done) {
 
