@@ -22,9 +22,10 @@ set `options` to an object with the following optional settings:
 
 - `[httpAgents]` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
 - `[httpsAgents]` - the list of `httpsAgents` to report socket information about. Can be a single `https.Agent` or an array of agents. Defaults to `Https.globalAgent`.
-- `[requestHeaders]` - determines if all request headers will be available to `reporter` objects. Defaults to _false_
-- `[requestPayload]` - determines if the request payload will be available to `reporter` objects. Defaults to _false_
-- `[responsePayload]` - determines if the response payload will be available to `reporter` objects. Defaults to _false_
+- `[requestHeaders]` - determines if all request headers will be available to `reporter` objects. Defaults to `[]`. Valid array values are `wreck` and/or `response`. The request headers will be included in the events specified within the array.
+- `[responseHeaders]` - determines if all response headers will be available to `reporter` objects. Defaults to `[]`. Valid array values are `wreck` and/or `response`. The response headers will be included in the events specified within the array.
+- `[requestPayload]` - determines if the request payload will be available to `reporter` objects. Defaults to `[]`. Valid array values are `response`. The request payload will be included in the events specified within the array.
+- `[responsePayload]` - determines if the response payload will be available to `reporter` objects. Defaults to `[]`. Valid array values are `wreck` and/or `response`. The response payload will be included in the events specified within the array.
 - `[opsInterval]` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
 - `[responseEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
@@ -45,7 +46,7 @@ set `options` to an object with the following optional settings:
         - "remove" - `delete`s the value
         - a valid regular express string. Only supports a single group. Ex: `"(\\d{4})$"` will replace the last four digits with "X"s. Take extra care when creating this string. You will need to make sure that the resultant RegExp object is what you need.
 
-    `filter` can be used to remove potentially sensitive information (credit card numbers, social security numbers, etc.) from the log payloads before they are sent out to reporters. This setting only impacts `response` events and only if payloads are included via `requestPayload` and `responsePayload`. `filter` is intended to impact the reporting of ALL downstream reporters. If you want filtering in only one, you will need to create a customized reporter. The filtering is done recursively so if you want to "censor" `ccn`, anywhere `ccn` appears in request or response bodies will be "censor"ed. Currently, you can only filter leaf nodes; nothing with children.
+    `filter` can be used to remove potentially sensitive information (credit card numbers, social security numbers, etc.) from the log payloads before they are sent out to reporters. This setting only impacts `response` and `wreck` events and only if payloads are included via `requestPayload` and `responsePayload`. `filter` is intended to impact the reporting of ALL downstream reporters. If you want filtering in only one, you will need to create a customized reporter. The filtering is done recursively so if you want to "censor" `ccn`, anywhere `ccn` appears in request or response bodies will be "censor"ed. Currently, you can only filter leaf nodes; nothing with children.
 
 ## Example Usage
 For example:
