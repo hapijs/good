@@ -122,24 +122,24 @@ describe('utils', function () {
 
         it('handles empty request payloads', function (done) {
 
-            var sampleresPayload = { message: 'test' };
-            generateGreatResponse(null, sampleresPayload);
-            generateGreatResponse({}, sampleresPayload);
-            generateGreatResponse(undefined, sampleresPayload);
-            generateGreatResponse('string payload', sampleresPayload);
-            generateGreatResponse('', sampleresPayload);
+            var sampleResponsePayload = { message: 'test' };
+            generateGreatResponse(null, sampleResponsePayload);
+            generateGreatResponse({}, sampleResponsePayload);
+            generateGreatResponse(undefined, sampleResponsePayload);
+            generateGreatResponse('string payload', sampleResponsePayload);
+            generateGreatResponse('', sampleResponsePayload);
             done();
         });
 
         it('handles empty response payloads', function (done) {
 
-            var samplereqPayload = { message: 'test' };
-            generateGreatResponse(samplereqPayload, null);
-            generateGreatResponse(samplereqPayload, {});
-            generateGreatResponse(samplereqPayload, undefined);
-            generateGreatResponse(samplereqPayload, 'string payload');
-            generateGreatResponse(samplereqPayload, '');
-            generateGreatResponse(samplereqPayload, null, true);
+            var sampleRequestPayload = { message: 'test' };
+            generateGreatResponse(sampleRequestPayload, null);
+            generateGreatResponse(sampleRequestPayload, {});
+            generateGreatResponse(sampleRequestPayload, undefined);
+            generateGreatResponse(sampleRequestPayload, 'string payload');
+            generateGreatResponse(sampleRequestPayload, '');
+            generateGreatResponse(sampleRequestPayload, null, true);
             done();
         });
 
