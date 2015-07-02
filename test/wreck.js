@@ -108,7 +108,7 @@ describe('Wreck', function () {
         });
     });
 
-    it('emits more data when requestHeaders, responseHeaders, and responsePayload supplied', function (done) {
+    it('emits more data when reqHeaders, resHeaders, and resPayload supplied', function (done) {
 
         var server = new Hapi.Server();
         server.connection({ host: 'localhost', port: 0 });
@@ -123,9 +123,9 @@ describe('Wreck', function () {
         });
 
         var options = {
-            requestHeaders: ['wreck'],
-            responseHeaders: ['wreck'],
-            responsePayload: ['wreck']
+            reqHeaders: ['wreck'],
+            resHeaders: ['wreck'],
+            resPayload: ['wreck']
         };
         options.reporters = [new GoodReporter({
             wreck: '*'
@@ -198,7 +198,7 @@ describe('Wreck', function () {
             register: require('../lib/index').register,
             options: {
                 reporters: [one],
-                responsePayload: ['wreck'],
+                resPayload: ['wreck'],
                 filter: {
                     last: 'censor',
                     password: 'censor',

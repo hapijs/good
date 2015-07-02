@@ -428,7 +428,7 @@ describe('good', function () {
             });
         });
 
-        it('provides additional information about "response" events using "requestHeaders", "responseHeaders", "requestPayload", and "responsePayload"', function (done) {
+        it('provides additional information about "response" events using "reqHeaders", "resHeaders", "reqPayload", and "resPayload"', function (done) {
 
             var server = new Hapi.Server();
             server.connection({ host: 'localhost' });
@@ -447,10 +447,10 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    requestHeaders: ['response'],
-                    requestPayload: ['response'],
-                    responseHeaders: ['response'],
-                    responsePayload: ['response']
+                    reqHeaders: ['response'],
+                    reqPayload: ['response'],
+                    resHeaders: ['response'],
+                    resPayload: ['response']
                 }
             };
 
@@ -478,11 +478,11 @@ describe('good', function () {
                         expect(response.log).to.exist();
                         expect(response.log).to.be.an.array();
                         expect(response.headers).to.exist();
-                        expect(response.responseHeaders).to.exist();
-                        expect(response.requestPayload).to.deep.equal({
+                        expect(response.resHeaders).to.exist();
+                        expect(response.reqPayload).to.deep.equal({
                             data: 'example payload'
                         });
-                        expect(response.responsePayload).to.equal('done');
+                        expect(response.resPayload).to.equal('done');
                         done();
                     });
 
@@ -532,8 +532,8 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    requestPayload: ['response'],
-                    responsePayload: ['response'],
+                    reqPayload: ['response'],
+                    resPayload: ['response'],
                     filter: {
                         last: 'censor',
                         password: 'censor',
@@ -565,10 +565,10 @@ describe('good', function () {
 
                         expect(res.statusCode).to.equal(200);
                         expect(messages).to.have.length(1);
-                        expect(response.requestPayload).to.deep.equal({
+                        expect(response.reqPayload).to.deep.equal({
                             password: 'XXXXX'
                         });
-                        expect(response.responsePayload).to.deep.equal({
+                        expect(response.resPayload).to.deep.equal({
                             first: 'John',
                             last: 'XXXXX',
                             ccn: '999999XXXX',

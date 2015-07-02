@@ -41,10 +41,10 @@ describe('utils', function () {
     describe('GreatWreck()', function () {
 
         var options = {
-            requestHeaders: [],
-            requestPayload: [],
-            responseHeaders: [],
-            responsePayload: []
+            reqHeaders: [],
+            reqPayload: [],
+            resHeaders: [],
+            resPayload: []
         };
 
         it('handles a null request and response', function (done) {
@@ -67,17 +67,17 @@ describe('utils', function () {
 
     describe('GreatResponse()', function () {
 
-        var generateGreatResponse = function (requestPayload, responsePayload, nullResponse) {
+        var generateGreatResponse = function (reqPayload, resPayload, nullResponse) {
 
             var filterRules = {
                 password: 'censor'
             };
 
             var options = {
-                requestHeaders: ['response'],
-                requestPayload: ['response'],
-                responsePayload: ['response'],
-                responseHeaders: ['response']
+                reqHeaders: ['response'],
+                reqPayload: ['response'],
+                resPayload: ['response'],
+                resHeaders: ['response']
             };
 
             var request = {
@@ -108,9 +108,9 @@ describe('utils', function () {
                         uri: 'http://localhost:3000'
                     }
                 },
-                payload: requestPayload,
+                payload: reqPayload,
                 response: nullResponse ? null : {
-                    source: responsePayload
+                    source: resPayload
                 },
                 getLog: function () {
 
@@ -122,24 +122,24 @@ describe('utils', function () {
 
         it('handles empty request payloads', function (done) {
 
-            var sampleResponsePayload = { message: 'test' };
-            generateGreatResponse(null, sampleResponsePayload);
-            generateGreatResponse({}, sampleResponsePayload);
-            generateGreatResponse(undefined, sampleResponsePayload);
-            generateGreatResponse('string payload', sampleResponsePayload);
-            generateGreatResponse('', sampleResponsePayload);
+            var sampleresPayload = { message: 'test' };
+            generateGreatResponse(null, sampleresPayload);
+            generateGreatResponse({}, sampleresPayload);
+            generateGreatResponse(undefined, sampleresPayload);
+            generateGreatResponse('string payload', sampleresPayload);
+            generateGreatResponse('', sampleresPayload);
             done();
         });
 
         it('handles empty response payloads', function (done) {
 
-            var sampleRequestPayload = { message: 'test' };
-            generateGreatResponse(sampleRequestPayload, null);
-            generateGreatResponse(sampleRequestPayload, {});
-            generateGreatResponse(sampleRequestPayload, undefined);
-            generateGreatResponse(sampleRequestPayload, 'string payload');
-            generateGreatResponse(sampleRequestPayload, '');
-            generateGreatResponse(sampleRequestPayload, null, true);
+            var samplereqPayload = { message: 'test' };
+            generateGreatResponse(samplereqPayload, null);
+            generateGreatResponse(samplereqPayload, {});
+            generateGreatResponse(samplereqPayload, undefined);
+            generateGreatResponse(samplereqPayload, 'string payload');
+            generateGreatResponse(samplereqPayload, '');
+            generateGreatResponse(samplereqPayload, null, true);
             done();
         });
 
