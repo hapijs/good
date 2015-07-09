@@ -100,6 +100,8 @@ This example does the following:
 2. Sets up the [`GoodFile`](https://github.com/hapijs/good-file) reporter to listen for 'ops' events and log them to `./test/fixtures/awesome_log` according to the file rules listed in the good-file documentation.
 3. Sets up the [`GoodHttp`](https://github.com/hapijs/good-http) reporter to listen for error events and POSTs them to `http://prod.logs:3000` with additional settings to pass into `Wreck`
 
+NOTE: Ensure calling `server.connection` prior to registering `Good`. `request` and  `response` event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
+
 Log messages are created with tags. Usually a log will include a tag to indicate if it is related to an error or info along with where the message originates. If, for example, the console should only output error's that were logged you can use the following configuration:
 
 ```javascript
