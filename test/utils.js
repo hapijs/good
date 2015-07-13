@@ -56,6 +56,14 @@ describe('utils', function () {
             expect(greatWreck.error.message).to.equal('my error');
             done();
         });
+
+        it('contains the current pid', function (done) {
+
+            var greatWreck = new Utils.GreatWreck();
+
+            expect(greatWreck.pid).to.equal(process.pid);
+            done();
+        });
     });
 
     describe('GreatResponse()', function () {

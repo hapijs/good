@@ -8,7 +8,7 @@ Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
 
 _'Monitor'_ should be configured using a _'hapi'_ server instead of calling the _'Monitor'_ constructor directly.
 
-**good** is a process monitor that listens for one or more of the below 'event types'. All of these events, _except_ 'ops',  map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/API.md#server-events).
+**good** is a process monitor that listens for one or more of the below 'event types'. All of these events, _except_ 'ops' and 'wreck',  map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/API.md#server-events).
 - `ops` - System and process performance - CPU, memory, disk, and other metrics.
 - `response` - Information about incoming requests and the response. This maps to either the "response" or "tail" event emitted from hapi servers.
 - `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the "log" event emitted from hapi servers.
@@ -218,6 +218,28 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
 
+### `GreatWreck(error, request, response, start, uri)`
+
+Event object emitted whenever Wreck finishes making a request to a remote server.
+
+- `event` - 'wreck'
+- `timestamp` - timestamp of the incoming `event` object
+- `timeSpent` - how many ms it took to make the request
+- `pid` - the current process id
+- `request` - information about the outgoing request
+    - `method` - `GET`, `POST`, etc
+    - `path` - the path requested
+    - `url` - the full URL to the remote resource
+    - `protocol` - e.g. `http:`
+    - `host` - the remote server host
+    - `headers` - object containing all outgoing request headers
+- `response` - information about the incoming request
+    - `statusCode` - the http status code of the response e.g. 200
+    - `statusMessage` - e.g. `OK`
+    - `headers` - object containing all incoming response headers
+- `error` - if the response errored, this field will be populated
+    - `message` - the error message
+    - `stack` - the stack trace of the error
 
 ## Reporters
 
