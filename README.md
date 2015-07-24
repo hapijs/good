@@ -257,6 +257,7 @@ Here are some additional reporters that are available from the hapijs community:
 - [good-loggly](https://github.com/fhemberger/good-loggly)
 - [good-winston](https://github.com/lancespeelmon/good-winston)
 - [hapi-good-logstash](https://github.com/atroo/hapi-good-logstash)
+- [good-graylog2](https://github.com/CascadeEnergy/good-graylog2)
 
 ## Reporter Interface
 
