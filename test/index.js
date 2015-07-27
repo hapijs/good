@@ -39,8 +39,11 @@ describe('Plugin', function () {
             httpAgents: new Http.Agent(),
             httpsAgents: new Https.Agent()
         };
-        var one = new GoodReporter({ ops: '*' });
-        options.reporters = [one];
+
+        options.reporters = [{
+            reporter: GoodReporter,
+            events: { ops: '*' }
+        }];
 
         var plugin = {
            register: require('..'),
@@ -52,6 +55,8 @@ describe('Plugin', function () {
             expect(err).to.not.exist();
 
             server.plugins.good.monitor.once('ops', function (event) {
+
+                var one = plugin.options.reporters[0].instance;
 
                 expect(event.osload).to.exist();
                 expect(one.messages).to.have.length(1);
@@ -90,8 +95,11 @@ describe('Plugin', function () {
             opsInterval: 1000,
             httpsAgents: internals.agent
         };
-        var one = new GoodReporter({ ops: '*' });
-        options.reporters = [one];
+
+        options.reporters = [{
+            reporter: GoodReporter,
+            events: { ops: '*' }
+        }];
 
         var plugin = {
             register: require('..'),
@@ -148,30 +156,15 @@ describe('Plugin', function () {
             }
         });
 
-        var emitted;
         var options = {
             httpAgents: new Http.Agent(),
             httpsAgents: new Https.Agent()
         };
-        options.reporters = [new GoodReporter({
-            wreck: '*'
-        }, null, function (event) {
 
-            if (!emitted) {
-                expect(event.event).to.equal('wreck');
-                expect(event.request.protocol).to.equal('https:');
-                expect(event.request.host).to.exist();
-                expect(event.request.path).to.equal('/');
-                emitted = true;
-            }
-            else {
-                expect(event.event).to.equal('wreck');
-                expect(event.request.protocol).to.equal('http:');
-                expect(event.request.host).to.exist();
-                expect(event.request.path).to.equal('/http');
-                done();
-            }
-        })];
+        options.reporters = [{
+            reporter: GoodReporter,
+            events: { wreck: '*' }
+        }];
 
         var plugin = {
             register: require('..'),
@@ -186,7 +179,26 @@ describe('Plugin', function () {
 
                 Wreck.get('https://127.0.0.1:' + server.connections[0].info.port + '/', { rejectUnauthorized: false }, function () {
 
-                    Wreck.get('http://127.0.0.1:' + server.connections[1].info.port + '/http', Hoek.ignore);
+                    Wreck.get('http://127.0.0.1:' + server.connections[1].info.port + '/http', function () {
+
+                        var one = plugin.options.reporters[0].instance;
+                        var messages = one.messages;
+
+                        expect(messages).to.have.length(2);
+
+                        expect(messages[0].event).to.equal('wreck');
+                        expect(messages[0].request.protocol).to.equal('https:');
+                        expect(messages[0].request.host).to.exist();
+                        expect(messages[0].request.path).to.equal('/');
+
+                        expect(messages[1].event).to.equal('wreck');
+                        expect(messages[1].request.protocol).to.equal('http:');
+                        expect(messages[1].request.host).to.exist();
+                        expect(messages[1].request.path).to.equal('/http');
+
+                        done();
+
+                    });
                 });
             });
         });
