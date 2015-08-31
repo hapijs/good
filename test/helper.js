@@ -1,28 +1,46 @@
 var internals = {};
 
-module.exports = internals.Reporter = function (events, config, datahandler) {
+module.exports.getTestReporter = function () {
 
-    this.events = events;
-    this.messages = [];
-    this.handler = datahandler || function () {};
-};
+    var Reporter = function (events, config, datahandler) {
 
-internals.Reporter.prototype.init = function (stream, emitter, callback) {
+        this.events = events;
+        this.messages = [];
+        this.handler = datahandler || function () {};
 
-    var self = this;
+        // Properties to assert against
+        this.initHitCount = 0;
+        this.emitters = [];
 
-    stream.on('data', function (data) {
+        Reporter.instance = this;
+    };
 
-        if (self.events[data.event]) {
-            self.messages.push(data);
-            self.handler(data);
-        }
-    });
+    Reporter.prototype.init = function (stream, emitter, callback) {
 
-    emitter.once('stop', function () {
+        var self = this;
 
-        self.stopped = true;
-    });
+        this.initHitCount++;
+        this.emitters.push(emitter);
 
-    callback();
+        stream.on('data', function (data) {
+
+            if (self.events[data.event]) {
+                self.messages.push(data);
+                self.handler(data);
+            }
+        });
+
+        emitter.once('stop', function () {
+
+            self.stopped = true;
+        });
+
+        callback();
+    };
+
+    Reporter.attributes = {
+        name: 'test-reporter'
+    };
+
+    return Reporter;
 };
