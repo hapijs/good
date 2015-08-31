@@ -1,40 +1,46 @@
 var internals = {};
 
-module.exports = internals.Reporter = function (events, config, datahandler) {
+module.exports.getTestReporter = function () {
 
-    this.events = events;
-    this.messages = [];
-    this.handler = datahandler || function () {};
+    var Reporter = function (events, config, datahandler) {
 
-    // Properties to assert against
-    this.initHitCount = 0;
-    this.emitters = [];
-};
+        this.events = events;
+        this.messages = [];
+        this.handler = datahandler || function () {};
 
-internals.Reporter.prototype.init = function (stream, emitter, callback) {
+        // Properties to assert against
+        this.initHitCount = 0;
+        this.emitters = [];
 
-    var self = this;
+        Reporter.instance = this;
+    };
 
-    this.initHitCount++;
-    this.emitters.push(emitter);
+    Reporter.prototype.init = function (stream, emitter, callback) {
 
-    stream.on('data', function (data) {
+        var self = this;
 
-        if (self.events[data.event]) {
-            self.messages.push(data);
-            self.handler(data);
-        }
-    });
+        this.initHitCount++;
+        this.emitters.push(emitter);
 
-    emitter.once('stop', function () {
+        stream.on('data', function (data) {
 
-        self.stopped = true;
-    });
+            if (self.events[data.event]) {
+                self.messages.push(data);
+                self.handler(data);
+            }
+        });
 
-    callback();
-};
+        emitter.once('stop', function () {
 
-internals.Reporter.attributes = {
-    name: 'good-reporter',
-    version: '1.0.0'
+            self.stopped = true;
+        });
+
+        callback();
+    };
+
+    Reporter.attributes = {
+        name: 'test-reporter'
+    };
+
+    return Reporter;
 };

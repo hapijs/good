@@ -11,7 +11,7 @@ var Wreck = require('wreck');
 // Done for testing because Wreck is a singleton and every test run ads one event to it
 Wreck.setMaxListeners(0);
 
-var GoodReporter = require('./helper');
+var Helper = require('./helper');
 
 
 // Declare internals
@@ -40,8 +40,9 @@ describe('Plugin', function () {
             httpsAgents: new Https.Agent()
         };
 
+        var Reporter = Helper.getTestReporter();
         options.reporters = [{
-            reporter: GoodReporter,
+            reporter: Reporter,
             events: { ops: '*' }
         }];
 
@@ -56,7 +57,7 @@ describe('Plugin', function () {
 
             server.plugins.good.monitor.once('ops', function (event) {
 
-                var one = plugin.options.reporters[0].instance;
+                var one = Reporter.instance;
 
                 expect(event.osload).to.exist();
                 expect(one.messages).to.have.length(1);
@@ -97,7 +98,7 @@ describe('Plugin', function () {
         };
 
         options.reporters = [{
-            reporter: GoodReporter,
+            reporter: Helper.getTestReporter(),
             events: { ops: '*' }
         }];
 
@@ -161,8 +162,9 @@ describe('Plugin', function () {
             httpsAgents: new Https.Agent()
         };
 
+        var Reporter = Helper.getTestReporter();
         options.reporters = [{
-            reporter: GoodReporter,
+            reporter: Reporter,
             events: { wreck: '*' }
         }];
 
@@ -181,7 +183,7 @@ describe('Plugin', function () {
 
                     Wreck.get('http://127.0.0.1:' + server.connections[1].info.port + '/http', function () {
 
-                        var one = plugin.options.reporters[0].instance;
+                        var one = Reporter.instance;
                         var messages = one.messages;
 
                         expect(messages).to.have.length(2);

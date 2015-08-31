@@ -9,7 +9,7 @@ var Items = require('items');
 var Joi = require('joi');
 var Lab = require('lab');
 
-var GoodReporter = require('./helper');
+var Helper = require('./helper');
 var Monitor = require('../lib/monitor');
 
 // Declare internals
@@ -59,7 +59,7 @@ describe('good', function () {
             var options = {
                 opsInterval: 100,
                 reporters: [{
-                    reporter: new GoodReporter({})
+                    reporter: Helper.getTestReporter()
                 }]
             };
 
@@ -77,10 +77,9 @@ describe('good', function () {
             var options = {
                 responseEvent: 'test',
                 reporters: [{
-                    reporter: new GoodReporter({})
+                    reporter: Helper.getTestReporter()
                 }]
             };
-
 
             var fn = function () {
 
@@ -100,17 +99,12 @@ describe('good', function () {
             };
 
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Helper.getTestReporter(),
                 events: { ops: '*' }
             }];
 
             monitor = new Monitor(new Hapi.Server(), options);
             monitor.start(function (error) {
-
-                var one = options.reporters[0].instance;
-                expect(one instanceof GoodReporter).to.be.true();
-                expect(options.reporters[0].metadata.name).to.equal('good-reporter');
-                expect(options.reporters[0].metadata.version).to.equal('1.0.0');
 
                 expect(monitor._dataStream.listeners('data')).to.have.length(1);
                 expect(error).to.not.exist();
@@ -126,39 +120,33 @@ describe('good', function () {
                 responseEvent: 'response'
             };
 
+            var GoodReporter = Helper.getTestReporter();
+
             options.reporters = [{
                 reporter: GoodReporter,
                 events: { ops: '*' }
             }];
 
-            var originalAttributes = GoodReporter.attributes;
             GoodReporter.attributes = {
                 pkg: {
-                    name: 'good-reporter-pkg',
-                    version: '2.0.0'
+                    name: 'good-reporter-pkg'
                 }
             };
 
             monitor = new Monitor(new Hapi.Server(), options);
             monitor.start(function (error) {
 
-                var one = options.reporters[0].instance;
-                expect(one instanceof GoodReporter).to.be.true();
-
-                expect(options.reporters[0].metadata.name).to.equal('good-reporter-pkg');
-                expect(options.reporters[0].metadata.version).to.equal('2.0.0');
-
                 expect(monitor._dataStream.listeners('data')).to.have.length(1);
                 expect(error).to.not.exist();
                 monitor.stop();
-
-                GoodReporter.attributes = originalAttributes;
 
                 done();
             });
         });
 
         it('supports passing a module name or path for the reporter function', function (done) {
+
+            require.cache[require.resolve('./helper')].exports = Helper.getTestReporter();
 
             var monitor;
             var options = {
@@ -175,6 +163,8 @@ describe('good', function () {
                 expect(error).to.not.exist();
                 expect(monitor._dataStream.listeners('data')).to.have.length(1);
                 monitor.stop();
+
+                require.cache[require.resolve('./helper')].exports = Helper;
                 done();
             });
         });
@@ -201,7 +191,7 @@ describe('good', function () {
             var options = {
                 responseEvent: 'tail',
                 reporters: [{
-                    reporter: new GoodReporter({})
+                    reporter: Helper.getTestReporter()
                 }],
                 extensions: ['tail', 'request', 'ops']
             };
@@ -224,11 +214,14 @@ describe('good', function () {
             var monitor;
             var options = {};
 
+            var ReporterOne = Helper.getTestReporter();
+            var ReporterTwo = Helper.getTestReporter();
+
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: ReporterOne,
                 events: { ops: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: ReporterTwo,
                 events: { ops: '*' }
             }];
 
@@ -237,8 +230,8 @@ describe('good', function () {
 
                 expect(error).to.not.exist();
 
-                var one = monitor.settings.reporters[0].instance;
-                var two = monitor.settings.reporters[1].instance;
+                var one = ReporterOne.instance;
+                var two = ReporterTwo.instance;
 
                 expect(one.initHitCount).to.equal(1);
                 expect(one.emitters[0].on).to.exist();
@@ -256,12 +249,13 @@ describe('good', function () {
             var monitor;
             var options = {};
 
+            var GoodReporter = Helper.getTestReporter();
+
             options.reporters = [{
                 reporter: GoodReporter,
                 events: { ops: '*' }
             }];
 
-            var originalInit = GoodReporter.prototype.init;
             GoodReporter.prototype.init = function (stream, emitter, callback) {
 
                 expect(emitter.on).to.exist();
@@ -275,8 +269,6 @@ describe('good', function () {
                 expect(error).to.exist();
                 expect(error.message).to.equal('mock error');
 
-                GoodReporter.prototype.init = originalInit;
-
                 done();
             });
         });
@@ -285,11 +277,12 @@ describe('good', function () {
 
             var monitor;
             var options = {};
+
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Helper.getTestReporter(),
                 events: { ops: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: Helper.getTestReporter(),
                 events: { ops: '*' }
             }];
 
@@ -314,26 +307,27 @@ describe('good', function () {
             var options = {};
 
             options.reporters = [{
-                reporter: GoodReporter
+                reporter: Helper.getTestReporter()
             }, {
-                reporter: GoodReporter
+                reporter: Helper.getTestReporter()
             }];
 
             expect(function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on');
+            }).to.throw('reporter must specify events to filter on (test-reporter)');
+
+            var GoodReporter = Helper.getTestReporter();
 
             options.reporters = [{
                 reporter: GoodReporter,
                 events: { ops: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: Helper.getTestReporter(),
                 events: { ops: '*' }
             }];
 
-            var originalInit = GoodReporter.prototype.init;
             GoodReporter.prototype.init = null;
 
             expect(function () {
@@ -341,26 +335,24 @@ describe('good', function () {
                 options.reporters[0].events = { log: '*' };
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('Every reporter object must have an init method');
-
-            GoodReporter.prototype.init = originalInit;
+            }).to.throw('Every reporter object must have an init method (test-reporter)');
 
             done();
         });
 
-        it('requires attributes on reporter constructor', function (done) {
+        it('requires name attribute on reporter constructor', function (done) {
 
             var monitor;
             var options = {};
+
+            var GoodReporter = Helper.getTestReporter();
+
+            GoodReporter.attributes = null;
 
             options.reporters = [{
                 reporter: GoodReporter,
                 events: { ops: '*' }
             }];
-
-            var originalAttributes = GoodReporter.attributes;
-
-            GoodReporter.attributes = null;
 
             monitor = new Monitor(new Hapi.Server(), options);
 
@@ -369,20 +361,24 @@ describe('good', function () {
                 monitor.start();
             };
 
-            expect(fnOne).to.throw(Error, 'reporter constructor missing attributes object');
+            expect(fnOne).to.throw(Error, 'reporter missing valid name attribute');
 
-            GoodReporter.attributes = {
-                name: null
-            };
+            options.reporters = [{
+                reporter: GoodReporter,
+                events: { ops: '*' }
+            }, {
+                reporter: Helper.getTestReporter(),
+                events: { ops: '*' }
+            }];
+
+            monitor = new Monitor(new Hapi.Server(), options);
 
             var fnTwo = function () {
 
                 monitor.start();
             };
 
-            expect(fnTwo).to.throw(Error, 'reporter attributus missing name');
-
-            GoodReporter.attributes = originalAttributes;
+            expect(fnTwo).to.throw(Error, 'reporter missing valid name attribute (0)');
 
             done();
         });
@@ -395,11 +391,14 @@ describe('good', function () {
             var monitor;
             var options = {};
 
+            var ReporterOne = Helper.getTestReporter();
+            var ReporterTwo = Helper.getTestReporter();
+
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: ReporterOne,
                 events: { ops: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: ReporterTwo,
                 events: { ops: '*' }
             }];
 
@@ -412,8 +411,8 @@ describe('good', function () {
 
                 var state = monitor._state;
 
-                var one = monitor.settings.reporters[0].instance;
-                var two = monitor.settings.reporters[1].instance;
+                var one = ReporterOne.instance;
+                var two = ReporterTwo.instance;
 
                 expect(one.stopped).to.be.true();
                 expect(two.stopped).to.be.true();
@@ -434,7 +433,7 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [{
-                        reporter: GoodReporter,
+                        reporter: Helper.getTestReporter(),
                         events: { response: '*' }
                     }]
                 }
@@ -473,14 +472,20 @@ describe('good', function () {
                 opsInterval: 100
             };
 
+            var Reporters = [
+                Helper.getTestReporter(),
+                Helper.getTestReporter(),
+                Helper.getTestReporter()
+            ];
+
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporters[0],
                 events: { log: '*', response: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: Reporters[1],
                 events: { error: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: Reporters[2],
                 events: { request: '*' }
             }];
 
@@ -510,7 +515,7 @@ describe('good', function () {
                         // Give the reporters time to report
                         setTimeout(function () {
 
-                            var events = plugin.options.reporters.reduce(function (memo, reporter) {
+                            var events = Reporters.reduce(function (memo, reporter) {
 
                                 return memo.concat(reporter.instance.messages.map(function (message) {
 
@@ -550,8 +555,9 @@ describe('good', function () {
                 responsePayload: true
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { response: '*' }
             }];
 
@@ -574,7 +580,7 @@ describe('good', function () {
                         }
                     }, function (res) {
 
-                        var messages = plugin.options.reporters[0].instance.messages;
+                        var messages = Reporter.instance.messages;
                         var response = messages[0];
 
                         expect(res.statusCode).to.equal(200);
@@ -646,8 +652,9 @@ describe('good', function () {
                 }
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { response: '*' }
             }];
 
@@ -670,7 +677,7 @@ describe('good', function () {
                         }
                     }, function (res) {
 
-                        var messages = plugin.options.reporters[0].instance.messages;
+                        var messages = Reporter.instance.messages;
                         var response = messages[0];
 
                         expect(res.statusCode).to.equal(200);
@@ -715,7 +722,7 @@ describe('good', function () {
             var options = {
                 opsInterval: 100,
                 reporters: [{
-                    reporter: GoodReporter,
+                    reporter: Helper.getTestReporter(),
                     events: {
                         ops: '*'
                     }
@@ -777,8 +784,9 @@ describe('good', function () {
                 opsInterval: 100
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { ops: '*' }
             }];
 
@@ -801,7 +809,7 @@ describe('good', function () {
 
                 server.start(function () {
 
-                    var one = plugin.options.reporters[0].instance;
+                    var one = Reporter.instance;
 
                     // Give the reporters time to report
                     setTimeout(function () {
@@ -839,8 +847,9 @@ describe('good', function () {
                 opsInterval: 2000
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { response: '*' }
             }];
 
@@ -873,7 +882,7 @@ describe('good', function () {
                         url: '/'
                     }, function (res) {
 
-                        var one = plugin.options.reporters[0].instance;
+                        var one = Reporter.instance;
 
                         expect(res.statusCode).to.equal(201);
                         expect(one.messages).to.have.length(1);
@@ -909,8 +918,9 @@ describe('good', function () {
                 opsInterval: 2000
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { error: '*' }
             }];
 
@@ -940,7 +950,7 @@ describe('good', function () {
                         url: '/'
                     }, function (res) {
 
-                        var one = plugin.options.reporters[0].instance;
+                        var one = Reporter.instance;
 
                         expect(res.statusCode).to.equal(500);
                         expect(one.messages).to.have.length(1);
@@ -984,8 +994,9 @@ describe('good', function () {
                 opsInterval: 2000
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { log: '*' }
             }];
 
@@ -1010,7 +1021,7 @@ describe('good', function () {
                         url: '/'
                     }, function (res) {
 
-                        var one = plugin.options.reporters[0].instance;
+                        var one = Reporter.instance;
 
                         expect(res.statusCode).to.equal(200);
                         expect(one.messages).to.have.length(1);
@@ -1048,8 +1059,9 @@ describe('good', function () {
                 opsInterval: 2000
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: { request: '*' }
             }];
 
@@ -1077,7 +1089,7 @@ describe('good', function () {
                         url: '/'
                     }, function (res) {
 
-                        var one = plugin.options.reporters[0].instance;
+                        var one = Reporter.instance;
 
                         expect(res.statusCode).to.equal(200);
                         expect(one.messages).to.have.length(1);
@@ -1114,11 +1126,14 @@ describe('good', function () {
                 opsInterval: 2000
             };
 
+            var ReporterOne = Helper.getTestReporter();
+            var ReporterTwo = Helper.getTestReporter();
+
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: ReporterOne,
                 events: { error: '*' }
             }, {
-                reporter: GoodReporter,
+                reporter: ReporterTwo,
                 events: { error: '*' }
             }];
 
@@ -1134,8 +1149,8 @@ describe('good', function () {
 
                 var handlerCallCount = 0;
 
-                var one = plugin.options.reporters[0].instance;
-                var two = plugin.options.reporters[1].instance;
+                var one = ReporterOne.instance;
+                var two = ReporterTwo.instance;
 
                 one.handler = function (data) {
 
@@ -1197,8 +1212,9 @@ describe('good', function () {
                 extensions: ['start', 'stop', 'request-internal', 'super-secret']
             };
 
+            var Reporter = Helper.getTestReporter();
             options.reporters = [{
-                reporter: GoodReporter,
+                reporter: Reporter,
                 events: {
                     start: '*',
                     stop: '*',
@@ -1206,7 +1222,7 @@ describe('good', function () {
                     'super-secret': '*'
                 }
             }, {
-                reporter: GoodReporter,
+                reporter: Helper.getTestReporter(),
                 events: { error: '*' }
             }];
 
@@ -1225,7 +1241,7 @@ describe('good', function () {
 
                         server.stop(function () {
 
-                            var one = plugin.options.reporters[0].instance;
+                            var one = Reporter.instance;
 
                             expect(one.messages).to.have.length(7);
 
