@@ -90,12 +90,11 @@ describe('good', function () {
             done();
         });
 
-        it('supports valid reporter options', function (done) {
+        it('supports a mix of reporter options', function (done) {
 
             var monitor;
             var options = {
-                responseEvent: 'response',
-                reporters: []
+                responseEvent: 'response'
             };
 
             options.reporters = [{
@@ -103,43 +102,15 @@ describe('good', function () {
                 events: { ops: '*' }
             }];
 
-            monitor = new Monitor(new Hapi.Server(), options);
-            monitor.start(function (error) {
-
-                expect(monitor._dataStream.listeners('data')).to.have.length(1);
-                expect(error).to.not.exist();
-                monitor.stop();
-                done();
-            });
-        });
-
-        it('supports reporter attributes nested in pkg property', function (done) {
-
-            var monitor;
-            var options = {
-                responseEvent: 'response'
-            };
-
-            var GoodReporter = Helper.getTestReporter();
-
-            options.reporters = [{
-                reporter: GoodReporter,
-                events: { ops: '*' }
-            }];
-
-            GoodReporter.attributes = {
-                pkg: {
-                    name: 'good-reporter-pkg'
-                }
-            };
+            var reporterConstructor = Helper.getTestReporter();
+            options.reporters.push(new reporterConstructor({ ops: '*' }));
 
             monitor = new Monitor(new Hapi.Server(), options);
             monitor.start(function (error) {
 
-                expect(monitor._dataStream.listeners('data')).to.have.length(1);
+                expect(monitor._dataStream.listeners('data')).to.have.length(2);
                 expect(error).to.not.exist();
                 monitor.stop();
-
                 done();
             });
         });
@@ -308,8 +279,6 @@ describe('good', function () {
 
             options.reporters = [{
                 reporter: Helper.getTestReporter()
-            }, {
-                reporter: Helper.getTestReporter()
             }];
 
             expect(function () {
@@ -340,48 +309,54 @@ describe('good', function () {
             done();
         });
 
-        it('requires name attribute on reporter constructor', function (done) {
+        it('uses reporter name or index in reporter validation errors', function (done) {
 
             var monitor;
             var options = {};
 
-            var GoodReporter = Helper.getTestReporter();
-
-            GoodReporter.attributes = null;
-
             options.reporters = [{
-                reporter: GoodReporter,
-                events: { ops: '*' }
+                reporter: Helper.getTestReporter()
             }];
 
-            monitor = new Monitor(new Hapi.Server(), options);
+            expect(function () {
 
-            var fnOne = function () {
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter must specify events to filter on (test-reporter)');
 
-                monitor.start();
+            var ReporterPkgName = Helper.getTestReporter();
+            ReporterPkgName.attributes = {
+                pkg: {
+                    name: 'test-reporter-two'
+                }
             };
-
-            expect(fnOne).to.throw(Error, 'reporter missing valid name attribute');
-
             options.reporters = [{
-                reporter: GoodReporter,
-                events: { ops: '*' }
+                reporter: ReporterPkgName
+            }];
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter must specify events to filter on (test-reporter-two)');
+
+            var ReporterByIndex = Helper.getTestReporter();
+            ReporterByIndex.attributes = {};
+            options.reporters = [{
+                reporter: ReporterByIndex
             }, {
-                reporter: Helper.getTestReporter(),
-                events: { ops: '*' }
+                reporter: Helper.getTestReporter()
             }];
 
-            monitor = new Monitor(new Hapi.Server(), options);
+            expect(function () {
 
-            var fnTwo = function () {
-
-                monitor.start();
-            };
-
-            expect(fnTwo).to.throw(Error, 'reporter missing valid name attribute (0)');
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter must specify events to filter on (0)');
 
             done();
         });
+
     });
 
     describe('stop()', function () {
