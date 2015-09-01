@@ -267,6 +267,7 @@ When creating a custom good reporter, it needs to implement the following interf
         - `key` - one of the supported good events or any of the `extensions` events that this reporter should listen for
         - `value` - a single string or an array of strings to filter incoming events. "\*" indicates no filtering. `null` and `undefined` are assumed to be "\*"
     - `config` - an implementation specific configuration value used to instantiate the reporter
+- An optional `attributes` key set on the constructor function with a `name` key set to a string that identifies the reporter. `name.pkg` is also acceptable alternative in the style of Hapi plugins. Used for error reporting
 - An `init` method with the following signature `function init (readstream, emitter, callback)` where:
     - `readstream` - the incoming [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable) from good. This stream is always in `objectMode`.
     - `emitter` - the good event emitter. The `emitter` will emit the following events:
@@ -292,5 +293,9 @@ GoodReporterExample.prototype.init = function (readstream, emitter, callback) {
         console.log('some clean up logic.');
     });
     callback();
+}
+
+GoodReporterExample.attributes = {
+    name: 'good-reporter-example'
 }
 ```

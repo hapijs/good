@@ -295,6 +295,53 @@ describe('good', function () {
 
             done();
         });
+
+        it('uses reporter name or index in reporter validation errors', function (done) {
+
+            var monitor;
+            var options = {};
+
+            var ignore = function () {};
+            ignore.attributes = {
+                name: 'test-reporter'
+            };
+
+            var one = {
+                reporter: ignore
+            };
+
+            options.reporters = [one];
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter must specify events to filter on (test-reporter)');
+
+            ignore.attributes = {
+                pkg: {
+                    name: 'test-reporter-two'
+                }
+            };
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter must specify events to filter on (test-reporter-two)');
+
+
+            ignore.attributes = {};
+            options.reporters = [one, one];
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter must specify events to filter on (0)');
+
+            done();
+        });
     });
 
     describe('stop()', function () {
