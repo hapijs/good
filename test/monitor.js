@@ -284,14 +284,14 @@ describe('good', function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on');
+            }).to.throw('reporter must specify events to filter on (0)');
 
             expect(function () {
 
                 options.reporters[0].events = { log: '*' };
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('Every reporter object must have an init method');
+            }).to.throw('Every reporter object must have an init method (0)');
 
             done();
         });
