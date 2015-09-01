@@ -284,14 +284,14 @@ describe('good', function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on (0)');
+            }).to.throw('reporter [0] must specify events to filter on');
 
             expect(function () {
 
                 options.reporters[0].events = { log: '*' };
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('Every reporter object must have an init method (0)');
+            }).to.throw('reporter [0] must have an init method');
 
             done();
         });
@@ -316,7 +316,7 @@ describe('good', function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on (test-reporter)');
+            }).to.throw('test-reporter must specify events to filter on');
 
             ignore.attributes = {
                 pkg: {
@@ -328,7 +328,7 @@ describe('good', function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on (test-reporter-two)');
+            }).to.throw('test-reporter-two must specify events to filter on');
 
 
             ignore.attributes = {};
@@ -338,7 +338,7 @@ describe('good', function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on (0)');
+            }).to.throw('reporter [0] must specify events to filter on');
 
             done();
         });
