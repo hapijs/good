@@ -284,14 +284,61 @@ describe('good', function () {
 
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('reporter must specify events to filter on');
+            }).to.throw('reporter [0] must specify events to filter on');
 
             expect(function () {
 
                 options.reporters[0].events = { log: '*' };
                 monitor = new Monitor(new Hapi.Server(), options);
                 monitor.start(Hoek.ignore);
-            }).to.throw('Every reporter object must have an init method');
+            }).to.throw('reporter [0] must have an init method');
+
+            done();
+        });
+
+        it('uses reporter name or index in reporter validation errors', function (done) {
+
+            var monitor;
+            var options = {};
+
+            var ignore = function () {};
+            ignore.attributes = {
+                name: 'test-reporter'
+            };
+
+            var one = {
+                reporter: ignore
+            };
+
+            options.reporters = [one];
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('test-reporter must specify events to filter on');
+
+            ignore.attributes = {
+                pkg: {
+                    name: 'test-reporter-two'
+                }
+            };
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('test-reporter-two must specify events to filter on');
+
+
+            ignore.attributes = {};
+            options.reporters = [one, one];
+
+            expect(function () {
+
+                monitor = new Monitor(new Hapi.Server(), options);
+                monitor.start(Hoek.ignore);
+            }).to.throw('reporter [0] must specify events to filter on');
 
             done();
         });
