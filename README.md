@@ -2,7 +2,7 @@
 
 [**hapi**](https://github.com/hapijs/hapi) process monitoring
 
-[![Build Status](https://secure.travis-ci.org/hapijs/good.png)](http://travis-ci.org/hapijs/good)![Current Version](https://img.shields.io/npm/v/good.svg)
+[![Build Status](https://secure.travis-ci.org/hapijs/good.svg)](http://travis-ci.org/hapijs/good)![Current Version](https://img.shields.io/npm/v/good.svg)
 
 Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
 
