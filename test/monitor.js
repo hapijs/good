@@ -684,9 +684,9 @@ describe('good', function () {
                     done();
                 };
 
-                methods.createError = function (callback) {
+                methods.createError = function (cb) {
 
-                    return callback(new Error('there was an error during processing'));
+                    return cb(new Error('there was an error during processing'));
                 };
 
                 parallel(methods, _callback);
