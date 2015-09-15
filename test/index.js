@@ -43,8 +43,8 @@ describe('Plugin', function () {
         options.reporters = [one];
 
         var plugin = {
-           register: require('..'),
-           options: options
+            register: require('..'),
+            options: options
         };
 
         server.register(plugin, function (err) {
