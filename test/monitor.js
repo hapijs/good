@@ -402,7 +402,14 @@ describe('good', function () {
             server.register(plugin, function () {
 
                 // .stop emits the "stop" event
-                server.stop();
+                server.stop(
+                    function (err) {
+
+                        if (err) {
+                            throw err;
+                        }
+                    }
+                );
             });
         });
     });
@@ -934,7 +941,14 @@ describe('good', function () {
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
-                        server.stop();
+                        server.stop(
+                            function (err) {
+
+                                if (err) {
+                                    throw err;
+                                }
+                            }
+                        );
                         done();
                     });
                 });
@@ -995,7 +1009,14 @@ describe('good', function () {
                             Joi.assert(event, schema);
                         }).to.not.throw();
 
-                        server.stop();
+                        server.stop(
+                            function (err) {
+
+                                if (err) {
+                                    throw err;
+                                }
+                            }
+                        );
                         done();
                     });
                 });
@@ -1054,7 +1075,14 @@ describe('good', function () {
 
                         expect(one.messages[0]).to.deep.equal(two.messages[0]);
                         console.error = consoleError;
-                        server.stop();
+                        server.stop(
+                            function (err) {
+
+                                if (err) {
+                                    throw err;
+                                }
+                            }
+                        );
 
                         done();
                     });
