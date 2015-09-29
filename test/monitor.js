@@ -32,7 +32,7 @@ describe('good', function () {
 
             var fn = function () {
 
-                var monitor = Monitor();
+                Monitor();
             };
 
             expect(fn).throws(Error, 'Monitor must be instantiated using new');
@@ -47,7 +47,7 @@ describe('good', function () {
 
             var fn = function () {
 
-                var monitor = new Monitor(new Hapi.Server(), options);
+                new Monitor(new Hapi.Server(), options);
             };
 
             expect(fn).to.throw(Error, /"opsInterval" must be larger than or equal to 100/gi);
@@ -65,7 +65,7 @@ describe('good', function () {
 
             var fn = function () {
 
-                var monitor = new Monitor(new Hapi.Server(), options);
+                new Monitor(new Hapi.Server(), options);
             };
 
             expect(fn).not.to.throw();
@@ -84,7 +84,7 @@ describe('good', function () {
 
             var fn = function () {
 
-                var monitor = new Monitor(new Hapi.Server(), options);
+                new Monitor(new Hapi.Server(), options);
             };
 
             expect(fn).to.throw(Error, /"responseEvent" must be one of \[response, tail\]/gi);
@@ -167,7 +167,7 @@ describe('good', function () {
 
             var fn = function () {
 
-                var monitor = new Monitor(new Hapi.Server(), options);
+                new Monitor(new Hapi.Server(), options);
             };
 
             expect(fn).to.throw(Error, 'Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
