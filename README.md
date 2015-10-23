@@ -96,7 +96,7 @@ server.register({
 
 This example does the following:
 
-1. Sets up the [`GoodConsole`](https://github.com/hapijs/good-console) reporter listening for 'request' and 'log' events.
+1. Sets up the [`GoodConsole`](https://github.com/hapijs/good-console) reporter listening for 'response' and 'log' events.
 2. Sets up the [`GoodFile`](https://github.com/hapijs/good-file) reporter to listen for 'ops' events and log them to `./test/fixtures/awesome_log` according to the file rules listed in the good-file documentation.
 3. Sets up the [`GoodHttp`](https://github.com/hapijs/good-http) reporter to listen for error events and POSTs them to `http://prod.logs:3000` with additional settings to pass into `Wreck`
 
