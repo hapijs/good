@@ -1,8 +1,5 @@
-<!-- version -->
-# 6.4.0 API Reference
-<!-- versionstop -->
-
-<!-- toc -->
+API Reference
+=====
 
 - [Options](#options)
 - [Event Types](#event-types)
@@ -15,7 +12,6 @@
 	- [`GreatWreck(error, request, response, start, uri)`](#greatwreckerror-request-response-start-uri)
 - [Reporter Interface](#reporter-interface)
 
-<!-- tocstop -->
 
 ## Good
 
