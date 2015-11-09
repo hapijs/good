@@ -20,7 +20,7 @@
     "items": "1.x.x",
     "joi": "6.x.x",
     "traverse": "0.6.6",
-    "wreck": "6.x.x"
+    "wreck": "5.x.x || 6.x.x"
   },
   "peerDependencies": {
     "hapi": ">=8.x.x"
