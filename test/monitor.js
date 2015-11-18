@@ -5,7 +5,6 @@ var Http = require('http');
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Items = require('items');
 var Joi = require('joi');
 var Lab = require('lab');
 
@@ -36,39 +35,6 @@ describe('good', function () {
             };
 
             expect(fn).throws(Error, 'Monitor must be instantiated using new');
-            done();
-        });
-
-        it('throws an error if opsInterval is too small', function (done) {
-
-            var options = {
-                opsInterval: 50
-            };
-
-            var fn = function () {
-
-                new Monitor(new Hapi.Server(), options);
-            };
-
-            expect(fn).to.throw(Error, /"opsInterval" must be larger than or equal to 100/gi);
-            done();
-        });
-
-        it('does not throw an error when opsInterval is more than 100', function (done) {
-
-            var options = {
-                opsInterval: 100,
-                reporters: [{
-                    reporter: new GoodReporter({})
-                }]
-            };
-
-            var fn = function () {
-
-                new Monitor(new Hapi.Server(), options);
-            };
-
-            expect(fn).not.to.throw();
             done();
         });
 
@@ -173,6 +139,23 @@ describe('good', function () {
             expect(fn).to.throw(Error, 'Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
             done();
         });
+
+        it('logs an error if one occurs doing ops information collection', function (done) {
+
+            var error = console.error;
+            console.error = function (err) {
+
+                console.error = error;
+                expect(err).to.be.an.instanceof(Error);
+                done();
+            };
+            var monitor = new Monitor(new Hapi.Server());
+            monitor.start(function (err) {
+
+                expect(err).to.not.exist();
+                monitor._ops.emit('error', new Error('mock error'));
+            });
+        });
     });
 
     describe('start()', function () {
@@ -244,14 +227,8 @@ describe('good', function () {
             var options = {};
             var one = new GoodReporter();
             var two = new GoodReporter();
-            var hitCount = 0;
 
-            one.start = two.start = function (emitter, callback) {
-
-                hitCount++;
-                expect(emitter).to.exist();
-                return callback(null);
-            };
+            one.start = two.start = function (emitter, callback) {};
 
             options.reporters = [one, two];
 
@@ -260,7 +237,7 @@ describe('good', function () {
 
                 expect(error).to.not.exist();
 
-                expect(monitor.listeners('ops')).to.have.length(1);
+                expect(monitor._ops.listeners('ops')).to.have.length(1);
                 expect(monitor._server.listeners('request-error')).to.have.length(1);
                 expect(monitor._server.listeners('log')).to.have.length(1);
                 expect(monitor._server.listeners('tail')).to.have.length(1);
@@ -362,11 +339,10 @@ describe('good', function () {
 
                 monitor.stop();
 
-                var state = monitor._state;
                 expect(one.stopped).to.be.true();
                 expect(two.stopped).to.be.true();
 
-                expect([false, null]).to.contain(state.opsInterval._repeat);
+                expect([false, null]).to.contain(monitor._ops._interval._repeat);
                 expect(monitor._server.listeners('log')).to.have.length(0);
                 expect(monitor.listeners('ops')).to.have.length(0);
                 expect(monitor._server.listeners('internalError')).to.have.length(0);
@@ -452,8 +428,7 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    reporters: [one, two, three],
-                    opsInterval: 100
+                    reporters: [one, two, three]
                 }
             };
 
@@ -648,64 +623,6 @@ describe('good', function () {
             });
         });
 
-        it('does not send an "ops" event if an error occurs during information gathering', function (done) {
-
-            var options = {
-                opsInterval: 100,
-                reporters: [{
-                    reporter: GoodReporter,
-                    events: {
-                        ops: '*'
-                    }
-                }]
-            };
-            var monitor = new Monitor(new Hapi.Server(), options);
-            var ops = false;
-            var log = console.error;
-
-            console.error = function (error) {
-
-                expect(error.message).to.equal('there was an error during processing');
-            };
-
-            var parallel = Items.parallel.execute;
-
-            Items.parallel.execute = function (methods, callback) {
-
-                var _callback = function (error, results) {
-
-                    callback(error, results);
-
-                    expect(error).to.exist();
-                    expect(error.message).to.equal('there was an error during processing');
-                    expect(results).to.not.exist();
-                    expect(ops).to.be.false();
-                    Items.parallel.execute = parallel;
-                    console.error = log;
-                    delete methods.createError;
-                    monitor.stop();
-                    done();
-                };
-
-                methods.createError = function (cb) {
-
-                    return cb(new Error('there was an error during processing'));
-                };
-
-                parallel(methods, _callback);
-            };
-
-            monitor.on('ops', function (event) {
-
-                ops = true;
-            });
-
-            monitor.start(function (error) {
-
-                expect(error).to.not.exist();
-            });
-        });
-
         it('has a standard "ops" event schema', function (done) {
 
             var server = new Hapi.Server();
@@ -719,7 +636,9 @@ describe('good', function () {
                 register: require('../lib/index').register,
                 options: {
                     reporters: [one],
-                    opsInterval: 100
+                    ops: {
+                        interval: 100
+                    }
                 }
             };
             var schema = Joi.object().keys({
@@ -774,8 +693,7 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    reporters: [one],
-                    opsInterval: 2000
+                    reporters: [one]
                 }
             };
             var schema = Joi.object().keys({
@@ -838,8 +756,7 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    reporters: [one],
-                    opsInterval: 2000
+                    reporters: [one]
                 }
             };
             var schema = Joi.object().keys({
@@ -907,8 +824,7 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    reporters: [one],
-                    opsInterval: 2000
+                    reporters: [one]
                 }
             };
             var schema = Joi.object().keys({
@@ -968,8 +884,7 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    reporters: [one],
-                    opsInterval: 2000
+                    reporters: [one]
                 }
             };
             var schema = Joi.object().keys({
@@ -1040,8 +955,7 @@ describe('good', function () {
             var plugin = {
                 register: require('../lib/index').register,
                 options: {
-                    reporters: [one, two],
-                    opsInterval: 2000
+                    reporters: [one, two]
                 }
             };
 

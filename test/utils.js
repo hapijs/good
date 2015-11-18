@@ -20,24 +20,6 @@ var it = lab.it;
 
 describe('utils', function () {
 
-    describe('makeContinuation()', function () {
-
-        it('successfully creates a continuation function', function (done) {
-
-            var method = Utils.makeContinuation(function () {
-
-                return true;
-            });
-
-            method(function (err, value) {
-
-                expect(err).to.not.exist();
-                expect(value).to.be.true();
-                done();
-            });
-        });
-    });
-
     describe('GreatWreck()', function () {
 
         it('handles a null request and response', function (done) {

@@ -3,7 +3,6 @@
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Http = require('http');
 var Https = require('https');
 var Lab = require('lab');
 var Wreck = require('wreck');
@@ -31,93 +30,7 @@ var it = lab.it;
 
 describe('Plugin', function () {
 
-    it('emits ops data', function (done) {
-
-        var server = new Hapi.Server();
-        var options = {
-            opsInterval: 100,
-            httpAgents: new Http.Agent(),
-            httpsAgents: new Https.Agent()
-        };
-        var one = new GoodReporter({ ops: '*' });
-        options.reporters = [one];
-
-        var plugin = {
-            register: require('..'),
-            options: options
-        };
-
-        server.register(plugin, function (err) {
-
-            expect(err).to.not.exist();
-
-            server.plugins.good.monitor.once('ops', function (event) {
-
-                expect(event.osload).to.exist();
-                expect(one.messages).to.have.length(1);
-
-                var message = one.messages[0];
-
-                expect(message.event).to.equal('ops');
-                expect(message.host).to.exist();
-
-                done();
-            });
-        });
-    });
-
-    it('tracks used sockets', function (done) {
-
-        var server = new Hapi.Server();
-
-        server.connection({ host: 'localhost' });
-
-        server.route({
-            method: 'GET',
-            path: '/',
-            handler: function (request, reply) {
-
-                Https.get({
-                    hostname: 'www.google.com',
-                    port: 433,
-                    path: '/',
-                    agent: internals.agent
-                });
-            }
-        });
-
-        var options = {
-            opsInterval: 1000,
-            httpsAgents: internals.agent
-        };
-        var one = new GoodReporter({ ops: '*' });
-        options.reporters = [one];
-
-        var plugin = {
-            register: require('..'),
-            options: options
-        };
-
-        server.register(plugin, function (err) {
-
-            expect(err).to.not.exist();
-
-            server.plugins.good.monitor.once('ops', function (event) {
-
-                expect(event.host).to.exist();
-                expect(event.sockets).to.exist();
-                expect(event.sockets.https.total).to.equal(6);
-
-                done();
-            });
-
-            for (var i = 0; i < 10; ++i) {
-                server.inject({ url: '/' });
-            }
-        });
-    });
-
-    it('wreck data emits', function (done) {
+    it('reports on outbound wreck requests', function (done) {
 
         var server = new Hapi.Server();
         var tlsOptions = {
@@ -149,10 +62,7 @@ describe('Plugin', function () {
         });
 
         var emitted;
-        var options = {
-            httpAgents: new Http.Agent(),
-            httpsAgents: new Https.Agent()
-        };
+        var options = {};
         options.reporters = [new GoodReporter({
             wreck: '*'
         }, null, function (event) {
