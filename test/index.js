@@ -1,39 +1,40 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Hapi = require('hapi');
-var Hoek = require('hoek');
-var Https = require('https');
-var Lab = require('lab');
-var Wreck = require('wreck');
+const Code = require('code');
+const Hapi = require('hapi');
+const Https = require('https');
+const Lab = require('lab');
+const Wreck = require('wreck');
 
 // Done for testing because Wreck is a singleton and every test run ads one event to it
 Wreck.setMaxListeners(0);
 
-var GoodReporter = require('./helper');
+const GoodReporter = require('./helper');
 
 
 // Declare internals
 
-var internals = {
+const internals = {
     agent: new Https.Agent({ maxSockets: 6 })
 };
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var expect = Code.expect;
-var describe = lab.describe;
-var it = lab.it;
+const lab = exports.lab = Lab.script();
+const expect = Code.expect;
+const describe = lab.describe;
+const it = lab.it;
 
 
-describe('Plugin', function () {
+describe('Plugin', () => {
 
-    it('reports on outbound wreck requests', function (done) {
+    it('reports on outbound wreck requests', (done) => {
 
-        var server = new Hapi.Server();
-        var tlsOptions = {
+        const server = new Hapi.Server();
+        const tlsOptions = {
             labels: ['https'],
             port: 0,
             key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0UqyXDCqWDKpoNQQK/fdr0OkG4gW6DUafxdufH9GmkX/zoKz\ng/SFLrPipzSGINKWtyMvo7mPjXqqVgE10LDI3VFV8IR6fnART+AF8CW5HMBPGt/s\nfQW4W4puvBHkBxWSW1EvbecgNEIS9hTGvHXkFzm4xJ2e9DHp2xoVAjREC73B7JbF\nhc5ZGGchKw+CFmAiNysU0DmBgQcac0eg2pWoT+YGmTeQj6sRXO67n2xy/hA1DuN6\nA4WBK3wM3O4BnTG0dNbWUEbe7yAbV5gEyq57GhJIeYxRvveVDaX90LoAqM4cUH06\n6rciON0UbDHV2LP/JaH5jzBjUyCnKLLo5snlbwIDAQABAoIBAQDJm7YC3pJJUcxb\nc8x8PlHbUkJUjxzZ5MW4Zb71yLkfRYzsxrTcyQA+g+QzA4KtPY8XrZpnkgm51M8e\n+B16AcIMiBxMC6HgCF503i16LyyJiKrrDYfGy2rTK6AOJQHO3TXWJ3eT3BAGpxuS\n12K2Cq6EvQLCy79iJm7Ks+5G6EggMZPfCVdEhffRm2Epl4T7LpIAqWiUDcDfS05n\nNNfAGxxvALPn+D+kzcSF6hpmCVrFVTf9ouhvnr+0DpIIVPwSK/REAF3Ux5SQvFuL\njPmh3bGwfRtcC5d21QNrHdoBVSN2UBLmbHUpBUcOBI8FyivAWJhRfKnhTvXMFG8L\nwaXB51IZAoGBAP/E3uz6zCyN7l2j09wmbyNOi1AKvr1WSmuBJveITouwblnRSdvc\nsYm4YYE0Vb94AG4n7JIfZLKtTN0xvnCo8tYjrdwMJyGfEfMGCQQ9MpOBXAkVVZvP\ne2k4zHNNsfvSc38UNSt7K0HkVuH5BkRBQeskcsyMeu0qK4wQwdtiCoBDAoGBANF7\nFMppYxSW4ir7Jvkh0P8bP/Z7AtaSmkX7iMmUYT+gMFB5EKqFTQjNQgSJxS/uHVDE\nSC5co8WGHnRk7YH2Pp+Ty1fHfXNWyoOOzNEWvg6CFeMHW2o+/qZd4Z5Fep6qCLaa\nFvzWWC2S5YslEaaP8DQ74aAX4o+/TECrxi0z2lllAoGAdRB6qCSyRsI/k4Rkd6Lv\nw00z3lLMsoRIU6QtXaZ5rN335Awyrfr5F3vYxPZbOOOH7uM/GDJeOJmxUJxv+cia\nPQDflpPJZU4VPRJKFjKcb38JzO6C3Gm+po5kpXGuQQA19LgfDeO2DNaiHZOJFrx3\nm1R3Zr/1k491lwokcHETNVkCgYBPLjrZl6Q/8BhlLrG4kbOx+dbfj/euq5NsyHsX\n1uI7bo1Una5TBjfsD8nYdUr3pwWltcui2pl83Ak+7bdo3G8nWnIOJ/WfVzsNJzj7\n/6CvUzR6sBk5u739nJbfgFutBZBtlSkDQPHrqA7j3Ysibl3ZIJlULjMRKrnj6Ans\npCDwkQKBgQCM7gu3p7veYwCZaxqDMz5/GGFUB1My7sK0hcT7/oH61yw3O8pOekee\nuctI1R3NOudn1cs5TAy/aypgLDYTUGQTiBRILeMiZnOrvQQB9cEf7TFgDoRNCcDs\nV/ZWiegVB/WY7H0BkCekuq5bHwjgtJTpvHGqQ9YD7RhE8RSYOhdQ/Q==\n-----END RSA PRIVATE KEY-----\n',
@@ -61,11 +62,11 @@ describe('Plugin', function () {
             }
         });
 
-        var emitted;
-        var options = {};
+        let emitted;
+        const options = {};
         options.reporters = [new GoodReporter({
             wreck: '*'
-        }, null, function (event) {
+        }, null, (event) => {
 
             if (!emitted) {
                 expect(event.event).to.equal('wreck');
@@ -83,20 +84,20 @@ describe('Plugin', function () {
             }
         })];
 
-        var plugin = {
+        const plugin = {
             register: require('..'),
             options: options
         };
 
-        server.register(plugin, function (err) {
+        server.register(plugin, (err) => {
 
             expect(err).to.not.exist();
 
-            server.start(function () {
+            server.start(() => {
 
-                Wreck.get('https://127.0.0.1:' + server.connections[0].info.port + '/', { rejectUnauthorized: false }, function () {
+                Wreck.get('https://127.0.0.1:' + server.connections[0].info.port + '/', { rejectUnauthorized: false }, () => {
 
-                    Wreck.get('http://127.0.0.1:' + server.connections[1].info.port + '/http', Hoek.ignore);
+                    Wreck.get('http://127.0.0.1:' + server.connections[1].info.port + '/http', () => {});
                 });
             });
         });
