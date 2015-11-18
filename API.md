@@ -4,12 +4,12 @@ API Reference
 - [Options](#options)
 - [Event Types](#event-types)
 - [Event Payloads](#event-payloads)
-	- [`GreatLog(event)`](#greatlogevent) 
-	- [`GreatError(request, error)`](#greaterrorrequest-error)
-	- [`GreatResponse(request, options)`](#greatresponserequest-options)
-	- [`GreatOps(ops)`](#greatopsops)
-	- [`GreatRequest(request, event)`](#greatrequestrequest-event)
-	- [`GreatWreck(error, request, response, start, uri)`](#greatwreckerror-request-response-start-uri)
+    - [`GreatLog(event)`](#greatlogevent)
+    - [`GreatError(request, error)`](#greaterrorrequest-error)
+    - [`GreatResponse(request, options)`](#greatresponserequest-options)
+    - [`GreatOps(ops)`](#greatopsops)
+    - [`GreatRequest(request, event)`](#greatrequestrequest-event)
+    - [`GreatWreck(error, request, response, start, uri)`](#greatwreckerror-request-response-start-uri)
 - [Reporter Interface](#reporter-interface)
 
 
@@ -25,12 +25,12 @@ Applications with multiple server instances, each with its own monitor should on
 as general events are a process-wide facility and will result in duplicated log events. To override some or all of the defaults,
 set `options` to an object with the following optional settings:
 
-- `[httpAgents]` - the list of `httpAgents` to report socket information about. Can be a single `http.Agent` or an array of agents objects. Defaults to `Http.globalAgent`.
-- `[httpsAgents]` - the list of `httpsAgents` to report socket information about. Can be a single `https.Agent` or an array of agents. Defaults to `Https.globalAgent`.
 - `[requestHeaders]` - determines if all request headers will be available to `reporter` objects. Defaults to _false_
 - `[requestPayload]` - determines if the request payload will be available to `reporter` objects. Defaults to _false_
 - `[responsePayload]` - determines if the response payload will be available to `reporter` objects. Defaults to _false_
-- `[opsInterval]` - the interval in milliseconds to sample system and process performance metrics. Minimum is _100ms_. Defaults to _15 seconds_.
+- `[ops]` - options passed directly into the [`Oppsy`](https://github.com/hapijs/oppsy#new-oppsyserver-config) constructor. Defaults to `{}`.
+    - `config` - options passed directly into the `Oppsy` constructor as the `config` value.
+    - `interval` - interval used when calling `Oppsy.start()`.
 - `[responseEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
