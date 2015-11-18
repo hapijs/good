@@ -5,7 +5,6 @@ var Http = require('http');
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Items = require('items');
 var Joi = require('joi');
 var Lab = require('lab');
 
@@ -228,7 +227,6 @@ describe('good', function () {
             var options = {};
             var one = new GoodReporter();
             var two = new GoodReporter();
-            var hitCount = 0;
 
             one.start = two.start = function (emitter, callback) {};
 
@@ -341,7 +339,6 @@ describe('good', function () {
 
                 monitor.stop();
 
-                var state = monitor._state;
                 expect(one.stopped).to.be.true();
                 expect(two.stopped).to.be.true();
 
