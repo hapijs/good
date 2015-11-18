@@ -3,7 +3,6 @@
 var Code = require('code');
 var Hapi = require('hapi');
 var Hoek = require('hoek');
-var Http = require('http');
 var Https = require('https');
 var Lab = require('lab');
 var Wreck = require('wreck');
