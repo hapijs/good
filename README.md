@@ -75,7 +75,7 @@ var options = {
 };
 ```
 
-This will now _only_ log 'log' events that have the 'error' _or_ 'medium' tag attached to them. Any 'log' events without one of those tags will be ignored. Please see the documentation of the [good-reporter](https://github.com/hapijs/good-reporter) interface for more information about tags and event filtering.
+This will now _only_ log 'log' events that have the 'error' _or_ 'medium' tag attached to them. Any 'log' events without one of those tags will be ignored.
 
 
 ## Reporters
