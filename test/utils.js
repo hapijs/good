@@ -1,68 +1,65 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Lab = require('lab');
-var Utils = require('../lib/utils');
-
-
-// Declare internals
-
-var internals = {};
+const Code = require('code');
+const Lab = require('lab');
+const Utils = require('../lib/utils');
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var expect = Code.expect;
-var describe = lab.describe;
-var it = lab.it;
+const lab = exports.lab = Lab.script();
+const expect = Code.expect;
+const describe = lab.describe;
+const it = lab.it;
 
 
-describe('utils', function () {
+describe('utils', () => {
 
-    describe('GreatWreck()', function () {
+    describe('GreatWreck()', () => {
 
-        it('handles a null request and response', function (done) {
+        it('handles a null request and response', (done) => {
 
-            var greatWreck = new Utils.GreatWreck();
+            const greatWreck = new Utils.GreatWreck();
             expect(greatWreck.request).to.exist();
             expect(greatWreck.response).to.exist();
             done();
         });
 
-        it('reports on errors', function (done) {
+        it('reports on errors', (done) => {
 
-            var error = new Error('my error');
-            var greatWreck = new Utils.GreatWreck(error);
+            const error = new Error('my error');
+            const greatWreck = new Utils.GreatWreck(error);
 
             expect(greatWreck.error.message).to.equal('my error');
             done();
         });
 
-        it('contains the current pid', function (done) {
+        it('contains the current pid', (done) => {
 
-            var greatWreck = new Utils.GreatWreck();
+            const greatWreck = new Utils.GreatWreck();
 
             expect(greatWreck.pid).to.equal(process.pid);
             done();
         });
     });
 
-    describe('GreatResponse()', function () {
+    describe('GreatResponse()', () => {
 
-        var generateGreatResponse = function (requestPayload, responsePayload, nullResponse) {
+        const generateGreatResponse = (requestPayload, responsePayload, nullResponse) => {
 
-            var filterRules = {
+            const filterRules = {
                 password: 'censor'
             };
 
-            var options = {
+            const options = {
                 requestHeaders: true,
                 requestPayload: true,
                 responsePayload: true
             };
 
-            var request = {
+            const request = {
                 id: '1429974169154:localhost:10578:i8x5ousn:10000',
                 raw: {
                     req: {
@@ -94,7 +91,7 @@ describe('utils', function () {
                 response: nullResponse ? null : {
                     source: responsePayload
                 },
-                getLog: function () {
+                getLog: () => {
 
                     return {};
                 }
@@ -102,9 +99,9 @@ describe('utils', function () {
             return new Utils.GreatResponse(request, options, filterRules);
         };
 
-        it('handles empty request payloads', function (done) {
+        it('handles empty request payloads', (done) => {
 
-            var sampleResponsePayload = { message: 'test' };
+            const sampleResponsePayload = { message: 'test' };
             generateGreatResponse(null, sampleResponsePayload);
             generateGreatResponse({}, sampleResponsePayload);
             generateGreatResponse(undefined, sampleResponsePayload);
@@ -113,9 +110,9 @@ describe('utils', function () {
             done();
         });
 
-        it('handles empty response payloads', function (done) {
+        it('handles empty response payloads', (done) => {
 
-            var sampleRequestPayload = { message: 'test' };
+            const sampleRequestPayload = { message: 'test' };
             generateGreatResponse(sampleRequestPayload, null);
             generateGreatResponse(sampleRequestPayload, {});
             generateGreatResponse(sampleRequestPayload, undefined);
@@ -125,11 +122,11 @@ describe('utils', function () {
             done();
         });
 
-        it('handles response payloads with a toString() function', function (done) {
+        it('handles response payloads with a toString() function', (done) => {
 
-            var samplePayload = {
+            const samplePayload = {
                 message: 'test',
-                toString: function () {
+                toString: () => {
 
                 }
             };
