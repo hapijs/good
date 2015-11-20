@@ -1,4 +1,6 @@
-var internals = {};
+'use strict';
+
+const internals = {};
 
 module.exports = internals.Reporter = function (events, config, datahandler) {
 
@@ -9,9 +11,9 @@ module.exports = internals.Reporter = function (events, config, datahandler) {
 
 internals.Reporter.prototype.init = function (stream, emitter, callback) {
 
-    var self = this;
+    const self = this;
 
-    stream.on('data', function (data) {
+    stream.on('data', (data) => {
 
         if (self.events[data.event]) {
             self.messages.push(data);
@@ -19,7 +21,7 @@ internals.Reporter.prototype.init = function (stream, emitter, callback) {
         }
     });
 
-    emitter.once('stop', function () {
+    emitter.once('stop', () => {
 
         self.stopped = true;
     });
