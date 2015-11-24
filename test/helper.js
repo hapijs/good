@@ -2,29 +2,30 @@
 
 const internals = {};
 
-module.exports = internals.Reporter = function (events, config, datahandler) {
+class Reporter {
+    constructor(events, config, datahandler) {
 
-    this.events = events;
-    this.messages = [];
-    this.handler = datahandler || function () {};
-};
+        this.events = events;
+        this.messages = [];
+        this.handler = datahandler || function () {};
+    }
+    init(stream, emitter, callback) {
 
-internals.Reporter.prototype.init = function (stream, emitter, callback) {
+        stream.on('data', (data) => {
 
-    const self = this;
+            if (this.events[data.event]) {
+                this.messages.push(data);
+                this.handler(data);
+            }
+        });
 
-    stream.on('data', (data) => {
+        emitter.once('stop', () => {
 
-        if (self.events[data.event]) {
-            self.messages.push(data);
-            self.handler(data);
-        }
-    });
+            this.stopped = true;
+        });
 
-    emitter.once('stop', () => {
+        callback();
+    }
+}
 
-        self.stopped = true;
-    });
-
-    callback();
-};
+module.exports = Reporter;

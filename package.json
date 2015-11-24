@@ -29,6 +29,7 @@
   "devDependencies": {
     "code": "2.x.x",
     "hapi": "10.x.x",
+    "insync": "2.1.x",
     "lab": "7.x.x"
   },
   "scripts": {
