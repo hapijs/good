@@ -6,6 +6,7 @@ const Code = require('code');
 const Hapi = require('hapi');
 const Lab = require('lab');
 
+const Good = require('../lib');
 const GoodReporter = require('./helper');
 const Monitor = require('../lib/monitor');
 
@@ -23,7 +24,7 @@ describe('good', () => {
     it('exposes the Monitor object', (done) => {
 
         const plugin = {
-            register: require('../lib/index').register,
+            register: Good.register,
             options: {
                 reporters: [{
                     reporter: GoodReporter,
@@ -43,7 +44,7 @@ describe('good', () => {
     it('starts the Monitor object during registration', (done) => {
 
         const plugin = {
-            register: require('../lib/index').register,
+            register: Good.register,
             options: {
                 reporters: [{
                     reporter: GoodReporter,
@@ -72,7 +73,7 @@ describe('good', () => {
     it('stops the monitor when the server stops', (done) => {
 
         const plugin = {
-            register: require('../lib/index').register,
+            register: Good.register,
             options: {
                 reporters: [{
                     reporter: GoodReporter,
