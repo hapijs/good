@@ -19,6 +19,25 @@ const GoodReporter = require('./helper');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
 
+// Delcare internals
+const internals = {
+    monitorFactory(server, options) {
+
+        const defualts = {
+            responseEvent: 'tail',
+            requestHeaders: false,
+            requestPayload: false,
+            responsePayload: false,
+            extensions: [],
+            reporters: [],
+            ops: {
+                interval: 15000
+            },
+            filter: {}
+        };
+        return new Monitor(server, Object.assign({}, defualts, options));
+    }
+};
 // Test shortcuts
 
 const lab = exports.lab = Lab.script();
@@ -27,104 +46,18 @@ const describe = lab.describe;
 const it = lab.it;
 
 
+
 describe('Monitor', () => {
-
-    it('throws an error if responseEvent is not "response" or "tail"', (done) => {
-
-        const fn = () => {
-
-            new Monitor(new Hapi.Server(), {
-                responseEvent: 'test',
-                reporters: [{
-                    reporter: new GoodReporter({})
-                }]
-            });
-        };
-
-        expect(fn).to.throw(Error, /"responseEvent" must be one of \[response, tail\]/gi);
-        done();
-    });
-
-    it('supports a mix of reporter options', (done) => {
-
-        const monitor = new Monitor(new Hapi.Server(), {
-            responseEvent: 'response',
-            reporters: [
-                new GoodReporter({ ops: '*' }), {
-                    reporter: GoodReporter,
-                    events: { ops: '*' }
-                }
-            ]
-        });
-
-        monitor.start((error) => {
-
-            expect(monitor._dataStream.listeners('data')).to.have.length(2);
-            expect(error).to.not.exist();
-            monitor.stop();
-            done();
-        });
-    });
-
-    it('supports passing a module name or path for the reporter function', (done) => {
-
-        const monitor = new Monitor(new Hapi.Server(), {
-            responseEvent: 'response',
-            reporters: [{
-                reporter: '../test/helper',
-                events: { log: '*' }
-            }]
-        });
-        monitor.start((error) => {
-
-            expect(error).to.not.exist();
-            expect(monitor._dataStream.listeners('data')).to.have.length(1);
-            monitor.stop();
-            done();
-        });
-    });
-
-    it('allows starting with no reporters', (done) => {
-
-        const monitor = new Monitor(new Hapi.Server(), {
-            responseEvent: 'response'
-        });
-        monitor.start((error) => {
-
-            expect(error).to.not.exist();
-            expect(monitor._dataStream.listeners('data')).to.have.length(0);
-            monitor.stop();
-            done();
-        });
-    });
-
-    it('throws an error if invalid extension events are used', (done) => {
-
-        const fn = () => {
-
-            new Monitor(new Hapi.Server(), {
-                responseEvent: 'tail',
-                reporters: [{
-                    reporter: new GoodReporter({})
-                }],
-                extensions: ['tail', 'request', 'ops']
-            });
-        };
-
-        expect(fn).to.throw(Error, 'Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
-        done();
-    });
 
     it('logs an error if one occurs doing ops information collection', (done) => {
 
-        const monitor = new Monitor(new Hapi.Server());
+        const monitor = internals.monitorFactory(new Hapi.Server());
         const error = console.error;
         console.error = (err) => {
 
             console.error = error;
             expect(err).to.be.an.instanceof(Error);
-            monitor.stop();
-            done();
+            monitor.stop(done);
         };
         monitor.start((err) => {
 
@@ -158,19 +91,18 @@ describe('Monitor', () => {
                 }, 10);
             };
 
-            const monitor = new Monitor(new Hapi.Server(), {
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: [one, two]
             });
             monitor.start((error) => {
 
                 expect(error).to.not.exist();
                 expect(hitCount).to.equal(2);
-                monitor.stop();
-                done();
+                monitor.stop(done);
             });
         });
 
-        it('callsback with an error if a there is an error in a reporter "init" method', (done) => {
+        it(`callsback with an error if a there is an error in a reporter 'init' method`, (done) => {
 
             const one = new GoodReporter();
             one.init = (stream, emitter, callback) => {
@@ -178,7 +110,7 @@ describe('Monitor', () => {
                 expect(emitter.on).to.exist();
                 return callback(new Error('mock error'));
             };
-            const monitor = new Monitor(new Hapi.Server(), {
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: [one]
             });
             monitor.start((error) => {
@@ -189,14 +121,14 @@ describe('Monitor', () => {
             });
         });
 
-        it('attaches events for "ops", "tail", "log", and "request-error"', (done) => {
+        it(`attaches events for 'ops', 'tail', 'log', and 'request-error'`, (done) => {
 
             const one = new GoodReporter();
             one.start = (emitter, callback) => {
 
                 callback(null);
             };
-            const monitor = new Monitor(new Hapi.Server(), {
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: [one]
             });
             monitor.start((error) => {
@@ -207,8 +139,7 @@ describe('Monitor', () => {
                 expect(monitor._server.listeners('request-error')).to.have.length(1);
                 expect(monitor._server.listeners('log')).to.have.length(1);
                 expect(monitor._server.listeners('tail')).to.have.length(1);
-                monitor.stop();
-                done();
+                monitor.stop(done);
             });
         });
 
@@ -222,14 +153,14 @@ describe('Monitor', () => {
 
             expect(() => {
 
-                const monitor = new Monitor(new Hapi.Server(), options);
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
             }).to.throw('reporter [0] must specify events to filter on');
 
             expect(() => {
 
                 options.reporters[0].events = { log: '*' };
-                const monitor = new Monitor(new Hapi.Server(), options);
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
             }).to.throw('reporter [0] must have an init method');
 
@@ -251,7 +182,7 @@ describe('Monitor', () => {
 
             expect(() => {
 
-                const monitor = new Monitor(new Hapi.Server(), options);
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
             }).to.throw('test-reporter must specify events to filter on');
 
@@ -263,7 +194,7 @@ describe('Monitor', () => {
 
             expect(() => {
 
-                const monitor = new Monitor(new Hapi.Server(), options);
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
             }).to.throw('test-reporter-two must specify events to filter on');
 
@@ -272,7 +203,7 @@ describe('Monitor', () => {
 
             expect(() => {
 
-                const monitor = new Monitor(new Hapi.Server(), options);
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
             }).to.throw('reporter [0] must specify events to filter on');
 
@@ -286,31 +217,36 @@ describe('Monitor', () => {
 
             const one = new GoodReporter({ log: '*' });
             const two = new GoodReporter({ ops: '*' });
-            const monitor = new Monitor(new Hapi.Server(), {
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: [one, two],
                 extensions: ['stop']
             });
 
-            monitor.once('stop', () => {
 
-                done();
-            });
-            monitor.start((err) => {
+            Insync.series([
+                monitor.start.bind(monitor),
+                (callback) => {
 
-                expect(err).to.not.exist();
+                    monitor.startOps(20000);
+                    return callback();
+                },
+                (callback) => {
 
-                monitor.stop();
+                    monitor.stop(() => {
 
-                expect(one.stopped).to.be.true();
-                expect(two.stopped).to.be.true();
+                        expect(one.stopped).to.be.true();
+                        expect(two.stopped).to.be.true();
 
-                expect([false, null]).to.contain(monitor._ops._interval._repeat);
-                expect(monitor._server.listeners('log')).to.have.length(0);
-                expect(monitor.listeners('ops')).to.have.length(0);
-                expect(monitor._server.listeners('internalError')).to.have.length(0);
-                expect(monitor._server.listeners('tail')).to.have.length(0);
-                expect(monitor._server.listeners('stop')).to.have.length(0);
-            });
+                        expect([false, null]).to.contain(monitor._ops._interval._repeat);
+                        expect(monitor._server.listeners('log')).to.have.length(0);
+                        expect(monitor.listeners('ops')).to.have.length(0);
+                        expect(monitor._server.listeners('internalError')).to.have.length(0);
+                        expect(monitor._server.listeners('tail')).to.have.length(0);
+                        expect(monitor._server.listeners('stop')).to.have.length(0);
+                        done();
+                    });
+                }
+            ]);
         });
     });
 
@@ -351,14 +287,14 @@ describe('Monitor', () => {
                 }, 10);
             });
 
-            const monitor = new Monitor(server, {
+            const monitor = internals.monitorFactory(server, {
                 reporters: [one, two, three]
             });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     Http.get(server.info.uri + '/?q=test', (res) => {
 
@@ -370,14 +306,14 @@ describe('Monitor', () => {
                             expect(events).to.only.include(['log', 'response', 'error', 'request']);
                             console.error = consoleError;
 
-                            next();
+                            callback();
                         }, 500);
                     });
                 }
             ], done);
         });
 
-        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', (done) => {
+        it(`provides additional information about 'response' events using 'requestHeaders','requestPayload', and 'responsePayload'`, (done) => {
 
             const server = new Hapi.Server();
             server.connection({ host: 'localhost' });
@@ -392,7 +328,7 @@ describe('Monitor', () => {
             });
 
             const one = new GoodReporter({ response: '*' });
-            const monitor = new Monitor(server, {
+            const monitor = internals.monitorFactory(server, {
                 reporters: [one],
                 requestHeaders: true,
                 requestPayload: true,
@@ -402,7 +338,7 @@ describe('Monitor', () => {
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     const req = Http.request({
                         hostname: '127.0.0.1',
@@ -428,7 +364,7 @@ describe('Monitor', () => {
                             data: 'example payload'
                         });
                         expect(response.responsePayload).to.equal('done');
-                        server.stop(next);
+                        server.stop(callback);
                     });
 
                     req.write(JSON.stringify({
@@ -438,23 +374,25 @@ describe('Monitor', () => {
                 }
             ], done);
         });
-        it('has a standard "ops" data object', (done) => {
+        it(`has a standard 'ops' data object`, (done) => {
 
             const server = new Hapi.Server();
             server.connection({ host: 'localhost' });
 
             const one = new GoodReporter({ ops: '*' });
-            const monitor = new Monitor(server, {
-                reporters: [one],
-                ops: {
-                    interval: 100
-                }
+            const monitor = internals.monitorFactory(server, {
+                reporters: [one]
             });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
+
+                    monitor.startOps(100);
+                    return callback();
+                },
+                (callback) => {
 
                     // Give the reporters time to report
                     setTimeout(() => {
@@ -463,13 +401,13 @@ describe('Monitor', () => {
 
                         const event = one.messages[0];
                         expect(event).to.be.an.instanceof(Utils.GreatOps);
-                        server.stop(next);
+                        server.stop(callback);
                     }, 150);
                 }
             ], done);
         });
 
-        it('has a standard "response" data object', (done) => {
+        it(`has a standard 'response' data object`, (done) => {
 
             const server = new Hapi.Server();
             server.connection({ host: 'localhost', labels: ['test', 'foo'] });
@@ -484,12 +422,12 @@ describe('Monitor', () => {
             });
 
             const one = new GoodReporter({ response: '*' });
-            const monitor = new Monitor(server, { reporters: [one] });
+            const monitor = internals.monitorFactory(server, { reporters: [one] });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     server.inject({
                         url: '/'
@@ -501,13 +439,13 @@ describe('Monitor', () => {
                         const event = one.messages[0];
 
                         expect(event).to.be.an.instanceof(Utils.GreatResponse);
-                        server.stop(next);
+                        server.stop(callback);
                     });
                 }
             ], done);
         });
 
-        it('has a standard "error" data object schema', (done) => {
+        it(`has a standard 'error' data object schema`, (done) => {
 
             const server = new Hapi.Server({ debug: false });
             server.connection({ host: 'localhost' });
@@ -522,12 +460,12 @@ describe('Monitor', () => {
             });
 
             const one = new GoodReporter({ error: '*' });
-            const monitor = new Monitor(server, { reporters: [one] });
+            const monitor = internals.monitorFactory(server, { reporters: [one] });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     server.inject({
                         url: '/'
@@ -539,13 +477,13 @@ describe('Monitor', () => {
                         const event = one.messages[0];
 
                         expect(event).to.be.an.instanceof(Utils.GreatError);
-                        server.stop(next);
+                        server.stop(callback);
                     });
                 }
             ], done);
         });
 
-        it('has a standard "log" data object', (done) => {
+        it(`has a standard 'log' data object`, (done) => {
 
             const server = new Hapi.Server();
             server.connection({ host: 'localhost' });
@@ -561,12 +499,12 @@ describe('Monitor', () => {
             });
 
             const one = new GoodReporter({ log: '*' });
-            const monitor = new Monitor(server, { reporters: [one] });
+            const monitor = internals.monitorFactory(server, { reporters: [one] });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     server.inject({
                         url: '/'
@@ -578,13 +516,13 @@ describe('Monitor', () => {
                         const event = one.messages[0];
 
                         expect(event).to.be.an.instanceof(Utils.GreatLog);
-                        server.stop(next);
+                        server.stop(callback);
                     });
                 }
             ], done);
         });
 
-        it('has a standard "request" event schema', (done) => {
+        it(`has a standard 'request' event schema`, (done) => {
 
             const server = new Hapi.Server();
             server.connection({ host: 'localhost' });
@@ -600,12 +538,12 @@ describe('Monitor', () => {
             });
 
             const one = new GoodReporter({ request: '*' });
-            const monitor = new Monitor(server, { reporters: [one] });
+            const monitor = internals.monitorFactory(server, { reporters: [one] });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     server.inject({
                         url: '/'
@@ -617,7 +555,7 @@ describe('Monitor', () => {
                         const event = one.messages[0];
 
                         expect(event).to.be.an.instanceof(Utils.GreatRequest);
-                        server.stop(next);
+                        server.stop(callback);
                     });
                 }
             ], done);
@@ -651,7 +589,7 @@ describe('Monitor', () => {
                 'request-internal': '*',
                 'super-secret': '*'
             });
-            const monitor = new Monitor(server, {
+            const monitor = internals.monitorFactory(server, {
                 reporters: [one],
                 extensions: ['start', 'stop', 'request-internal', 'super-secret']
             });
@@ -659,17 +597,17 @@ describe('Monitor', () => {
             Insync.series([
                 monitor.start.bind(monitor),
                 server.start.bind(server),
-                (next) => {
+                (callback) => {
 
                     server.inject({
                         url: '/'
                     }, () => {
 
-                        next();
+                        callback();
                     });
                 },
                 server.stop.bind(server),
-                (next) => {
+                (callback) => {
 
                     expect(one.messages).to.have.length(7);
 
@@ -702,7 +640,7 @@ describe('Monitor', () => {
                     expect(one.messages[6]).to.deep.equal({
                         event: 'stop'
                     });
-                    next();
+                    callback();
                 }
             ], done);
         });
@@ -736,12 +674,12 @@ describe('Monitor', () => {
             });
 
             const reporter = new GoodReporter({ wreck: '*' });
-            const monitor = new Monitor(server, { reporters: [reporter] });
+            const monitor = internals.monitorFactory(server, { reporters: [reporter] });
 
             Insync.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
-                (next) => {
+                (callback) => {
 
                     Wreck.get(server.connections[0].info.uri + '/', { rejectUnauthorized: false }, () => {
 
