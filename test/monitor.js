@@ -19,11 +19,11 @@ const GoodReporter = require('./helper');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
 
-// Delcare internals
+// Declare internals
 const internals = {
     monitorFactory(server, options) {
 
-        const defualts = {
+        const defaults = {
             responseEvent: 'tail',
             requestHeaders: false,
             requestPayload: false,
@@ -35,7 +35,7 @@ const internals = {
             },
             filter: {}
         };
-        return new Monitor(server, Object.assign({}, defualts, options));
+        return new Monitor(server, Object.assign({}, defaults, options));
     }
 };
 // Test shortcuts

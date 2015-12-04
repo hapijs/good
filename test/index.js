@@ -137,7 +137,7 @@ describe('good', () => {
         const plugin = {
             register: Good.register,
             options: {
-                responseEvent: 'fobar'
+                responseEvent: 'foobar'
             }
         };
         const server = new Hapi.Server();
