@@ -123,7 +123,7 @@ describe('Monitor', () => {
 
         it(`attaches events for 'ops', 'tail', 'log', and 'request-error'`, (done) => {
 
-            const monitor = internals.monitorFactory(new Hapi.Server(), { reporters: [new GoodReporter()]} );
+            const monitor = internals.monitorFactory(new Hapi.Server(), { reporters: [new GoodReporter()] } );
             monitor.start((error) => {
 
                 expect(error).to.not.exist();

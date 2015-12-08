@@ -10,7 +10,9 @@ class Reporter {
         this.handler = datahandler || function () {};
     }
     init(stream, emitter, callback) {
+
         stream.on('data', (data) => {
+
             if (this.events[data.event]) {
                 this.messages.push(data);
                 this.handler(data);
@@ -18,6 +20,7 @@ class Reporter {
         });
 
         stream.on('end', () => {
+
             this.stopped = true;
         });
 
