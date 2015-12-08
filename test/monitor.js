@@ -367,6 +367,7 @@ describe('Monitor', () => {
                 }
             ], done);
         });
+
         it(`has a standard 'ops' data object`, (done) => {
 
             const server = new Hapi.Server();
@@ -638,7 +639,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('reports on outbound wreck requests', { skip: false }, (done) => {
+        it('reports on outbound wreck requests', (done) => {
 
             const server = new Hapi.Server();
             const tls = {
@@ -699,6 +700,62 @@ describe('Monitor', () => {
                     });
                 }
             ], done);
+        });
+
+        it('attaches good data from the request.plugins.good and route good config to reporting objects', (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+            server.route({
+                path: '/',
+                method: 'GET',
+                config: {
+                    handler(request, reply) {
+
+                        request.plugins.good = {
+                            foo: 'baz',
+                            filter: true
+                        };
+                        reply();
+                        request.log(['test', { test: true }]);
+                    },
+                    plugins: {
+                        good: {
+                            foo: 'bar',
+                            zip: 'zap'
+                        }
+                    }
+                }
+            });
+
+            const reporter = new GoodReporter({ response: '*', request: '*' });
+            const monitor = internals.monitorFactory(server, { reporters: [reporter] });
+
+            Insync.series([
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    server.inject({
+                        url: server.info.uri
+                    }, (res) => {
+
+                        expect(res.statusCode).to.equal(200);
+                        expect(reporter.messages[0].config).to.deep.equal({
+                            foo: 'baz',
+                            filter: true,
+                            zip: 'zap'
+                        });
+                        expect(reporter.messages[1].config).to.deep.equal({
+                            foo: 'baz',
+                            filter: true,
+                            zip: 'zap'
+                        });
+                        callback();
+                    });
+                }
+            ], done);
+
+
         });
     });
 });
