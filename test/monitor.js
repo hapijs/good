@@ -123,14 +123,7 @@ describe('Monitor', () => {
 
         it(`attaches events for 'ops', 'tail', 'log', and 'request-error'`, (done) => {
 
-            const one = new GoodReporter();
-            one.start = (emitter, callback) => {
-
-                callback(null);
-            };
-            const monitor = internals.monitorFactory(new Hapi.Server(), {
-                reporters: [one]
-            });
+            const monitor = internals.monitorFactory(new Hapi.Server(), { reporters: [new GoodReporter()]} );
             monitor.start((error) => {
 
                 expect(error).to.not.exist();
@@ -213,15 +206,14 @@ describe('Monitor', () => {
 
     describe('stop()', () => {
 
-        it('cleans up open timeouts, removes event handlers, and emits a stop event', (done) => {
+        it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', (done) => {
 
             const one = new GoodReporter({ log: '*' });
             const two = new GoodReporter({ ops: '*' });
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: [one, two],
-                extensions: ['stop']
+                extensions: ['request-internal']
             });
-
 
             Insync.series([
                 monitor.start.bind(monitor),
@@ -243,10 +235,11 @@ describe('Monitor', () => {
                         expect(monitor._server.listeners('internalError')).to.have.length(0);
                         expect(monitor._server.listeners('tail')).to.have.length(0);
                         expect(monitor._server.listeners('stop')).to.have.length(0);
-                        done();
+
+                        callback();
                     });
                 }
-            ]);
+            ], done);
         });
     });
 
