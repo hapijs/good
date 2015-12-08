@@ -19,12 +19,12 @@ class Reporter {
             }
         });
 
-        emitter.once('stop', () => {
+        stream.on('end', () => {
 
             this.stopped = true;
         });
 
-        callback();
+        process.nextTick(callback);
     }
 }
 
