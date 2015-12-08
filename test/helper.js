@@ -10,21 +10,18 @@ class Reporter {
         this.handler = datahandler || function () {};
     }
     init(stream, emitter, callback) {
-
         stream.on('data', (data) => {
-
             if (this.events[data.event]) {
                 this.messages.push(data);
                 this.handler(data);
             }
         });
 
-        emitter.once('stop', () => {
-
+        stream.on('end', () => {
             this.stopped = true;
         });
 
-        callback();
+        process.nextTick(callback);
     }
 }
 
