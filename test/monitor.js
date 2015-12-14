@@ -791,6 +791,7 @@ describe('good', function () {
                 responseTime: Joi.number().integer().required(),
                 statusCode: Joi.number().integer().required(),
                 pid: Joi.number().integer().required(),
+                httpVersion: Joi.string().required(),
                 log: Joi.array().items(Joi.object())
             });
 
