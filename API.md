@@ -118,7 +118,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
 
 Optional properties controlled by the `options` argument into Good.
 
-- `headers` - the header object for the incomming request.
+- `headers` - the header object for the incoming request.
 - `requestPayload` - maps to `request.payload`.
 - `responsePayload` - maps to `request.response.source`.
 
@@ -156,7 +156,7 @@ Event object associated with the 'ops' event emitted from Good. `ops` is the agg
 Event object associated with the "request" event. This is the hapi event emitter via `request.log()`. `request` and `events` are the parameters passed by hapi when emitting the "request" event.
 
 - `event` - 'request'
-- `timestamp` - timestamp of the incomming `event` object.
+- `timestamp` - timestamp of the incoming `event` object.
 - `tags` - array of strings representing any tags associated with the 'log' event.
 - `data` - the string or object mapped to `event.data`.
 - `pid` - the current process id.
