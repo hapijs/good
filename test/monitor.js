@@ -30,9 +30,7 @@ const internals = {
             responsePayload: false,
             extensions: [],
             reporters: [],
-            ops: {
-                interval: 15000
-            },
+            ops: false,
             filter: {}
         };
         return new Monitor(server, Object.assign({}, defaults, options));
@@ -45,13 +43,11 @@ const expect = Code.expect;
 const describe = lab.describe;
 const it = lab.it;
 
-
-
 describe('Monitor', () => {
 
     it('logs an error if one occurs doing ops information collection', (done) => {
 
-        const monitor = internals.monitorFactory(new Hapi.Server());
+        const monitor = internals.monitorFactory(new Hapi.Server(), { ops: { interval: 15000 } });
         const error = console.error;
         console.error = (err) => {
 
@@ -63,6 +59,18 @@ describe('Monitor', () => {
 
             expect(err).to.not.exist();
             monitor._ops.emit('error', new Error('mock error'));
+        });
+    });
+
+    it('allows starting the monitor without the ops monitoring', (done) => {
+
+        const monitor = internals.monitorFactory(new Hapi.Server());
+        monitor.start((err) => {
+
+            expect(err).to.not.exist();
+            monitor.startOps(100);
+            expect(monitor._ops).to.be.false();
+            monitor.stop(done);
         });
     });
 
@@ -123,7 +131,7 @@ describe('Monitor', () => {
 
         it(`attaches events for 'ops', 'tail', 'log', and 'request-error'`, (done) => {
 
-            const monitor = internals.monitorFactory(new Hapi.Server(), { reporters: [new GoodReporter()] } );
+            const monitor = internals.monitorFactory(new Hapi.Server(), { reporters: [new GoodReporter()], ops: { interval: 15000 } } );
             monitor.start((error) => {
 
                 expect(error).to.not.exist();
@@ -212,7 +220,10 @@ describe('Monitor', () => {
             const two = new GoodReporter({ ops: '*' });
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: [one, two],
-                extensions: ['request-internal']
+                extensions: ['request-internal'],
+                ops: {
+                    interval: 1500
+                }
             });
 
             Insync.series([
@@ -375,7 +386,10 @@ describe('Monitor', () => {
 
             const one = new GoodReporter({ ops: '*' });
             const monitor = internals.monitorFactory(server, {
-                reporters: [one]
+                reporters: [one],
+                ops: {
+                    interval: 1500
+                }
             });
 
             Insync.series([

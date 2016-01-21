@@ -30,7 +30,7 @@
     "code": "2.x.x",
     "hapi": "10.x.x",
     "insync": "2.1.x",
-    "lab": "7.3.x"
+    "lab": "7.3.0"
   },
   "scripts": {
     "test": "lab -m 5000 -t 100 -v -La code",
