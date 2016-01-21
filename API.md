@@ -202,7 +202,7 @@ When creating a custom good reporter, it needs to implement the following interf
     - `stop` - always emitted when the hapi server is shutting down. Perform any tear-down logic in this event handler
 
 ```javascript
-var Squeeze = require('good-squeeze').Squeeze;
+var GoodSqueeze = require('good-squeeze')
 
 function GoodReporterExample (events, config) {
 
@@ -210,16 +210,21 @@ function GoodReporterExample (events, config) {
         return new GoodReporterExample(events, config);
     }
 
-    this.squeeze = Squeeze(events);
+    this.squeeze = GoodSqueeze.Squeeze(events);
+    this.safeJson = GoodSqueeze.SafeJson()
 }
 
 GoodReporterExample.prototype.init = function (readstream, emitter, callback) {
 
-    readstream.pipe(this.squeeze).pipe(process.stdout);
+    readstream
+    .pipe(this.squeeze) // filters events as configured above
+    .pipe(this.safeJson) // safely converts from object to a string, as stdout expects
+    .pipe(process.stdout);
+    
     emitter.on('stop', function () {
-
         console.log('some clean up logic.');
     });
+    
     callback();
 }
 
