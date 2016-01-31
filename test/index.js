@@ -5,6 +5,7 @@
 const Code = require('code');
 const Hapi = require('hapi');
 const Lab = require('lab');
+const Oppsy = require('oppsy');
 
 const Good = require('../lib');
 const GoodReporter = require('./helper');
@@ -20,26 +21,6 @@ const it = lab.it;
 
 
 describe('good', () => {
-
-    it('exposes the Monitor object', (done) => {
-
-        const plugin = {
-            register: Good.register,
-            options: {
-                reporters: [{
-                    reporter: GoodReporter,
-                    events: { response: '*' }
-                }]
-            }
-        };
-        const server = new Hapi.Server();
-        server.register(plugin, (err) => {
-
-            expect(err).to.not.exist();
-            expect(server.plugins.good.monitor).to.be.an.object();
-            done();
-        });
-    });
 
     it('starts the Monitor object during registration', (done) => {
 
@@ -85,15 +66,21 @@ describe('good', () => {
             }
         };
         const server = new Hapi.Server();
+        const start = Oppsy.prototype.start;
+
         server.register(plugin, (err) => {
 
             expect(err).to.not.exist();
+            Oppsy.prototype.start = (interval) => {
+
+                Oppsy.prototype.start = start;
+                expect(interval).to.equal(2000);
+                done();
+            };
             server.connection();
             server.start((err) => {
 
                 expect(err).to.not.exist();
-                expect(server.plugins.good.monitor._ops._interval._repeat).to.be.a.function();
-                done();
             });
         });
     });
@@ -169,12 +156,11 @@ describe('good', () => {
         server.register(plugin, (err) => {
 
             expect(err).to.not.exist();
-            expect(server.plugins.good.monitor._dataStream.listeners('data')).to.have.length(2);
             done();
         });
     });
 
-    it('supports passing a module name or path for the reporter function', (done) => {
+    it('supports passing a path for the reporter function', (done) => {
 
         const plugin = {
             register: Good.register,
@@ -191,7 +177,6 @@ describe('good', () => {
         server.register(plugin, (err) => {
 
             expect(err).to.not.exist();
-            expect(server.plugins.good.monitor._dataStream.listeners('data')).to.have.length(1);
             done();
         });
     });
@@ -209,7 +194,6 @@ describe('good', () => {
         server.register(plugin, (err) => {
 
             expect(err).to.not.exist();
-            expect(server.plugins.good.monitor._dataStream.listeners('data')).to.have.length(0);
             done();
         });
     });
