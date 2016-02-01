@@ -4,7 +4,7 @@
 
 [![Build Status](https://secure.travis-ci.org/hapijs/good.svg)](http://travis-ci.org/hapijs/good)![Current Version](https://img.shields.io/npm/v/good.svg)
 
-Lead Maintainer: [Lloyd Benson](https://github.com/lloydbenson)
+Lead Maintainer: [Adam Bretz](https://github.com/arb)
 
 
 **good** is a Hapi process monitor. It listens for events emitted by Hapi Server instances and allows custom reporters to be registered that output subscribed events.
