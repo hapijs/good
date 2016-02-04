@@ -110,6 +110,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
 - `responseTime` - calculated value of `Date.now() - request.info.received`.
 - `statusCode` - the status code of the response.
 - `pid` - the current process id.
+- `httpVersion` - the http protocol information from the request.
 - `source` - object with the following values:
     - `remoteAddress` - information about the remote address. maps to `request.info.remoteAddress`
     - `userAgent` - the user agent of the incoming request.
