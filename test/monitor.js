@@ -648,6 +648,62 @@ describe('good', function () {
             });
         });
 
+        it('filters query per the filter rules', function (done) {
+
+            var server = new Hapi.Server();
+            server.connection({ host: 'localhost' });
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) {
+
+                    reply({});
+                }
+            });
+
+            var one = new GoodReporter({ response: '*' });
+            var plugin = {
+                register: require('../lib/index').register,
+                options: {
+                    reporters: [one],
+                    requestPayload: true,
+                    responsePayload: true,
+                    filter: {
+                        access_token: 'censor'
+                    }
+                }
+            };
+
+            server.register(plugin, function () {
+
+                server.start(function () {
+
+                    var req = Http.request({
+                        hostname: '127.0.0.1',
+                        port: server.info.port,
+                        method: 'GET',
+                        path: '/?access_token=abcd123',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }, function (res) {
+
+                        var messages = one.messages;
+                        var response = messages[0];
+
+                        expect(res.statusCode).to.equal(200);
+                        expect(messages).to.have.length(1);
+                        expect(response.query).to.deep.equal({
+                            access_token: 'XXXXXXX'
+                        });
+                        done();
+                    });
+
+                    req.end();
+                });
+            });
+        });
+
         it('does not send an "ops" event if an error occurs during information gathering', function (done) {
 
             var options = {

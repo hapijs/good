@@ -19,6 +19,9 @@ server.connection({ host: 'localhost' });
 
 var options = {
     opsInterval: 1000,
+    filter:{
+        access_token: 'censor'
+    },
     reporters: [{
         reporter: require('good-console'),
         events: { log: '*', response: '*' }
