@@ -372,7 +372,11 @@ describe('good', function () {
                 expect(monitor._server.listeners('internalError')).to.have.length(0);
                 expect(monitor._server.listeners('tail')).to.have.length(0);
 
-                done();
+                setTimeout(function () {
+                    expect(one.streamEnded).to.be.true();
+                    expect(two.streamEnded).to.be.true();
+                    done();
+                }, 0);
             });
         });
 
