@@ -372,12 +372,37 @@ describe('good', function () {
                 expect(monitor._server.listeners('internalError')).to.have.length(0);
                 expect(monitor._server.listeners('tail')).to.have.length(0);
 
-                setTimeout(function () {
+                done();
+            });
+        });
 
-                    expect(one.streamEnded).to.be.true();
-                    expect(two.streamEnded).to.be.true();
-                    done();
-                }, 0);
+        it('should end the dataStream', function (done) {
+
+            var monitor;
+            var options = {};
+            var reporter = {
+                init: function (stream, emitter, callback) {
+
+                    stream.on('data', function () {
+                    });
+
+                    stream.on('end', function () {
+
+                        done();
+                    });
+
+                    callback();
+                }
+            };
+
+            options.reporters = [reporter];
+
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (err) {
+
+                expect(err).to.not.exist();
+
+                monitor.stop();
             });
         });
 
