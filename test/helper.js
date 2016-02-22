@@ -20,6 +20,7 @@ internals.Reporter.prototype.init = function (stream, emitter, callback) {
     });
 
     stream.on('end', function () {
+
         self.streamEnded = true;
     });
 

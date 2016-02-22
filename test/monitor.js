@@ -373,6 +373,7 @@ describe('good', function () {
                 expect(monitor._server.listeners('tail')).to.have.length(0);
 
                 setTimeout(function () {
+
                     expect(one.streamEnded).to.be.true();
                     expect(two.streamEnded).to.be.true();
                     done();
