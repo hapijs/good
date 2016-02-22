@@ -376,6 +376,36 @@ describe('good', function () {
             });
         });
 
+        it('should end the dataStream', function (done) {
+
+            var monitor;
+            var options = {};
+            var reporter = {
+                init: function (stream, emitter, callback) {
+
+                    stream.on('data', function () {
+                    });
+
+                    stream.on('end', function () {
+
+                        done();
+                    });
+
+                    callback();
+                }
+            };
+
+            options.reporters = [reporter];
+
+            monitor = new Monitor(new Hapi.Server(), options);
+            monitor.start(function (err) {
+
+                expect(err).to.not.exist();
+
+                monitor.stop();
+            });
+        });
+
         it('is called on the "stop" server event', function (done) {
 
             var plugin = {
