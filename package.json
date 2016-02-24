@@ -16,11 +16,11 @@
     "node": ">=0.10.x"
   },
   "dependencies": {
-    "hoek": "^3.0.4",
-    "items": "^2.0.0",
-    "joi": "^8.0.2",
+    "hoek": "3.X.X",
+    "items": "2.X.X",
+    "joi": "8.X.X",
     "traverse": "0.6.6",
-    "wreck": "^7.0.0"
+    "wreck": "7.X.X"
   },
   "peerDependencies": {
     "hapi": ">=8.x.x"
