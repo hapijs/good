@@ -3,11 +3,10 @@
 const Stream = require('stream');
 
 class Incrementer extends Stream.Transform {
-    constructor(starting, multiple) {
+    constructor(starting) {
 
         super({ objectMode: true });
         this.starting = starting;
-        this.multiple = multiple || 1;
         this.once('end', () => this._finalized = true);
     }
     _transform(value, encoding, callback) {
@@ -59,7 +58,7 @@ class Writer extends Stream.Writable {
     _write(chunk, end, callback) {
 
         this.data.push(chunk);
-        callback();
+        callback(null);
     }
 }
 
