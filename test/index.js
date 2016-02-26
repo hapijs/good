@@ -8,24 +8,24 @@ const Lab = require('lab');
 const Oppsy = require('oppsy');
 
 const Good = require('../lib');
-const GoodReporter = require('./reporters');
+const GoodReporter = require('./fixtures/reporters');
 const Monitor = require('../lib/monitor');
 
 const reporters = {
     foo:[{
         ctor: {
-            module: '../test/reporters',
+            module: '../test/fixtures/reporters',
             name: 'Incrementer',
             args: [10, 5]
         }
     }, {
         ctor: {
-            module: '../test/reporters',
+            module: '../test/fixtures/reporters',
             name: 'Stringify'
         }
     }, {
         ctor: {
-            module: '../test/reporters',
+            module: '../test/fixtures/reporters',
             name: 'Writer'
         }
     }]
@@ -156,11 +156,11 @@ describe('good', () => {
                 responseEvent: 'response',
                 reporters: {
                     'foo':[
-                        new GoodReporter.Incrementer(2, 10),
-                        new GoodReporter.Incrementer(4, 1),
-                        '../test/reporter', {
+                        new GoodReporter.Incrementer(2),
+                        new GoodReporter.Incrementer(4),
+                        '../test/fixtures/reporter', {
                             ctor: {
-                                module: '../test/reporters',
+                                module: '../test/fixtures/reporters',
                                 name: 'Writer'
                             }
                         }

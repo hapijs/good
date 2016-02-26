@@ -14,10 +14,8 @@ const Wreck = require('wreck');
 // Done for testing because Wreck is a singleton and every test run ads one event to it
 Wreck.setMaxListeners(0);
 
-//TODO error on only one stream se this pumps objects, nothing really works with JUST objects
-
-const GoodReporter = require('./reporters');
-let Stringify = require('./reporter');
+const GoodReporter = require('./fixtures/reporters');
+let Stringify = require('./fixtures/reporter');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
 
@@ -102,12 +100,12 @@ describe('Monitor', () => {
                 reporters: {
                     foo: [{
                         ctor: {
-                            module: '../test/reporters',
+                            module: '../test/fixtures/reporters',
                             name: 'Incrementer',
                             args: [10, 5]
                         }
                     },
-                    '../test/reporter']
+                    '../test/fixtures/reporter']
                 }
             });
 
@@ -121,7 +119,7 @@ describe('Monitor', () => {
 
         it('calls the start methods of any reporter that has one', (done) => {
 
-            const reporterOne = new GoodReporter.Incrementer(1, 2);
+            const reporterOne = new GoodReporter.Incrementer(1);
             reporterOne.start = function (one, two, three, callback) {
 
                 expect(one).to.be.true();
@@ -133,7 +131,7 @@ describe('Monitor', () => {
             };
             reporterOne.start.args = [true, 'foo', false];
 
-            const reporterTwo = new GoodReporter.Incrementer(4,5);
+            const reporterTwo = new GoodReporter.Incrementer(4);
             reporterTwo.start = function (callback) {
 
                 expect(callback).to.be.a.function();
@@ -158,7 +156,7 @@ describe('Monitor', () => {
                         reporterOne,
                         reporterTwo, {
                             ctor: {
-                                module: '../test/reporters',
+                                module: '../test/fixtures/reporters',
                                 name: 'Stringify'
                             },
                             start: [false, 'test']
@@ -178,7 +176,7 @@ describe('Monitor', () => {
 
         it(`callsback with an error if a there is an error in a reporter 'start' method`, (done) => {
 
-            const one = new GoodReporter.Incrementer(1,2);
+            const one = new GoodReporter.Incrementer(1);
             one.start = function (callback) {
 
                 expect(this).to.equal(one);
@@ -201,7 +199,7 @@ describe('Monitor', () => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [new GoodReporter.Incrementer(1,2), new GoodReporter.Stringify()]
+                    foo: [new GoodReporter.Incrementer(1), new GoodReporter.Stringify()]
                 },
                 ops: 15000
             });
@@ -223,7 +221,7 @@ describe('Monitor', () => {
                 reporters: {
                     foo: [{
                         ctor: {
-                            module: '../test/reporters',
+                            module: '../test/fixtures/reporters',
                             name: 'NotConstructor'
                         }
                     }]
@@ -234,19 +232,19 @@ describe('Monitor', () => {
 
                 const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
-            }).to.throw(Error, 'Error in foo. ../test/reporters must be a constructor function.');
+            }).to.throw(Error, 'Error in foo. ../test/fixtures/reporters must be a constructor function.');
 
             expect(() => {
 
                 options.reporters.foo = [{
                     ctor: {
-                        module: '../test/reporters',
+                        module: '../test/fixtures/reporters',
                         name: 'NotStream'
                     }
                 }];
                 const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
-            }).to.throw(Error, 'Error in foo. ../test/reporters must create a stream that has a pipe function.');
+            }).to.throw(Error, 'Error in foo. ../test/fixtures/reporters must create a stream that has a pipe function.');
 
             done();
         });
@@ -261,8 +259,8 @@ describe('Monitor', () => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [new GoodReporter.Incrementer(5, 1), out1],
-                    bar: [new GoodReporter.Incrementer(99, 1), out2]
+                    foo: [new GoodReporter.Incrementer(5), out1],
+                    bar: [new GoodReporter.Incrementer(99), out2]
                 }
             });
 
@@ -316,7 +314,7 @@ describe('Monitor', () => {
 
         it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', (done) => {
 
-            const one = new GoodReporter.Incrementer(1,2);
+            const one = new GoodReporter.Incrementer(1);
             const two = new GoodReporter.Stringify();
             const three = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(new Hapi.Server(), {
