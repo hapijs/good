@@ -8,8 +8,28 @@ const Lab = require('lab');
 const Oppsy = require('oppsy');
 
 const Good = require('../lib');
-const GoodReporter = require('./helper');
+const GoodReporter = require('./fixtures/reporters');
 const Monitor = require('../lib/monitor');
+
+const reporters = {
+    foo:[{
+        ctor: {
+            module: '../test/fixtures/reporters',
+            name: 'Incrementer',
+            args: [10, 5]
+        }
+    }, {
+        ctor: {
+            module: '../test/fixtures/reporters',
+            name: 'Stringify'
+        }
+    }, {
+        ctor: {
+            module: '../test/fixtures/reporters',
+            name: 'Writer'
+        }
+    }]
+};
 
 
 // Test shortcuts
@@ -27,10 +47,7 @@ describe('good', () => {
         const plugin = {
             register: Good.register,
             options: {
-                reporters: [{
-                    reporter: GoodReporter,
-                    events: { response: '*' }
-                }]
+                reporters
             }
         };
         const server = new Hapi.Server();
@@ -56,10 +73,7 @@ describe('good', () => {
         const plugin = {
             register: Good.register,
             options: {
-                reporters: [{
-                    reporter: GoodReporter,
-                    events: { response: '*' }
-                }],
+                reporters,
                 ops: {
                     interval: 2000
                 }
@@ -90,10 +104,7 @@ describe('good', () => {
         const plugin = {
             register: Good.register,
             options: {
-                reporters: [{
-                    reporter: GoodReporter,
-                    events: { response: '*' }
-                }]
+                reporters
             }
         };
         const server = new Hapi.Server();
@@ -143,42 +154,23 @@ describe('good', () => {
             register: Good.register,
             options: {
                 responseEvent: 'response',
-                reporters: [
-                    new GoodReporter({ ops: '*' }), {
-                        reporter: GoodReporter,
-                        events: { ops: '*' }
-                    }
-                ]
+                reporters: {
+                    foo: [
+                        new GoodReporter.Incrementer(2),
+                        new GoodReporter.Incrementer(4),
+                        '../test/fixtures/reporter', {
+                            ctor: {
+                                module: '../test/fixtures/reporters',
+                                name: 'Writer'
+                            }
+                        }
+                    ]
+                }
             }
         };
         const server = new Hapi.Server();
 
-        server.register(plugin, (err) => {
-
-            expect(err).to.not.exist();
-            done();
-        });
-    });
-
-    it('supports passing a path for the reporter function', (done) => {
-
-        const plugin = {
-            register: Good.register,
-            options: {
-                responseEvent: 'response',
-                reporters: [{
-                    reporter: '../test/helper',
-                    events: { log: '*' }
-                }]
-            }
-        };
-        const server = new Hapi.Server();
-
-        server.register(plugin, (err) => {
-
-            expect(err).to.not.exist();
-            done();
-        });
+        server.register(plugin, done);
     });
 
     it('allows starting with no reporters', (done) => {
@@ -191,11 +183,7 @@ describe('good', () => {
         };
         const server = new Hapi.Server();
 
-        server.register(plugin, (err) => {
-
-            expect(err).to.not.exist();
-            done();
-        });
+        server.register(plugin, done);
     });
 
     it('throws an error if invalid extension events are used', (done) => {
