@@ -155,7 +155,7 @@ describe('good', () => {
             options: {
                 responseEvent: 'response',
                 reporters: {
-                    'foo':[
+                    foo: [
                         new GoodReporter.Incrementer(2),
                         new GoodReporter.Incrementer(4),
                         '../test/fixtures/reporter', {
@@ -170,11 +170,7 @@ describe('good', () => {
         };
         const server = new Hapi.Server();
 
-        server.register(plugin, (err) => {
-
-            expect(err).to.not.exist();
-            done();
-        });
+        server.register(plugin, done);
     });
 
     it('allows starting with no reporters', (done) => {
@@ -187,11 +183,7 @@ describe('good', () => {
         };
         const server = new Hapi.Server();
 
-        server.register(plugin, (err) => {
-
-            expect(err).to.not.exist();
-            done();
-        });
+        server.register(plugin, done);
     });
 
     it('throws an error if invalid extension events are used', (done) => {

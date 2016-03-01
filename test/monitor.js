@@ -88,12 +88,12 @@ describe('Monitor', () => {
                 return new Inc(starting, multiple);
             };
 
-            const Strng = Stringify;
+            const stringify = Stringify;
             Stringify = function (options) {
 
-                Stringify = Strng;
+                Stringify = stringify;
                 expect(options).to.be.undefined();
-                return new Strng(options);
+                return new stringify(options);
             };
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
@@ -120,16 +120,12 @@ describe('Monitor', () => {
         it('calls the start methods of any reporter that has one', (done) => {
 
             const reporterOne = new GoodReporter.Incrementer(1);
-            reporterOne.start = function (one, two, three, callback) {
+            reporterOne.start = function (callback) {
 
-                expect(one).to.be.true();
-                expect(two).to.equal('foo');
-                expect(three).to.be.false();
                 expect(callback).to.be.a.function();
                 expect(this).to.equal(reporterOne);
                 return callback();
             };
-            reporterOne.start.args = [true, 'foo', false];
 
             const reporterTwo = new GoodReporter.Incrementer(4);
             reporterTwo.start = function (callback) {
@@ -139,14 +135,12 @@ describe('Monitor', () => {
                 return callback();
             };
 
-            const realStart = GoodReporter.Stringify.prototype.start;
-            GoodReporter.Stringify.prototype.start = function (one, two, callback) {
+            const realStart = Stringify.prototype.start;
+            Stringify.prototype.start = function (callback) {
 
-                GoodReporter.Stringify.prototype.start = realStart;
-                expect(one).to.be.false();
-                expect(two).to.equal('test');
+                Stringify.prototype.start = realStart;
                 expect(callback).to.be.a.function();
-                expect(this).to.be.an.instanceof(GoodReporter.Stringify);
+                expect(this).to.be.an.instanceof(Stringify);
                 realStart(callback);
             };
 
@@ -158,8 +152,7 @@ describe('Monitor', () => {
                             ctor: {
                                 module: '../test/fixtures/reporters',
                                 name: 'Stringify'
-                            },
-                            start: [false, 'test']
+                            }
                         }
                     ]
                 }
@@ -174,7 +167,7 @@ describe('Monitor', () => {
         });
 
 
-        it(`callsback with an error if a there is an error in a reporter 'start' method`, (done) => {
+        it(`calls back with an error if a there is an error in a reporter 'start' method`, (done) => {
 
             const one = new GoodReporter.Incrementer(1);
             one.start = function (callback) {
@@ -215,7 +208,7 @@ describe('Monitor', () => {
             });
         });
 
-        it('validates the incomming stream object instances', (done) => {
+        it('validates the incoming stream object instances', (done) => {
 
             const options = {
                 reporters: {
@@ -360,7 +353,6 @@ describe('Monitor', () => {
         it('sends events to all reporters when they occur', (done) => {
 
             const server = new Hapi.Server({ debug: false });
-            //server.connection({ host: 'localhost' });
             server.connection();
 
             server.route({
@@ -413,8 +405,6 @@ describe('Monitor', () => {
                         expect(res.statusCode).to.equal(500);
                         const res1 = out1.data;
                         const res2 = out2.data;
-
-                        //console.log(res1);
 
                         expect(res1).to.have.length(4);
                         expect(res1).to.deep.contain([{
@@ -936,8 +926,6 @@ describe('Monitor', () => {
                     });
                 }
             ], done);
-
-
         });
     });
 });

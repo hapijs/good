@@ -34,7 +34,7 @@
     "lab": "7.3.0"
   },
   "scripts": {
-    "test": "lab -m 5000 -t 100 -v -La code || node -e ''",
+    "test": "lab -m 5000 -t 100 -v -La code",
     "test-cov-html": "lab -m 5000 -r html -o coverage.html -La code"
   },
   "license": "BSD-3-Clause"
