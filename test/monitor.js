@@ -15,7 +15,7 @@ const Wreck = require('wreck');
 Wreck.setMaxListeners(0);
 
 const GoodReporter = require('./fixtures/reporters');
-let Stringify = require('./fixtures/reporter');
+const Stringify = require('./fixtures/reporter');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
 
@@ -88,12 +88,11 @@ describe('Monitor', () => {
                 return new Inc(starting, multiple);
             };
 
-            const stringify = Stringify;
-            Stringify = function (options) {
+            require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = function (options) {
 
-                Stringify = stringify;
+                require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = Stringify;
                 expect(options).to.be.undefined();
-                return new stringify(options);
+                return new Stringify(options);
             };
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
@@ -135,12 +134,12 @@ describe('Monitor', () => {
                 return callback();
             };
 
-            const realStart = Stringify.prototype.start;
-            Stringify.prototype.start = function (callback) {
+            const realStart = GoodReporter.Stringify.prototype.start;
+            GoodReporter.Stringify.prototype.start = function (callback) {
 
                 Stringify.prototype.start = realStart;
                 expect(callback).to.be.a.function();
-                expect(this).to.be.an.instanceof(Stringify);
+                expect(this).to.be.an.instanceof(GoodReporter.Stringify);
                 realStart(callback);
             };
 
