@@ -1,159 +1,212 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Lab = require('lab');
-var Utils = require('../lib/utils');
-
-
-// Declare internals
-
-var internals = {};
+const Code = require('code');
+const Lab = require('lab');
+const Hoek = require('hoek');
+const Utils = require('../lib/utils');
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var expect = Code.expect;
-var describe = lab.describe;
-var it = lab.it;
+const lab = exports.lab = Lab.script();
+const expect = Code.expect;
+const describe = lab.describe;
+const it = lab.it;
 
 
-describe('utils', function () {
+describe('utils', () => {
 
-    describe('makeContinuation()', function () {
+    describe('GreatWreck()', () => {
 
-        it('successfully creates a continuation function', function (done) {
+        it('handles a null request and response', (done) => {
 
-            var method = Utils.makeContinuation(function () {
-
-                return true;
-            });
-
-            method(function (err, value) {
-
-                expect(err).to.not.exist();
-                expect(value).to.be.true();
-                done();
-            });
-        });
-    });
-
-    describe('GreatWreck()', function () {
-
-        it('handles a null request and response', function (done) {
-
-            var greatWreck = new Utils.GreatWreck();
+            const greatWreck = new Utils.GreatWreck();
             expect(greatWreck.request).to.exist();
             expect(greatWreck.response).to.exist();
             done();
         });
 
-        it('reports on errors', function (done) {
+        it('reports on errors', (done) => {
 
-            var error = new Error('my error');
-            var greatWreck = new Utils.GreatWreck(error);
+            const error = new Error('my error');
+            const greatWreck = new Utils.GreatWreck(error);
 
             expect(greatWreck.error.message).to.equal('my error');
             done();
         });
 
-        it('contains the current pid', function (done) {
+        it('contains the current pid', (done) => {
 
-            var greatWreck = new Utils.GreatWreck();
+            const greatWreck = new Utils.GreatWreck();
 
             expect(greatWreck.pid).to.equal(process.pid);
             done();
         });
     });
 
-    describe('GreatResponse()', function () {
+    describe('GreatResponse()', () => {
 
-        var generateGreatResponse = function (requestPayload, responsePayload, nullResponse) {
+        const _request = {
+            id: '1429974169154:localhost:10578:i8x5ousn:10000',
+            raw: {
+                req: {
+                    headers: {
+                        'user-agent': 'Paw/2.2.1 (Macintosh; OS X/10.10.3) GCDHTTPRequest'
+                    }
+                },
+                res: {
+                    statusCode: 200
+                }
+            },
+            info: {
+                received: 1429974169154,
+                remoteAddress: '127.0.0.1'
+            },
+            method: 'POST',
+            path: '/',
+            query: {},
+            responseTime: 123,
+            connection: {
+                settings: {
+                    labels: []
+                },
+                info: {
+                    uri: 'http://localhost:3000'
+                }
+            },
+            getLog: () => {
 
-            var filterRules = {
+                return {};
+            }
+        };
+
+        const generateGreatResponse = (requestPayload, responsePayload, nullResponse) => {
+
+            const filterRules = {
                 password: 'censor'
             };
 
-            var options = {
+            const options = {
                 requestHeaders: true,
                 requestPayload: true,
                 responsePayload: true
             };
 
-            var request = {
-                id: '1429974169154:localhost:10578:i8x5ousn:10000',
-                raw: {
-                    req: {
-                        headers: {
-                            'user-agent': 'Paw/2.2.1 (Macintosh; OS X/10.10.3) GCDHTTPRequest'
-                        }
-                    },
-                    res: {
-                        statusCode: 200
-                    }
-                },
-                info: {
-                    received: 1429974169154,
-                    remoteAddress: '127.0.0.1'
-                },
-                method: 'POST',
-                path: '/',
-                query: {},
-                responseTime: 123,
-                connection: {
-                    settings: {
-                        labels: []
-                    },
-                    info: {
-                        uri: 'http://localhost:3000'
-                    }
-                },
-                payload: requestPayload,
-                response: nullResponse ? null : {
-                    source: responsePayload
-                },
-                getLog: function () {
-
-                    return {};
-                }
+            const request = Hoek.clone(_request);
+            request.payload = requestPayload;
+            request.response = nullResponse ? null : {
+                source: responsePayload
             };
+
             return new Utils.GreatResponse(request, options, filterRules);
         };
 
-        it('handles empty request payloads', function (done) {
+        it('handles response payloads with a toString() function', (done) => {
 
-            var sampleResponsePayload = { message: 'test' };
-            generateGreatResponse(null, sampleResponsePayload);
-            generateGreatResponse({}, sampleResponsePayload);
-            generateGreatResponse(undefined, sampleResponsePayload);
-            generateGreatResponse('string payload', sampleResponsePayload);
-            generateGreatResponse('', sampleResponsePayload);
-            done();
-        });
-
-        it('handles empty response payloads', function (done) {
-
-            var sampleRequestPayload = { message: 'test' };
-            generateGreatResponse(sampleRequestPayload, null);
-            generateGreatResponse(sampleRequestPayload, {});
-            generateGreatResponse(sampleRequestPayload, undefined);
-            generateGreatResponse(sampleRequestPayload, 'string payload');
-            generateGreatResponse(sampleRequestPayload, '');
-            generateGreatResponse(sampleRequestPayload, null, true);
-            done();
-        });
-
-        it('handles response payloads with a toString() function', function (done) {
-
-            var samplePayload = {
+            const samplePayload = {
                 message: 'test',
-                toString: function () {
+                toString: () => {
 
                 }
             };
 
-            generateGreatResponse(samplePayload, '');
-            generateGreatResponse('', samplePayload);
+            const req = generateGreatResponse(samplePayload, '');
+            expect(req.requestPayload).to.deep.equal(samplePayload);
+            const res = generateGreatResponse('', samplePayload);
+            expect(res.responsePayload).to.deep.equal(samplePayload);
+            done();
+        });
+
+        it('filters request payloads', (done) => {
+
+            const request = Hoek.clone(_request);
+            request.payload = {
+                password: 12345,
+                email: 'adam@hapijs.com'
+            };
+            request.response = {
+                source: {
+                    first: 'John',
+                    last: 'Smith',
+                    ccn: '9999999999',
+                    line: 'foo',
+                    userId: 555645465,
+                    address: {
+                        line: ['123 Main street', 'Apt 200', 'Suite 100'],
+                        bar: {
+                            line: '123',
+                            extra: 123456
+                        },
+                        city: 'Pittsburgh',
+                        last: 'Jones',
+                        foo: [{
+                            email: 'adam@hapijs.com',
+                            baz: 'another string',
+                            line: 'another string'
+                        }]
+                    }
+                }
+            };
+
+            const data = new Utils.GreatResponse(request, {
+                requestPayload: true,
+                responsePayload: true
+            }, {
+                last: 'censor',
+                password: 'censor',
+                email: 'remove',
+                ccn: '(\\d{4})$',
+                userId: '(645)',
+                city: '(\\w?)',
+                line: 'censor'
+            });
+
+            expect(data.requestPayload).to.deep.equal({
+                password: 'XXXXX'
+            });
+            expect(data.responsePayload).to.deep.equal({
+                first: 'John',
+                last: 'XXXXX',
+                ccn: '999999XXXX',
+                userId: '555XXX465',
+                line: 'XXX',
+                address: {
+                    line: ['XXXXXXXXXXXXXXX', 'XXXXXXX', 'XXXXXXXXX'],
+                    bar: {
+                        line: 'XXX',
+                        extra: 123456
+                    },
+                    city: 'Xittsburgh',
+                    last: 'XXXXX',
+                    foo: [{
+                        baz: 'another string',
+                        line: 'XXXXXXXXXXXXXX'
+                    }]
+                }
+            });
+            done();
+        });
+    });
+
+    describe('GreatError()', () => {
+
+        it('can base stringifyed', (done) => {
+
+            const err = new Utils.GreatError({
+                id: 15,
+                url: 'http://localhost:9001',
+                method: 'PUT',
+                pid: 99,
+                info: {
+                    received: Date.now()
+                }
+            }, new Error('mock error'));
+
+            const parse = JSON.parse(JSON.stringify(err));
+            expect(parse.error).to.be.an.object();
+            expect(parse.error.stack).to.be.a.string();
             done();
         });
     });
