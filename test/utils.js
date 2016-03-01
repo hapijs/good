@@ -84,10 +84,6 @@ describe('utils', () => {
 
         const generateGreatResponse = (requestPayload, responsePayload, nullResponse) => {
 
-            const filterRules = {
-                password: 'censor'
-            };
-
             const options = {
                 requestHeaders: true,
                 requestPayload: true,
@@ -100,7 +96,7 @@ describe('utils', () => {
                 source: responsePayload
             };
 
-            return new Utils.GreatResponse(request, options, filterRules);
+            return new Utils.GreatResponse(options, request);
         };
 
         it('handles response payloads with a toString() function', (done) => {
@@ -116,76 +112,6 @@ describe('utils', () => {
             expect(req.requestPayload).to.deep.equal(samplePayload);
             const res = generateGreatResponse('', samplePayload);
             expect(res.responsePayload).to.deep.equal(samplePayload);
-            done();
-        });
-
-        it('filters request payloads', (done) => {
-
-            const request = Hoek.clone(_request);
-            request.payload = {
-                password: 12345,
-                email: 'adam@hapijs.com'
-            };
-            request.response = {
-                source: {
-                    first: 'John',
-                    last: 'Smith',
-                    ccn: '9999999999',
-                    line: 'foo',
-                    userId: 555645465,
-                    address: {
-                        line: ['123 Main street', 'Apt 200', 'Suite 100'],
-                        bar: {
-                            line: '123',
-                            extra: 123456
-                        },
-                        city: 'Pittsburgh',
-                        last: 'Jones',
-                        foo: [{
-                            email: 'adam@hapijs.com',
-                            baz: 'another string',
-                            line: 'another string'
-                        }]
-                    }
-                }
-            };
-
-            const data = new Utils.GreatResponse(request, {
-                requestPayload: true,
-                responsePayload: true
-            }, {
-                last: 'censor',
-                password: 'censor',
-                email: 'remove',
-                ccn: '(\\d{4})$',
-                userId: '(645)',
-                city: '(\\w?)',
-                line: 'censor'
-            });
-
-            expect(data.requestPayload).to.deep.equal({
-                password: 'XXXXX'
-            });
-            expect(data.responsePayload).to.deep.equal({
-                first: 'John',
-                last: 'XXXXX',
-                ccn: '999999XXXX',
-                userId: '555XXX465',
-                line: 'XXX',
-                address: {
-                    line: ['XXXXXXXXXXXXXXX', 'XXXXXXX', 'XXXXXXXXX'],
-                    bar: {
-                        line: 'XXX',
-                        extra: 123456
-                    },
-                    city: 'Xittsburgh',
-                    last: 'XXXXX',
-                    foo: [{
-                        baz: 'another string',
-                        line: 'XXXXXXXXXXXXXX'
-                    }]
-                }
-            });
             done();
         });
     });
