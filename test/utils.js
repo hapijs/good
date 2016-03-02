@@ -18,11 +18,11 @@ const it = lab.it;
 
 describe('utils', () => {
 
-    describe('GreatWreck()', () => {
+    describe('Wreck()', () => {
 
         it('handles a null request and response', (done) => {
 
-            const greatWreck = new Utils.GreatWreck();
+            const greatWreck = new Utils.Wreck();
             expect(greatWreck.request).to.exist();
             expect(greatWreck.response).to.exist();
             done();
@@ -31,7 +31,7 @@ describe('utils', () => {
         it('reports on errors', (done) => {
 
             const error = new Error('my error');
-            const greatWreck = new Utils.GreatWreck(error);
+            const greatWreck = new Utils.Wreck(error);
 
             expect(greatWreck.error.message).to.equal('my error');
             done();
@@ -39,14 +39,14 @@ describe('utils', () => {
 
         it('contains the current pid', (done) => {
 
-            const greatWreck = new Utils.GreatWreck();
+            const greatWreck = new Utils.Wreck();
 
             expect(greatWreck.pid).to.equal(process.pid);
             done();
         });
     });
 
-    describe('GreatResponse()', () => {
+    describe('RequestSent()', () => {
 
         const _request = {
             id: '1429974169154:localhost:10578:i8x5ousn:10000',
@@ -82,12 +82,15 @@ describe('utils', () => {
             }
         };
 
-        const generateGreatResponse = (requestPayload, responsePayload, nullResponse) => {
+        const generateRequestSent = (requestPayload, responsePayload, nullResponse) => {
 
-            const options = {
-                requestHeaders: true,
-                requestPayload: true,
-                responsePayload: true
+            const reqOpts = {
+                headers: true,
+                payload: true
+            };
+
+            const resOpts = {
+                payload: true
             };
 
             const request = Hoek.clone(_request);
@@ -96,7 +99,7 @@ describe('utils', () => {
                 source: responsePayload
             };
 
-            return new Utils.GreatResponse(options, request);
+            return new Utils.RequestSent(reqOpts, resOpts, request);
         };
 
         it('handles response payloads with a toString() function', (done) => {
@@ -108,19 +111,19 @@ describe('utils', () => {
                 }
             };
 
-            const req = generateGreatResponse(samplePayload, '');
+            const req = generateRequestSent(samplePayload, '');
             expect(req.requestPayload).to.deep.equal(samplePayload);
-            const res = generateGreatResponse('', samplePayload);
+            const res = generateRequestSent('', samplePayload);
             expect(res.responsePayload).to.deep.equal(samplePayload);
             done();
         });
     });
 
-    describe('GreatError()', () => {
+    describe('RequestError()', () => {
 
-        it('can base stringifyed', (done) => {
+        it('can be stringifyed', (done) => {
 
-            const err = new Utils.GreatError({
+            const err = new Utils.RequestError({
                 id: 15,
                 url: 'http://localhost:9001',
                 method: 'PUT',
