@@ -25,9 +25,10 @@ const internals = {
 
         const defaults = {
             responseEvent: 'tail',
-            requestHeaders: false,
-            requestPayload: false,
-            responsePayload: false,
+            includes: {
+                request: [],
+                response: []
+            },
             extensions: [],
             reporters: [],
             ops: false,
@@ -490,9 +491,10 @@ describe('Monitor', () => {
                 reporters: {
                     foo: [new GoodReporter.Namer('extraHeaders'), out]
                 },
-                requestHeaders: true,
-                requestPayload: true,
-                responsePayload: true
+                includes: {
+                    request: ['headers', 'payload'],
+                    response: ['payload']
+                }
             });
 
             Insync.series([
@@ -566,7 +568,7 @@ describe('Monitor', () => {
                         expect(out.data).to.have.length(1);
 
                         const event = out.data[0];
-                        expect(event).to.be.an.instanceof(Utils.GreatOps);
+                        expect(event).to.be.an.instanceof(Utils.Ops);
                         server.stop(callback);
                     }, 150);
                 }
@@ -603,8 +605,7 @@ describe('Monitor', () => {
                         expect(out.data).to.have.length(1);
 
                         const event = out.data[0];
-
-                        expect(event).to.be.an.instanceof(Utils.GreatResponse);
+                        expect(event).to.be.an.instanceof(Utils.RequestSent);
                         server.stop(callback);
                     });
                 }
@@ -641,7 +642,7 @@ describe('Monitor', () => {
                         expect(out.data).to.have.length(2);
 
                         const event = out.data[0];
-                        expect(event).to.be.an.instanceof(Utils.GreatError);
+                        expect(event).to.be.an.instanceof(Utils.RequestError);
                         server.stop(callback);
                     });
                 }
@@ -680,7 +681,7 @@ describe('Monitor', () => {
 
                         const event = out.data[0];
 
-                        expect(event).to.be.an.instanceof(Utils.GreatLog);
+                        expect(event).to.be.an.instanceof(Utils.ServerLog);
                         server.stop(callback);
                     });
                 }
@@ -719,7 +720,7 @@ describe('Monitor', () => {
 
                         const event = out.data[0];
 
-                        expect(event).to.be.an.instanceof(Utils.GreatRequest);
+                        expect(event).to.be.an.instanceof(Utils.RequestLog);
                         server.stop(callback);
                     });
                 }
@@ -854,13 +855,13 @@ describe('Monitor', () => {
                             const one = out.data[1];
                             const two = out.data[3];
 
-                            expect(one).to.be.an.instanceof(Utils.GreatWreck);
+                            expect(one).to.be.an.instanceof(Utils.Wreck);
                             expect(one.event).to.equal('wreck');
                             expect(one.request.protocol).to.equal('https:');
                             expect(one.request.host).to.exist();
                             expect(one.request.path).to.equal('/');
 
-                            expect(two).to.be.an.instanceof(Utils.GreatWreck);
+                            expect(two).to.be.an.instanceof(Utils.Wreck);
                             expect(two.event).to.equal('wreck');
                             expect(two.request.protocol).to.equal('http:');
                             expect(two.request.host).to.exist();
