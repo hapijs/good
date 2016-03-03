@@ -545,7 +545,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
-                    foo: [new GoodReporter.Namer('ops'), out]
+                    foo: [out]
                 },
                 ops: {
                     interval: 100
@@ -590,7 +590,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo : [new GoodReporter.Namer(), out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo : [out] } });
 
             Insync.series([
                 server.start.bind(server),
@@ -627,7 +627,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo: [new GoodReporter.Namer('error'), out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             Insync.series([
                 server.start.bind(server),
@@ -665,7 +665,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo: [new GoodReporter.Namer(), out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             Insync.series([
                 server.start.bind(server),
@@ -704,7 +704,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo: [new GoodReporter.Namer(), out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             Insync.series([
                 server.start.bind(server),
@@ -840,7 +840,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo: [new GoodReporter.Namer(), out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             Insync.series([
                 server.start.bind(server),
@@ -901,7 +901,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo: [new GoodReporter.Namer(), out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             Insync.series([
                 monitor.start.bind(monitor),
