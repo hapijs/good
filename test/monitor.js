@@ -489,7 +489,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
-                    foo: [new GoodReporter.Namer('extraHeaders'), out]
+                    foo: [out]
                 },
                 includes: {
                     request: ['headers', 'payload'],
@@ -525,7 +525,6 @@ describe('Monitor', () => {
                             data: 'example payload'
                         });
                         expect(response.responsePayload).to.equal('done');
-                        expect(response.name).to.equal('extraHeaders');
                         server.stop(callback);
                     });
 
@@ -545,7 +544,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
-                    foo: [out]
+                    foo: [new GoodReporter.Namer('ops'), out]
                 },
                 ops: {
                     interval: 100
@@ -926,6 +925,68 @@ describe('Monitor', () => {
                     });
                 }
             ], done);
+        });
+
+        it('can communicate with process.stdout and process.stderr', (done) => {
+
+            const replace = (orig, dest) => {
+
+                return (message, encoding) => {
+
+                    try {
+                        const data = JSON.parse(message);
+                        dest.push(data);
+                        return true;
+                    }
+                    catch (e) {
+                        return orig(message, encoding);
+                    }
+                };
+            };
+
+            const write = process.stdout.write;
+            const writeData = [];
+            process.stdout.write = replace(write, writeData);
+
+            const err = process.stderr.write;
+            const errData = [];
+            process.stderr.write = replace(err, errData);
+
+            const server = new Hapi.Server();
+            const monitor = internals.monitorFactory(server, {
+                ops: {
+                    internal: 100
+                },
+                reporters: {
+                    foo: [new GoodReporter.Namer('foo'), new GoodReporter.Stringify(), 'stdout'],
+                    bar: [new GoodReporter.Namer('bar'), new GoodReporter.Stringify(), 'stderr']
+                }
+            });
+
+            Insync.series([
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    monitor.startOps(100);
+                    setTimeout(callback, 250);
+                },
+                monitor.stop.bind(monitor),
+                (callback) => {
+
+                    process.stdout.write = write;
+                    process.stderr.write = err;
+
+                    expect(writeData.length).to.be.above(1);
+                    expect(writeData[0]).to.include(['event', 'timestamp', 'host', 'pid', 'os', 'proc', 'load']);
+                    expect(writeData[0].name).to.equal('foo');
+
+                    expect(errData.length).to.be.above(1);
+                    expect(errData[0]).to.include(['event', 'timestamp', 'host', 'pid', 'os', 'proc', 'load']);
+                    expect(errData[0].name).to.equal('bar');
+
+                    callback();
+                }
+            ],done);
         });
     });
 });
