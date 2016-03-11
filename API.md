@@ -145,6 +145,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
     - `remoteAddress` - information about the remote address. maps to `request.info.remoteAddress`
     - `userAgent` - the user agent of the incoming request.
     - `referer` - the referer headed of the incoming request.
+- `route` - route path used by request. Maps to `request.route.path`.
 - `log` - maps to `request.getLog()` of the hapi request object.
 
 ### `Ops`
