@@ -7,7 +7,10 @@ class Incrementer extends Stream.Transform {
 
         super({ objectMode: true });
         this.starting = starting;
-        this.once('end', () => this._finalized = true);
+        this.once('end', () => {
+
+            this._finalized = true;
+        });
     }
     _transform(value, encoding, callback) {
 
@@ -20,7 +23,10 @@ class Stringify extends Stream.Transform {
     constructor() {
 
         super({ objectMode: true });
-        this.once('end', () => this._finalized = true);
+        this.once('end', () => {
+
+            this._finalized = true;
+        });
     }
     _transform(value, encoding, callback) {
 
@@ -50,7 +56,10 @@ class Writer extends Stream.Writable {
 
         super({ objectMode });
         this.data = [];
-        this.once('finish', () => this._finalized = true);
+        this.once('finish', () => {
+
+            this._finalized = true;
+        });
     }
     _write(chunk, end, callback) {
 

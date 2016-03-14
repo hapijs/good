@@ -46,7 +46,7 @@ const it = lab.it;
 
 describe('Monitor', () => {
 
-    it('logs an error if one occurs doing ops information collection', (done) => {
+    it('logs an error if one occurs doing ops information collection', { plan: 2 }, (done) => {
 
         const monitor = internals.monitorFactory(new Hapi.Server(), { ops: { interval: 15000 } });
         const error = console.error;
@@ -63,7 +63,7 @@ describe('Monitor', () => {
         });
     });
 
-    it('allows starting the monitor without the ops monitoring', (done) => {
+    it('allows starting the monitor without the ops monitoring', { plan: 2 }, (done) => {
 
         const monitor = internals.monitorFactory(new Hapi.Server());
         monitor.start((err) => {
@@ -77,7 +77,7 @@ describe('Monitor', () => {
 
     describe('start()', () => {
 
-        it('correctly passes dynamic arguments to stream constructors', (done) => {
+        it('correctly passes dynamic arguments to stream constructors', { plan: 5 }, (done) => {
 
             const Inc = GoodReporter.Incrementer;
             GoodReporter.Incrementer = function (starting, multiple) {
@@ -99,13 +99,12 @@ describe('Monitor', () => {
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
                     foo: [{
-                        ctor: {
-                            module: '../test/fixtures/reporters',
-                            name: 'Incrementer',
-                            args: [10, 5]
-                        }
-                    },
-                    '../test/fixtures/reporter']
+                        module: '../test/fixtures/reporters',
+                        name: 'Incrementer',
+                        args: [10, 5]
+                    }, {
+                        module: '../test/fixtures/reporter'
+                    }]
                 }
             });
 
@@ -117,7 +116,7 @@ describe('Monitor', () => {
             });
         });
 
-        it('calls the start methods of any reporter that has one', (done) => {
+        it('calls the start methods of any reporter that has one', { plan: 8 }, (done) => {
 
             const reporterOne = new GoodReporter.Incrementer(1);
             reporterOne.start = function (callback) {
@@ -138,7 +137,7 @@ describe('Monitor', () => {
             const realStart = GoodReporter.Stringify.prototype.start;
             GoodReporter.Stringify.prototype.start = function (callback) {
 
-                Stringify.prototype.start = realStart;
+                GoodReporter.Stringify.prototype.start = realStart;
                 expect(callback).to.be.a.function();
                 expect(this).to.be.an.instanceof(GoodReporter.Stringify);
                 realStart(callback);
@@ -149,10 +148,8 @@ describe('Monitor', () => {
                     foo: [
                         reporterOne,
                         reporterTwo, {
-                            ctor: {
-                                module: '../test/fixtures/reporters',
-                                name: 'Stringify'
-                            }
+                            module: '../test/fixtures/reporters',
+                            name: 'Stringify'
                         }
                     ]
                 }
@@ -167,7 +164,7 @@ describe('Monitor', () => {
         });
 
 
-        it(`calls back with an error if a there is an error in a reporter 'start' method`, (done) => {
+        it('calls back with an error if a there is an error in a reporter "start" method', { plan: 3 }, (done) => {
 
             const one = new GoodReporter.Incrementer(1);
             one.start = function (callback) {
@@ -188,7 +185,7 @@ describe('Monitor', () => {
             });
         });
 
-        it(`attaches events for 'ops', 'tail', 'log', and 'request-error'`, (done) => {
+        it('attaches events for "ops", "tail", "log", and "request-error"', { plan: 5 }, (done) => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
@@ -208,15 +205,13 @@ describe('Monitor', () => {
             });
         });
 
-        it('validates the incoming stream object instances', (done) => {
+        it('validates the incoming stream object instances', { plan: 2 }, (done) => {
 
             const options = {
                 reporters: {
                     foo: [{
-                        ctor: {
-                            module: '../test/fixtures/reporters',
-                            name: 'NotConstructor'
-                        }
+                        module: '../test/fixtures/reporters',
+                        name: 'NotConstructor'
                     }]
                 }
             };
@@ -230,10 +225,8 @@ describe('Monitor', () => {
             expect(() => {
 
                 options.reporters.foo = [{
-                    ctor: {
-                        module: '../test/fixtures/reporters',
-                        name: 'NotStream'
-                    }
+                    module: '../test/fixtures/reporters',
+                    name: 'NotStream'
                 }];
                 const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});
@@ -245,7 +238,7 @@ describe('Monitor', () => {
 
     describe('push()', () => {
 
-        it('passes data through each step in the pipeline', (done) => {
+        it('passes data through each step in the pipeline', { plan: 3 }, (done) => {
 
             const out1 = new GoodReporter.Writer(true);
             const out2 = new GoodReporter.Writer(true);
@@ -305,7 +298,7 @@ describe('Monitor', () => {
 
     describe('stop()', () => {
 
-        it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', (done) => {
+        it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', { plan: 9 }, (done) => {
 
             const one = new GoodReporter.Incrementer(1);
             const two = new GoodReporter.Stringify();
@@ -350,7 +343,7 @@ describe('Monitor', () => {
 
     describe('monitoring', () => {
 
-        it('sends events to all reporters when they occur', (done) => {
+        it('sends events to all reporters when they occur', { plan: 11 }, (done) => {
 
             const server = new Hapi.Server({ debug: false });
             server.connection();
@@ -472,7 +465,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it(`provides additional information about 'response' events using 'requestHeaders','requestPayload', and 'responsePayload'`, (done) => {
+        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', { plan: 7 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -536,7 +529,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it(`has a standard 'ops' data object`, (done) => {
+        it('has a standard "ops" data object', { plan: 2 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -574,7 +567,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it(`has a standard 'response' data object`, (done) => {
+        it('has a standard "response" data object', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection({ labels: ['test', 'foo'] });
@@ -611,7 +604,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it(`has a standard 'error' data object`, (done) => {
+        it('has a standard "error" data object', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server({ debug: false });
             server.connection();
@@ -648,7 +641,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it(`has a standard 'log' data object`, (done) => {
+        it('has a standard "log" data object', { plan: 3 },  (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -687,7 +680,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it(`has a standard 'request' event schema`, (done) => {
+        it('has a standard "request" event schema', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -726,7 +719,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('reports extension events when they occur', (done) => {
+        it('reports extension events when they occur', { plan: 14 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -810,7 +803,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('reports on outbound wreck requests', (done) => {
+        it('reports on outbound wreck requests', { plan: 11 }, (done) => {
 
             const server = new Hapi.Server();
             const tls = {
@@ -873,7 +866,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('attaches good data from the request.plugins.good and route good config to reporting objects', (done) => {
+        it('attaches good data from the request.plugins.good and route good config to reporting objects', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -927,7 +920,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('can communicate with process.stdout and process.stderr', (done) => {
+        it('can communicate with process.stdout and process.stderr', { plan: 6 }, (done) => {
 
             const replace = (orig, dest) => {
 
