@@ -36,7 +36,7 @@ const it = lab.it;
 
 describe('good', () => {
 
-    it('starts the Monitor object during registration', (done) => {
+    it('starts the Monitor object during registration', { plan: 2 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -62,7 +62,7 @@ describe('good', () => {
         });
     });
 
-    it('starts the ops monitor when the server starts', (done) => {
+    it('starts the ops monitor when the server starts', { plan: 2 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -83,17 +83,13 @@ describe('good', () => {
 
                 Oppsy.prototype.start = start;
                 expect(interval).to.equal(2000);
-                done();
             };
             server.connection();
-            server.start((err) => {
-
-                expect(err).to.not.exist();
-            });
+            server.start(done);
         });
     });
 
-    it('stops the monitor when the server stops', (done) => {
+    it('stops the monitor when the server stops', { plan: 2 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -124,7 +120,7 @@ describe('good', () => {
         });
     });
 
-    it(`throws an error if responseEvent is not 'response' or 'tail'`, (done) => {
+    it('throws an error if responseEvent is not "response" or "tail"', { plan: 1 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -133,16 +129,15 @@ describe('good', () => {
             }
         };
         const server = new Hapi.Server();
-        const fn = () => {
+
+        expect(() => {
 
             server.register(plugin, () => {});
-        };
-
-        expect(fn).to.throw(Error, /"responseEvent" must be one of \[response, tail\]/gi);
+        }).to.throw(Error, /"responseEvent" must be one of \[response, tail\]/gi);
         done();
     });
 
-    it('supports a mix of reporter options', (done) => {
+    it('supports a mix of reporter options', { plan: 1 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -160,12 +155,16 @@ describe('good', () => {
                 }
             }
         };
+
         const server = new Hapi.Server();
 
-        server.register(plugin, done);
+        expect(() => {
+
+            server.register(plugin, done);
+        }).to.not.throw();
     });
 
-    it('allows starting with no reporters', (done) => {
+    it('allows starting with no reporters', { plan: 1 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -173,12 +172,16 @@ describe('good', () => {
                 responseEvent: 'response'
             }
         };
+
         const server = new Hapi.Server();
 
-        server.register(plugin, done);
+        expect(() => {
+
+            server.register(plugin, done);
+        }).to.not.throw();
     });
 
-    it('throws an error if invalid extension events are used', (done) => {
+    it('throws an error if invalid extension events are used', { plan: 1 }, (done) => {
 
         const plugin = {
             register: Good.register,
@@ -187,12 +190,11 @@ describe('good', () => {
             }
         };
         const server = new Hapi.Server();
-        const fn = () => {
+
+        expect(() => {
 
             server.register(plugin, () => {});
-        };
-
-        expect(fn).to.throw(Error, 'Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
+        }).to.throw(Error, 'Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
         done();
     });
 });

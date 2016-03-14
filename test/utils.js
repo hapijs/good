@@ -20,7 +20,7 @@ describe('utils', () => {
 
     describe('Wreck()', () => {
 
-        it('handles a null request and response', (done) => {
+        it('handles a null request and response', { plan: 2 }, (done) => {
 
             const greatWreck = new Utils.Wreck();
             expect(greatWreck.request).to.exist();
@@ -28,7 +28,7 @@ describe('utils', () => {
             done();
         });
 
-        it('reports on errors', (done) => {
+        it('reports on errors', { plan: 1 }, (done) => {
 
             const error = new Error('my error');
             const greatWreck = new Utils.Wreck(error);
@@ -37,7 +37,7 @@ describe('utils', () => {
             done();
         });
 
-        it('contains the current pid', (done) => {
+        it('contains the current pid', { plan: 1 }, (done) => {
 
             const greatWreck = new Utils.Wreck();
 
@@ -102,7 +102,7 @@ describe('utils', () => {
             return new Utils.RequestSent(reqOpts, resOpts, request);
         };
 
-        it('handles response payloads with a toString() function', (done) => {
+        it('handles response payloads with a toString() function', { plan: 2 }, (done) => {
 
             const samplePayload = {
                 message: 'test',
@@ -121,7 +121,7 @@ describe('utils', () => {
 
     describe('RequestError()', () => {
 
-        it('can be stringifyed', (done) => {
+        it('can be stringifyed', { plan: 2 }, (done) => {
 
             const err = new Utils.RequestError({
                 id: 15,
