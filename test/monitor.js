@@ -7,7 +7,7 @@ const Fs = require('fs');
 
 const Code = require('code');
 const Hapi = require('hapi');
-const Insync = require('insync');
+const Async = require('async');
 const Lab = require('lab');
 const Wreck = require('wreck');
 
@@ -313,7 +313,7 @@ describe('Monitor', () => {
                 }
             });
 
-            Insync.series([
+            Async.series([
                 monitor.start.bind(monitor),
                 (callback) => {
 
@@ -339,6 +339,72 @@ describe('Monitor', () => {
                 }
             ], done);
         });
+
+        it('calls all the stop methods for any stream that has one', { plan: 9 }, (done) => {
+
+            const one = new GoodReporter.Incrementer(1);
+            const two = new GoodReporter.Stringify();
+            const three = new GoodReporter.Writer(true);
+
+            one.stop = function (callback) {
+
+                expect(this).to.equal(one);
+                expect(callback).to.be.a.function();
+                return callback();
+            };
+
+            two.stop = function (callback) {
+
+                expect(this).to.equal(two);
+                expect(callback).to.be.a.function();
+                return callback('error');
+            };
+
+            three.stop = function (callback) {
+
+                expect(this).to.equal(three);
+                expect(callback).to.be.a.function();
+                return callback();
+            };
+
+            const error = console.error;
+            console.error = (message) => {
+
+                expect(message).to.equal('error');
+                console.error = error;
+            };
+
+            // Prevent this from being on every test
+            GoodReporter.Stringify.prototype.stop = function (callback) {
+
+                delete GoodReporter.Stringify.prototype.stop;
+                expect(this).to.be.an.instanceof(GoodReporter.Stringify);
+                expect(callback).to.be.a.function();
+                return callback();
+            };
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [
+                        one,
+                        two, {
+                            module: '../test/fixtures/reporters',
+                            name: 'Stringify'
+                        },
+                        three]
+                },
+                extensions: ['request-internal'],
+                ops: {
+                    interval: 1500
+                }
+            });
+
+            Async.series([
+                monitor.start.bind(monitor),
+                monitor.stop.bind(monitor)
+            ], done);
+        });
+
     });
 
     describe('monitoring', () => {
@@ -383,7 +449,7 @@ describe('Monitor', () => {
                 }
             });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -490,7 +556,7 @@ describe('Monitor', () => {
                 }
             });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -544,7 +610,7 @@ describe('Monitor', () => {
                 }
             });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -584,7 +650,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo : [out] } });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -621,7 +687,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -659,7 +725,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -698,7 +764,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -749,7 +815,7 @@ describe('Monitor', () => {
                 extensions: ['start', 'stop', 'request-internal', 'super-secret']
             });
 
-            Insync.series([
+            Async.series([
                 monitor.start.bind(monitor),
                 server.start.bind(server),
                 (callback) => {
@@ -834,7 +900,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
-            Insync.series([
+            Async.series([
                 server.start.bind(server),
                 monitor.start.bind(monitor),
                 (callback) => {
@@ -895,7 +961,7 @@ describe('Monitor', () => {
             const out = new GoodReporter.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
-            Insync.series([
+            Async.series([
                 monitor.start.bind(monitor),
                 (callback) => {
 
@@ -956,7 +1022,7 @@ describe('Monitor', () => {
                 }
             });
 
-            Insync.series([
+            Async.series([
                 monitor.start.bind(monitor),
                 (callback) => {
 
