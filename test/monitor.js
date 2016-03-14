@@ -99,13 +99,12 @@ describe('Monitor', () => {
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
                     foo: [{
-                        ctor: {
-                            module: '../test/fixtures/reporters',
-                            name: 'Incrementer',
-                            args: [10, 5]
-                        }
-                    },
-                    '../test/fixtures/reporter']
+                        module: '../test/fixtures/reporters',
+                        name: 'Incrementer',
+                        args: [10, 5]
+                    }, {
+                        module: '../test/fixtures/reporter'
+                    }]
                 }
             });
 
@@ -149,10 +148,8 @@ describe('Monitor', () => {
                     foo: [
                         reporterOne,
                         reporterTwo, {
-                            ctor: {
-                                module: '../test/fixtures/reporters',
-                                name: 'Stringify'
-                            }
+                            module: '../test/fixtures/reporters',
+                            name: 'Stringify'
                         }
                     ]
                 }
@@ -213,10 +210,8 @@ describe('Monitor', () => {
             const options = {
                 reporters: {
                     foo: [{
-                        ctor: {
-                            module: '../test/fixtures/reporters',
-                            name: 'NotConstructor'
-                        }
+                        module: '../test/fixtures/reporters',
+                        name: 'NotConstructor'
                     }]
                 }
             };
@@ -230,10 +225,8 @@ describe('Monitor', () => {
             expect(() => {
 
                 options.reporters.foo = [{
-                    ctor: {
-                        module: '../test/fixtures/reporters',
-                        name: 'NotStream'
-                    }
+                    module: '../test/fixtures/reporters',
+                    name: 'NotStream'
                 }];
                 const monitor = internals.monitorFactory(new Hapi.Server(), options);
                 monitor.start(() => {});

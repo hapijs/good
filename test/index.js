@@ -12,22 +12,16 @@ const GoodReporter = require('./fixtures/reporters');
 const Monitor = require('../lib/monitor');
 
 const reporters = {
-    foo:[{
-        ctor: {
-            module: '../test/fixtures/reporters',
-            name: 'Incrementer',
-            args: [10, 5]
-        }
+    foo: [{
+        module: '../test/fixtures/reporters',
+        name: 'Incrementer',
+        args: [10, 5]
     }, {
-        ctor: {
-            module: '../test/fixtures/reporters',
-            name: 'Stringify'
-        }
+        module: '../test/fixtures/reporters',
+        name: 'Stringify'
     }, {
-        ctor: {
-            module: '../test/fixtures/reporters',
-            name: 'Writer'
-        }
+        module: '../test/fixtures/reporters',
+        name: 'Writer'
     }]
 };
 
@@ -157,12 +151,10 @@ describe('good', () => {
                 reporters: {
                     foo: [
                         new GoodReporter.Incrementer(2),
-                        new GoodReporter.Incrementer(4),
-                        '../test/fixtures/reporter', {
-                            ctor: {
-                                module: '../test/fixtures/reporters',
-                                name: 'Writer'
-                            }
+                        new GoodReporter.Incrementer(4), {
+                            module: '../test/fixtures/reporters',
+                            name: 'Writer',
+                            args: [{ objectMode: true }]
                         }
                     ]
                 }
