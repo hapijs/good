@@ -34,7 +34,7 @@ class Stringify extends Stream.Transform {
     }
     start(done) {
 
-        setTimeout(done, 10);
+        setTimeout(done, 5);
     }
 }
 
