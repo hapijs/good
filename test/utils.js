@@ -38,6 +38,12 @@ describe('utils', () => {
             },
             method: 'POST',
             path: '/',
+            route: {
+                method: 'POST',
+                path: '/',
+                realm: {},
+                settings: {}
+            },
             query: {},
             responseTime: 123,
             connection: {
