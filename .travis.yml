@@ -2,8 +2,7 @@ sudo: false
 language: node_js
 node_js:
     - "4"
-    - "4.0"
-    - "5"
+    - "node"
 env:
     - HAPI_VERSION="10"
     - HAPI_VERSION="11"
