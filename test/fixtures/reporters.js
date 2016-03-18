@@ -32,10 +32,6 @@ class Stringify extends Stream.Transform {
 
         callback(null, JSON.stringify(value) + '\n');
     }
-    start(done) {
-
-        setTimeout(done, 5);
-    }
 }
 
 class Namer extends Stream.Transform {
