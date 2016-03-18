@@ -75,15 +75,14 @@ These changes address the two most common requests; "how do I filter on `X`?" an
 
 1. When "onPreStart" is emitted from the hapi server, the monitoring operation starts.
 2. All of the streams are created via `new` (if needed) and collected into an temporary internal array.
-3. If a stream has a `start` method, it is called and passed a `callback` function. Use this for any async setup a stream might need before receiving any data.
-4. All of the streams in the temporary array are piped together. This will cause any standard [Node stream](https://nodejs.org/api/stream.html) events to occur that instances can listen for.
+3. All of the streams in the temporary array are piped together. This will cause any standard [Node stream](https://nodejs.org/api/stream.html) events to occur that instances can listen for.
 
-At this point, data will start flowing to each of the reporters through the pipe interface. Data can be though any of the standard stream methods and events.
+At this point, data will start flowing to each of the reporters through the pipe interface. Data can be accessed in individual instances though any of the standard stream methods and events.
 
 **Shutdown**
+
 1. When "onPostStop" is emitted from the hapi server, the shutdown sequence starts.
 2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events.
-3. If any stream has a `stop` method, it is called and passed a `callback` function. Use this for any async teardown a stream might need before the hapi server is shutdown.
 
 ## Event Types
 
