@@ -25,9 +25,8 @@ const internals = {
                 response: []
             },
             extensions: [],
-            reporters: [],
-            ops: false,
-            filter: {}
+            reporters: {},
+            ops: false
         };
         return new Monitor(server, Object.assign({}, defaults, options));
     }
@@ -67,6 +66,41 @@ describe('Monitor', () => {
             monitor.startOps(100);
             expect(monitor._ops).to.be.false();
             monitor.stop(done);
+        });
+    });
+
+    it('logs and destroys a reporter in the event of a stream error', { plan: 3 }, (done) => {
+
+        const one = new GoodReporter.Incrementer(1);
+        const two = new GoodReporter.Writer(true);
+        const monitor = internals.monitorFactory(new Hapi.Server(), {
+            reporters: {
+                foo: [one, two]
+            }
+        });
+        const err = console.error;
+        console.error = (message) => {
+
+            console.error = err;
+            expect(message).to.equal('There was a problem in foo and it has been destroyed.');
+        };
+
+        Async.series([
+            monitor.start.bind(monitor),
+            (callback) => {
+
+                monitor.push(() => ({ id: 1, number: 2 }));
+                monitor.push(() => ({ id: 2, number: 5 }));
+                two.emit('error');
+                monitor.push(() => ({ id: 3, number: 100 }));
+                // Need this because of https://github.com/nodejs/node/pull/5251
+                setImmediate(callback);
+            }
+        ], () => {
+
+            expect(two.data).to.have.length(2);
+            expect(two.data).to.deep.equal([{ id: 1, number: 3 }, { id: 2, number: 6 }]);
+            done();
         });
     });
 
