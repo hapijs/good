@@ -17,7 +17,9 @@ const server = new Hapi.Server();
 server.connection();
 
 const options = {
-    opsInterval: 1000,
+    ops: {
+        interval: 1000
+    },
     reporters: {
         console: [{
             module: 'good-squeeze',
@@ -25,7 +27,7 @@ const options = {
             args: [{ log: '*', response: '*' }]
         }, {
             module: 'good-console'
-        }, 'stdout']
+        }, 'stdout'],
         file: [{
             module: 'good-squeeze',
             name: 'Squeeze',
