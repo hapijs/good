@@ -73,26 +73,20 @@ server.register({
 
 This example does the following:
 
-1. Sets up the `console` reporter reporter listening for 'response' and 'log' events.
-2. Sets up the `file` reporter to listen for 'ops' events and log them to `./test/fixtures/awesome_log` according to the file rules listed in the good-file documentation.
+1. Sets up the `console` reporter reporter listening for 'response' and 'log' events and writes them to `process.stdout`.
+2. Sets up the `file` reporter to listen for 'ops' events and logs them to `./test/fixtures/awesome_log`.
 3. Sets up the `http` reporter to listen for error events and POSTs them to `http://prod.logs:3000` with additional settings to passed into `Wreck`
 
 **NOTE**: Ensure calling `server.connection` prior to registering `Good`. `request` and `response` event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
 
 ## Existing streams
 
-A single reporter is either a write stream or a transform stream. Every effort has been made to support any generic stream in the node ecosystem. As long as the stream is properly implemented, you can use it in your reporting pipeline. The following streams were built specifically to work with good.
+The following streams are maintained by the hapi community and are known to work with good. Any transform or write stream can work with good, these are just a few inside the hapijs organization.
 
 - [good-squeeze](https://github.com/hapijs/good-squeeze)
-- [good-udp](https://github.com/hapijs/good-udp)
 - [good-file](https://github.com/hapijs/good-file)
 - [good-http](https://github.com/hapijs/good-http)
 - [good-console](https://github.com/hapijs/good-console)
-- [good-influxdb](https://github.com/totherik/good-influxdb)
-- [good-loggly](https://github.com/continuationlabs/good-loggly)
-- [good-winston](https://github.com/lancespeelmon/good-winston)
-- [hapi-good-logstash](https://github.com/atroo/hapi-good-logstash)
-- [good-graylog2](https://github.com/CascadeEnergy/good-graylog2)
 
 ## API
 

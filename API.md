@@ -27,7 +27,7 @@ as general events are a process-wide facility and will result in duplicated log 
 - `[responseEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
     - 'response' - the response was sent but request tails may still be pending.
     - 'tail' - the response was sent and all request tails completed.
-- `[extensions]` - an array of [hapi event names](https://github.com/hapijs/hapi/blob/master/API.md#server-events) to listen for and report via the good reporting mechanism. Can not be any of ['log', 'request-error', 'ops', 'request', 'response', 'tail']. **Disclaimer** This option should be used with caution. This option will allow users to listen to internal events that are not meant for public consumption. The list of available events can change with any changes to the hapi event system. Also, *none* of the official hapijs reporters have been tested against these custom events. Also, the schema for these events can not be guaranteed because they vary from version to version of hapi.
+- `[extensions]` - an array of [hapi event names](https://github.com/hapijs/hapi/blob/master/API.md#server-events) to listen for and report via the good reporting mechanism. Can not be any of ['log', 'request-error', 'ops', 'request', 'response', 'tail']. **Disclaimer** This option should be used with caution. This option will allow users to listen to internal events that are not meant for public consumption. The list of available events can change with any changes to the hapi event system. Also, *none* of the official hapijs reporters have been tested against these custom events. The schema for these events can not be guaranteed because they vary from version to version of hapi.
 - `[reporters]` - Defaults to `{}`. `reporters` is a `key`, `value` pair where the `key` is a reporter name and the `value` is an array of mixed value types. Valid values for the array items are:
     - streams specifications object with the following keys
         - `module` - a string that will be used to import a module from node_modules or a local file. Should export a single constructor function that can be invoked with `new`.
@@ -38,7 +38,7 @@ as general events are a process-wide facility and will result in duplicated log 
 
 ## Reporter Interface
 
-The reporter interface uses the standard stream and pipe interface found commonly in the node ecosystem. Each item in the array of streams will be piped together in the array order. Any stream described using a stream specification will be constructed with `new` to prevent any cross contamination from one reporter to another. For example, when passing the following specification for an "ops-console" reporter:
+The reporter interface uses the standard stream-and-pipe interface found commonly in the node ecosystem. Each item in the array of streams will be piped together in the array order. Any stream described using a stream specification object will be constructed with `new` to prevent any cross contamination from one reporter to another. For example, when passing the following specification for an "ops-console" reporter:
 
 ```
 {
@@ -59,7 +59,7 @@ Internally, this would create an array (`streams`), import `good-squeeze` from n
 const result = streams[0].pipe(streams[1]).pipe(streams[2]);
 ```
 
-*Any* time there one of the "good events" occurs, a unique copy of the event is pushed into each stream pipeline. It is up to the developer to filter events they don't care about on a per pipeline basis. The "Squeeze" transform stream provides the basic event type and tag filtering used in previous versions of good which should meet many filtering needs.
+*Any* time one of the "good events" occurs, a unique copy of the event is pushed into each reporter stream pipeline. It is up to the developer to filter events they don't care about on a per pipeline basis. The "Squeeze" transform stream provides the basic event type and tag filtering used in previous versions of good which should meet many filtering needs.
 
 It is also up to the developer to manage `objectMode` in each pipeline from one stream to the next. The first stream will *always* receive an object. After that, it's up to the developer to manage the message type throughout the pipeline. In the above example, because we want to write to `stdout`, we needed to add a transform stream to convert the payload coming out of "Squeeze" to a string using "SafeJson" before sending it to `process.stdout`. Objects can not be written directly to `process.stdout`, so "SafeJson" was used to safely stringify the message coming from the "Squeeze" stream.
 
@@ -67,7 +67,9 @@ Finally, the developer must make sure the reporting pipeline makes sense. In the
 
 Each reporter pipeline receives it's own copy of the message from good. That means the payload can be freely modified without worrying about impacting other reporters. Just add more and more transform streams into the pipeline to fine-tune any reporting needs. Need a different filtering mechanism? Write a new transform stream to filter based on IP, request route, payload type... Want to add extra data about events? Just add a transform stream into the mix to add the current date, something specific to your company, filter out sensitive information before logging it... the sky is the limit.
 
-These changes address the two most common requests; "how do I filter on `X`?" and "how do I add `Y` to the message payload?". Now developers are empowered to customize the reporting pipeline to suite their needs. While there is far less hand-holding with this interface, developers have much more control of reporting coming out of good. It also allows any existing transform or write stream to be used with good, rather than only ones written adhering to some specialized interface.
+These changes address the two most common requests; "how do I filter on `X`?" and "how do I add `Y` to the message payload?". Now developers are empowered to customize the reporting pipeline to suite their needs. While there is far less hand-holding with this interface, developers have much more control of reporting coming out of good.
+
+**This change also allows user to leverage *any* existing transform or write stream in the node ecosystem to be used with good.**
 
 ### Reporter Lifecycle
 
@@ -82,7 +84,7 @@ At this point, data will start flowing to each of the reporters through the pipe
 **Shutdown**
 
 1. When "onPostStop" is emitted from the hapi server, the shutdown sequence starts.
-2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events.
+2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick Node tick. 
 
 ## Event Types
 
