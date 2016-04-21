@@ -101,4 +101,4 @@ Here are some additional reporters that are available from the hapijs community:
 
 ## API
 
-See the [API Reference](API.md).
+See the [API Reference](https://github.com/hapijs/good/blob/f6615655054f37a0f5f5267b35135788a6577d2e/API.md).
