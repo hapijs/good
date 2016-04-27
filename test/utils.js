@@ -18,6 +18,34 @@ const it = lab.it;
 
 describe('utils', () => {
 
+    describe('Wreck()', () => {
+
+        it('handles a null request and response', { plan: 2 }, (done) => {
+
+            const greatWreck = new Utils.Wreck();
+            expect(greatWreck.request).to.exist();
+            expect(greatWreck.response).to.exist();
+            done();
+        });
+
+        it('reports on errors', { plan: 1 }, (done) => {
+
+            const error = new Error('my error');
+            const greatWreck = new Utils.Wreck(error);
+
+            expect(greatWreck.error.message).to.equal('my error');
+            done();
+        });
+
+        it('contains the current pid', { plan: 1 }, (done) => {
+
+            const greatWreck = new Utils.Wreck();
+
+            expect(greatWreck.pid).to.equal(process.pid);
+            done();
+        });
+    });
+
     describe('RequestSent()', () => {
 
         const _request = {

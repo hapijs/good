@@ -3,11 +3,13 @@
 // Load modules
 
 const Http = require('http');
+const Fs = require('fs');
 
 const Async = require('async');
 const Code = require('code');
 const Hapi = require('hapi');
 const Lab = require('lab');
+const Wreck = require('wreck');
 
 const GoodReporter = require('./fixtures/reporters');
 const Stringify = require('./fixtures/reporter');
@@ -39,6 +41,13 @@ const describe = lab.describe;
 const it = lab.it;
 
 describe('Monitor', () => {
+
+    // Each test run can potentally add listeners to wreck if monitor.stop() is not called
+    lab.beforeEach((done) => {
+
+        Wreck.removeAllListeners();
+        done();
+    });
 
     it('logs an error if one occurs doing ops information collection', { plan: 2 }, (done) => {
 
@@ -258,7 +267,7 @@ describe('Monitor', () => {
 
     describe('stop()', () => {
 
-        it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', { plan: 9 }, (done) => {
+        it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', { plan: 11 }, (done) => {
 
             const one = new GoodReporter.Incrementer(1);
             const two = new GoodReporter.Stringify();
@@ -293,6 +302,8 @@ describe('Monitor', () => {
                         expect(monitor._server.listeners('internalError')).to.have.length(0);
                         expect(monitor._server.listeners('tail')).to.have.length(0);
                         expect(monitor._server.listeners('stop')).to.have.length(0);
+                        expect(Wreck.listeners('request')).to.have.length(0);
+                        expect(Wreck.listeners('response')).to.have.length(0);
 
                         callback();
                     });
@@ -760,6 +771,69 @@ describe('Monitor', () => {
                         payload:[]
                     });
                     callback();
+                }
+            ], done);
+        });
+
+        it('reports on outbound wreck requests', { plan: 11 }, (done) => {
+
+            const server = new Hapi.Server();
+            const tls = {
+                key: Fs.readFileSync(process.cwd() + '/test/fixtures/server.key', { encoding: 'utf8' }),
+                cert: Fs.readFileSync(process.cwd() + '/test/fixtures/server.cert', { encoding: 'utf8' })
+            };
+
+            server.connection({ port: 0, labels: ['https'], tls });
+            server.connection({ port: 0, labels: ['http'] });
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: function (request, reply) {
+
+                    reply('/');
+                }
+            });
+
+            server.select('http').route({
+                method: 'GET',
+                path: '/http',
+                handler: function (request, reply) {
+
+                    reply('http');
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
+
+            Async.series([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    Wreck.get(server.connections[0].info.uri + '/', { rejectUnauthorized: false }, () => {
+
+                        Wreck.get(server.connections[1].info.uri + '/http', () => {
+
+                            expect(out.data).to.have.length(4);
+                            const one = out.data[1];
+                            const two = out.data[3];
+
+                            expect(one).to.be.an.instanceof(Utils.Wreck);
+                            expect(one.event).to.equal('wreck');
+                            expect(one.request.protocol).to.equal('https:');
+                            expect(one.request.host).to.exist();
+                            expect(one.request.path).to.equal('/');
+
+                            expect(two).to.be.an.instanceof(Utils.Wreck);
+                            expect(two.event).to.equal('wreck');
+                            expect(two.request.protocol).to.equal('http:');
+                            expect(two.request.host).to.exist();
+                            expect(two.request.path).to.equal('/http');
+
+                            server.stop(done);
+                        });
+                    });
                 }
             ], done);
         });
