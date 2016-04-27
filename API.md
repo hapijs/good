@@ -2,6 +2,7 @@
 
 - [Options](#options)
 - [Reporter Interface](#reporter-interface)
+  * [Filtering Using Plugin Configs](#filtering-using-plugin-configs)
   * [Reporter Lifecycle](#reporter-lifecycle)
 - [Event Types](#event-types)
 - [Event Payloads](#event-payloads)
@@ -70,6 +71,47 @@ Each reporter pipeline receives it's own copy of the message from good. That mea
 These changes address the two most common requests; "how do I filter on `X`?" and "how do I add `Y` to the message payload?". Now developers are empowered to customize the reporting pipeline to suite their needs. While there is far less hand-holding with this interface, developers have much more control of reporting coming out of good.
 
 **This change also allows user to leverage *any* existing transform or write stream in the node ecosystem to be used with good.**
+
+### Filtering Using Plugin Configs
+
+Plugin configs set at the route and request level can be used to drive additional filtering. In this example a reporter allows setting a `suppressResponseLog` property.
+
+Setting plugin config at route level
+```
+var routeConfig = {
+    plugins: {
+        good: {
+            suppressResponseEvent: true
+        }
+    }
+};
+
+server.route({ method: 'GET', path: '/user', config: routeConfig });
+```
+
+Setting config in a handler
+```
+const handler = function (request, reply) {
+
+    request.plugins.good = {
+        suppressResponseEvent: true
+    };
+
+    reply.continue();
+}
+```
+
+In the `_transform` method implemented by the reporter
+```
+_transform(data, enc, next) {
+
+    if (data.eventName === 'response' && data.config.suppressResponseLog) {
+        return next();
+    }
+
+    return next(null, data);
+}
+```
 
 ### Reporter Lifecycle
 
