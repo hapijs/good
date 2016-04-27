@@ -123,7 +123,7 @@ Event object associated with 'error' events.
 - `method` - method of the request that originated the error. Maps to `request.method`.
 - `pid` - the current process id.
 - `error` - the raw error object.
-- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs. Can be used for additional filtering logic.
 
 The `toJSON` method of `GreatError` has been overwritten because `Error` objects can not be stringified directly. A stringified `GreatError` will have `error.message` and `error.stack` in place of the raw `Error` object.
 
@@ -149,7 +149,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
     - `referer` - the referer headed of the incoming request.
 - `route` - route path used by request. Maps to `request.route.path`.
 - `log` - maps to `request.getLog()` of the hapi request object.
-- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs. Can be used for additional filtering logic.
 
 ### `Ops`
 
@@ -192,7 +192,7 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `id` - id of the request, maps to `request.id`.
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
-- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs. Can be used for additional filtering logic.
 
 ### Extension Payloads
 
