@@ -84,7 +84,7 @@ At this point, data will start flowing to each of the reporters through the pipe
 **Shutdown**
 
 1. When "onPostStop" is emitted from the hapi server, the shutdown sequence starts.
-2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick Node tick. 
+2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick Node tick.
 
 ## Event Types
 
@@ -123,6 +123,7 @@ Event object associated with 'error' events.
 - `method` - method of the request that originated the error. Maps to `request.method`.
 - `pid` - the current process id.
 - `error` - the raw error object.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs.
 
 The `toJSON` method of `GreatError` has been overwritten because `Error` objects can not be stringified directly. A stringified `GreatError` will have `error.message` and `error.stack` in place of the raw `Error` object.
 
@@ -148,6 +149,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
     - `referer` - the referer headed of the incoming request.
 - `route` - route path used by request. Maps to `request.route.path`.
 - `log` - maps to `request.getLog()` of the hapi request object.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs.
 
 ### `Ops`
 
@@ -190,6 +192,7 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `id` - id of the request, maps to `request.id`.
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good` using `Object.assign` with request-level configs overriding route-level configs.
 
 ### Extension Payloads
 
