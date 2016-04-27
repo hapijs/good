@@ -2,6 +2,7 @@
 
 - [Options](#options)
 - [Reporter Interface](#reporter-interface)
+  * [Filtering Using Plugin Configs](#filtering-using-plugin-configs)
   * [Reporter Lifecycle](#reporter-lifecycle)
 - [Event Types](#event-types)
 - [Event Payloads](#event-payloads)
@@ -71,6 +72,47 @@ These changes address the two most common requests; "how do I filter on `X`?" an
 
 **This change also allows user to leverage *any* existing transform or write stream in the node ecosystem to be used with good.**
 
+### Filtering Using Plugin Configs
+
+Plugin configs set at the route and request level can be used to drive additional filtering. In this example a reporter allows setting a `suppressResponseLog` property.
+
+Setting plugin config at route level
+```
+var routeConfig = {
+    plugins: {
+        good: {
+            suppressResponseEvent: true
+        }
+    }
+};
+
+server.route({ method: 'GET', path: '/user', config: routeConfig });
+```
+
+Setting config in a handler
+```
+const handler = function (request, reply) {
+
+    request.plugins.good = {
+        suppressResponseEvent: true
+    };
+
+    reply.continue();
+}
+```
+
+In the `_transform` method implemented by the reporter
+```
+_transform(data, enc, next) {
+
+    if (data.eventName === 'response' && data.config.suppressResponseLog) {
+        return next();
+    }
+
+    return next(null, data);
+}
+```
+
 ### Reporter Lifecycle
 
 **Startup**
@@ -84,7 +126,7 @@ At this point, data will start flowing to each of the reporters through the pipe
 **Shutdown**
 
 1. When "onPostStop" is emitted from the hapi server, the shutdown sequence starts.
-2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick Node tick. 
+2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick Node tick.
 
 ## Event Types
 
@@ -123,6 +165,7 @@ Event object associated with 'error' events.
 - `method` - method of the request that originated the error. Maps to `request.method`.
 - `pid` - the current process id.
 - `error` - the raw error object.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
 
 The `toJSON` method of `GreatError` has been overwritten because `Error` objects can not be stringified directly. A stringified `GreatError` will have `error.message` and `error.stack` in place of the raw `Error` object.
 
@@ -148,6 +191,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
     - `referer` - the referer headed of the incoming request.
 - `route` - route path used by request. Maps to `request.route.path`.
 - `log` - maps to `request.getLog()` of the hapi request object.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
 
 ### `Ops`
 
@@ -190,6 +234,7 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `id` - id of the request, maps to `request.id`.
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
+- `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
 
 ### Extension Payloads
 
