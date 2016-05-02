@@ -19,7 +19,9 @@
     "hoek": "3.x.x",
     "joi": "7.x.x",
     "oppsy": "1.x.x",
-    "pumpify": "1.3.x"
+    "pumpify": "1.3.x",
+    "traverse": "0.6.6",
+    "wreck": "7.x.x"
   },
   "peerDependencies": {
     "hapi": ">=10.x.x"
