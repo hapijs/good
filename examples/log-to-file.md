@@ -1,7 +1,6 @@
 # Log to File
 
 - [Basic Example](#basic-example)
-- [Separators in JSON Streams](#Separators-in-JSON-streams)
 - [Log Rotation](#log-rotation)
 
 ## Basic Example
@@ -24,28 +23,9 @@ This reporter spec logs ops events to a file.
 
 It uses the `good-squeeze` Squeeze function to select only ops events.
 
-Events that pass the filter stream to `good-squeeze` SafeJson for formatting.
+Events that pass the filter stream to `good-squeeze` SafeJson, which transforms the event data into a JSON string.
 
-JSON-formatted events stream to `good-file`, which writes them to `./test/fixtures/awesome_log`.
-
-### Separators in JSON Streams
-
-To insert a comma between JSON-formatted objects, add `args` to the SafeJson formatter. `good` passes the `args` array to the [SafeJson constructor](https://github.com/hapijs/good-squeeze#safejsonoptions-stringify).
-
-```
-file: [{
-    module: 'good-squeeze',
-    name: 'Squeeze',
-    args: [{ ops: '*' }]
-}, {
-    module: 'good-squeeze',
-    name: 'SafeJson',
-    args: [{}, { separator: ',' }]
-}, {
-    module: 'good-file',
-    args: ['./test/fixtures/awesome_log']
-}]
-```
+Events formatted as JSON strings stream to `good-file`, which writes them to `./test/fixtures/awesome_log`.
 
 ### Log Rotation
 
@@ -59,7 +39,7 @@ file: [{
 }, {
     module: 'good-squeeze',
     name: 'SafeJson',
-    args: [{}, { separator: ',' }]
+    args: [ null, { separator: ',' }]
 }, {
     module: 'rotating-file-stream',
     args: ['ops_log', {

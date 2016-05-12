@@ -6,11 +6,15 @@
 console: [{
     module: 'good-squeeze',
     name: 'Squeeze',
-    args: [{ log: '*', response: '*' }]
+    args: [{
+        log: '*',
+        response: '*'
+    }]
 }, {
     module: 'white-out',
-    args: [{ password: 'remove',
-        age: `censor`
+    args: [{
+        password: 'remove',
+        age: 'censor'
     }]
 }, {
     module: 'good-console'

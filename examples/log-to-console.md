@@ -6,7 +6,10 @@
 console: [{
     module: 'good-squeeze',
     name: 'Squeeze',
-    args: [{ log: '*', response: '*' }]
+    args: [{
+        log: '*',
+        response: '*'
+    }]
 }, {
     module: 'good-console'
 }, 'stdout']

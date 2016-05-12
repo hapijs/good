@@ -9,11 +9,14 @@ http: [{
     args: [{ error: '*' }]
 }, {
     module: 'good-http',
-    args: ['http://prod.logs:3000', {
-        wreck: {
-            headers: { 'x-api-key': 12345 }
+    args: [
+        'http://prod.logs:3000',
+        {
+            wreck: {
+                headers: { 'x-api-key': 12345 }
+            }
         }
-    }]
+    ]
 }
 ```
 
