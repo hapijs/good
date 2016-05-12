@@ -39,13 +39,19 @@ file: [{
 }, {
     module: 'good-squeeze',
     name: 'SafeJson',
-    args: [ null, { separator: ',' }]
+    args: [
+        null,
+        { separator: ',' }
+    ]
 }, {
     module: 'rotating-file-stream',
-    args: ['ops_log', {
-        size: '1000B',
-        path: './logs'
-    }]
+    args: [
+        'ops_log',
+        {
+            size: '1000B',
+            path: './logs'
+        }
+    ]
 }]
 ```
 
