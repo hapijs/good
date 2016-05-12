@@ -27,7 +27,7 @@ Events that pass the filter stream to `good-squeeze` SafeJson, which transforms 
 
 Events formatted as JSON strings stream to `good-file`, which writes them to `./test/fixtures/awesome_log`.
 
-### Log Rotation
+## Log Rotation
 
 `good-file` does not do log rotation. See [rotating-file-stream](https://github.com/iccicci/rotating-file-stream) for one alternative. See the [rotating-file-stream constructor docs](https://github.com/iccicci/rotating-file-stream#new-rotatingfilestreamfilename-options) for parameter details.
 

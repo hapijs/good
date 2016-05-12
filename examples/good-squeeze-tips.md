@@ -1,7 +1,7 @@
 # `good-squeeze` Tips
 
-- [Separators in JSON Streams](#Separators-in-JSON-streams)
-- [Tag Filtering](#Tag-Filtering)
+- [Separators in JSON Streams](#separators-in-json-streams)
+- [Tag Filtering](#tag-filtering)
 
 ## Separators in JSON Streams
 
@@ -36,7 +36,8 @@ console: [{
     args: [{
         log: ['database', 'api'],
         response: 'hapi',
-        error: '*' }]
+        error: '*'
+    }]
 }, {
     module: 'good-console'
 }, 'stdout']

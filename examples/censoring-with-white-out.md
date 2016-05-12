@@ -33,4 +33,4 @@ Sanitized event data streams to `good-console` for formatting. See the `good con
 
 Formatted events stream to `process.stdout` for display.
 
-You can use `white-out` with files, http, and other output types by adding the `white-out` configuration to the stream spec.
+You can use `white-out` with files, http, and other output types by adding the `white-out` configuration to the stream spec. See [white-out](https://github.com/continuationlabs/white-out) for more details.
