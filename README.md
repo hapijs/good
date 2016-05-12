@@ -79,6 +79,8 @@ This example does the following:
 
 **NOTE**: Ensure calling `server.connection` prior to registering `Good`. `request` and `response` event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
 
+Looking for more examples? Check out the [examples folder](https://github.com/hapijs/good/tree/master/examples).
+
 ## Existing streams
 
 The following streams are maintained by the hapi community and are known to work with good. Any transform or write stream can work with good, these are just a few inside the hapijs organization.
