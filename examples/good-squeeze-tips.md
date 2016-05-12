@@ -3,7 +3,7 @@
 - [Separators in JSON Streams](#Separators-in-JSON-streams)
 - [Tag Filtering](#Tag-Filtering)
 
-### Separators in JSON Streams
+## Separators in JSON Streams
 
 To insert a comma between JSON-formatted objects, add `args` to the SafeJson formatter. `good` passes the `args` array to the [SafeJson constructor](https://github.com/hapijs/good-squeeze#safejsonoptions-stringify).
 
@@ -25,7 +25,7 @@ file: [{
 }]
 ```
 
-### Tag Filtering
+## Tag Filtering
 
 To filter events by tags, pass `good-squeeze` a string or array of tags. See the [Squeeze constructor docs](https://github.com/hapijs/good-squeeze#squeezeevents-options) and [Squeeze.subcription docs](https://github.com/hapijs/good-squeeze#squeezesubscriptionevents) for more details.
 
