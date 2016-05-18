@@ -21,8 +21,6 @@ console: [{
 }, 'stdout']
 ```
 
-**NOTE: This example is untested. Please submit a PR to remove this note if you test and it works or to correct if it doesn't.**
-
 This reporter spec logs response and log events to the console. It removes any data with key `password` (will not appear in output) and censors data with key `age` (appears as Xs).
 
 It uses `good-squeeze` to select only log and response events.
