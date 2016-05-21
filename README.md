@@ -56,17 +56,19 @@ const options = {
 
 server.register({
     register: require('good'),
-    options: options
+    options,
 }, (err) => {
 
     if (err) {
-        console.error(err);
-    } else {
-        server.start(() => {
-
-            console.info('Server started at ' + server.info.uri);
-        });
+        return console.error(err);
     }
+
+    server.start(() => {
+
+        console.info(`Server started at ${ server.info.uri }`);
+
+    });
+
 });
 
 ```
