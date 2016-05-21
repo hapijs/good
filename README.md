@@ -62,11 +62,8 @@ server.register({
     if (err) {
         return console.error(err);
     }
-
     server.start(() => {
-
         console.info(`Server started at ${ server.info.uri }`);
-
     });
 
 });
