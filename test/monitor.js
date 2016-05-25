@@ -99,7 +99,7 @@ describe('Monitor', () => {
         ], () => {
 
             expect(two.data).to.have.length(2);
-            expect(two.data).to.deep.equal([{ id: 1, number: 3 }, { id: 2, number: 6 }]);
+            expect(two.data).to.equal([{ id: 1, number: 3 }, { id: 2, number: 6 }]);
             done();
         });
     });
@@ -222,7 +222,7 @@ describe('Monitor', () => {
                 const res1 = out1.data;
                 const res2 = out2.data;
 
-                expect(res1).to.deep.equal([
+                expect(res1).to.equal([
                     { number: 5 },
                     { number: 6 },
                     { number: 7 },
@@ -236,7 +236,7 @@ describe('Monitor', () => {
                     { number: 15 }
                 ]);
 
-                expect(res2).to.deep.equal([
+                expect(res2).to.equal([
                     { number: 99 },
                     { number: 100 },
                     { number: 101 },
@@ -360,7 +360,7 @@ describe('Monitor', () => {
                         const res2 = out2.data;
 
                         expect(res1).to.have.length(4);
-                        expect(res1).to.deep.contain([{
+                        expect(res1).to.contain([{
                             event: 'request',
                             tags: ['test-tag'],
                             data: 'log request data',
@@ -391,7 +391,7 @@ describe('Monitor', () => {
                         expect(err1.error.stack.split('\n')[0]).to.equal('Error: Uncaught error: mock error');
 
                         expect(res2).to.have.length(4);
-                        expect(res2).to.deep.contain([{
+                        expect(res2).to.contain([{
                             event: 'request',
                             tags: ['test-tag'],
                             data: 'log request data',
@@ -474,7 +474,7 @@ describe('Monitor', () => {
                         expect(response.event).to.equal('response');
                         expect(response.log).to.be.an.array();
                         expect(response.headers).to.exist();
-                        expect(response.requestPayload).to.deep.equal({
+                        expect(response.requestPayload).to.equal({
                             data: 'example payload'
                         });
                         expect(response.responsePayload).to.equal('done');
@@ -727,7 +727,7 @@ describe('Monitor', () => {
 
                     expect(out.data).to.have.length(8);
 
-                    expect(out.data[0]).to.deep.equal({
+                    expect(out.data[0]).to.equal({
                         event: 'start',
                         payload: []
                     });
@@ -742,7 +742,7 @@ describe('Monitor', () => {
                         expect(event.payload[1].internal).to.be.true();
                     }
 
-                    expect(out.data[2]).to.deep.equal({
+                    expect(out.data[2]).to.equal({
                         event: 'super-secret',
                         payload: [{
                             id: 1,
@@ -750,12 +750,12 @@ describe('Monitor', () => {
                         }]
                     });
 
-                    expect(out.data[3]).to.deep.equal({
+                    expect(out.data[3]).to.equal({
                         event: 'super-secret',
                         payload: [null, null, null]
                     });
 
-                    expect(out.data[7]).to.deep.equal({
+                    expect(out.data[7]).to.equal({
                         event: 'stop',
                         payload:[]
                     });
@@ -802,12 +802,12 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(200);
-                        expect(out.data[0].config).to.deep.equal({
+                        expect(out.data[0].config).to.equal({
                             foo: 'baz',
                             filter: true,
                             zip: 'zap'
                         });
-                        expect(out.data[1].config).to.deep.equal({
+                        expect(out.data[1].config).to.equal({
                             foo: 'baz',
                             filter: true,
                             zip: 'zap'
