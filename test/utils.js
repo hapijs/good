@@ -90,9 +90,9 @@ describe('utils', () => {
             };
 
             const req = generateRequestSent(samplePayload, '');
-            expect(req.requestPayload).to.deep.equal(samplePayload);
+            expect(req.requestPayload).to.equal(samplePayload);
             const res = generateRequestSent('', samplePayload);
-            expect(res.responsePayload).to.deep.equal(samplePayload);
+            expect(res.responsePayload).to.equal(samplePayload);
             done();
         });
     });
