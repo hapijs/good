@@ -82,7 +82,7 @@ describe('Monitor', () => {
         console.error = (message) => {
 
             console.error = err;
-            expect(message).to.equal('There was a problem in foo and it has been destroyed.');
+            expect(message).to.match(/There was a problem \(.*\) in foo and it has been destroyed\./);
         };
 
         Async.series([
