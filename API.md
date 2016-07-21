@@ -20,7 +20,7 @@ as general events are a process-wide facility and will result in duplicated log 
 
 ## Options
 - `[includes]` - optional configuration object
-    - `[request]` - array of extra hapi request object fields to supply to reporters on "response" events. Valid values ['headers', 'payload']. Defaults to `[]`.
+    - `[request]` - array of extra hapi request object fields to supply to reporters on "request" events. Valid values ['headers', 'payload']. Defaults to `[]`.
     - `[response]` - array of extra hapi response object fields to supply to reporters on "response" events. Valid values ['payload']. Defaults to `[]`.
 - `[ops]` - options for controlling the ops reporting from good. Set to `false` to disable ops monitoring completely.
     - `config` - options passed directly into the [`Oppsy`](https://github.com/hapijs/oppsy) constructor as the `config` value. Defaults to `{}`
@@ -35,15 +35,15 @@ as general events are a process-wide facility and will result in duplicated log 
         - `[name]` - if the imported module exports more than one constructor function, use `name` to specify which one to use.
         - `[args]` - an array of arguments to pass to the constructor when this stream object is created via `new`.
     - instantiated stream objects
-    - string name of a built in `process` stream. Valid values are `"stdout"` and `"stderr"`.
+    - string name of a built in `process` stream. Valid values are `'stdout'` and `'stderr'`.
 
 ## Reporter Interface
 
 The reporter interface uses the standard stream-and-pipe interface found commonly in the node ecosystem. Each item in the array of streams will be piped together in the array order. Any stream described using a stream specification object will be constructed with `new` to prevent any cross contamination from one reporter to another. For example, when passing the following specification for an "ops-console" reporter:
 
-```
+```js
 {
-    ops-console: [{
+    'ops-console': [{
         module: 'good-squeeze',
         name: 'Squeeze',
         args: [{ ops: '*' }]
@@ -56,7 +56,7 @@ The reporter interface uses the standard stream-and-pipe interface found commonl
 
 Internally, this would create an array (`streams`), import `good-squeeze` from node_modules, and then create a new "Squeeze" transform stream via `new Squeeze({ ops: '*' })` and push that result into `streams`. Then it would create a "SafeJson" transform stream via `new SafeJson()` and push that into `streams`. Finally, since 'stdout' is an existing process stream, it gets pushed directly into `streams`. Once all of the streams have been created and collected, the algorithm does essentially the following:
 
-```
+```js
 const result = streams[0].pipe(streams[1]).pipe(streams[2]);
 ```
 
@@ -76,8 +76,8 @@ These changes address the two most common requests; "how do I filter on `X`?" an
 
 Plugin configs set at the route and request level can be used to drive additional filtering. In this example a reporter allows setting a `suppressResponseLog` property.
 
-Setting plugin config at route level
-```
+Setting plugin config at route level:
+```js
 var routeConfig = {
     plugins: {
         good: {
@@ -89,8 +89,8 @@ var routeConfig = {
 server.route({ method: 'GET', path: '/user', config: routeConfig });
 ```
 
-Setting config in a handler
-```
+Setting config in a handler:
+```js
 const handler = function (request, reply) {
 
     request.plugins.good = {
@@ -101,8 +101,8 @@ const handler = function (request, reply) {
 }
 ```
 
-In the `_transform` method implemented by the reporter
-```
+In the `_transform` method implemented by the reporter:
+```js
 _transform(data, enc, next) {
 
     if (data.eventName === 'response' && data.config.suppressResponseLog) {
