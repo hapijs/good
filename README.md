@@ -21,14 +21,14 @@ const options = {
         interval: 1000
     },
     reporters: {
-        console: [{
+        myConsoleReporter: [{
             module: 'good-squeeze',
             name: 'Squeeze',
             args: [{ log: '*', response: '*' }]
         }, {
             module: 'good-console'
         }, 'stdout'],
-        file: [{
+        myFileReporter: [{
             module: 'good-squeeze',
             name: 'Squeeze',
             args: [{ ops: '*' }]
@@ -39,7 +39,7 @@ const options = {
             module: 'good-file',
             args: ['./test/fixtures/awesome_log']
         }],
-        http: [{
+        myHTTPReporter: [{
             module: 'good-squeeze',
             name: 'Squeeze',
             args: [{ error: '*' }]
@@ -72,9 +72,11 @@ server.register({
 
 This example does the following:
 
-1. Sets up the `console` reporter reporter listening for 'response' and 'log' events and writes them to `process.stdout`.
-2. Sets up the `file` reporter to listen for 'ops' events and logs them to `./test/fixtures/awesome_log`.
-3. Sets up the `http` reporter to listen for error events and POSTs them to `http://prod.logs:3000` with additional settings to passed into `Wreck`
+1. Sets up the reporter named `myConsoleReporter` listening for 'response' and 'log' events and writes them to `process.stdout`.
+2. Sets up the reporter named `myFileReporter` to listen for 'ops' events and logs them to `./test/fixtures/awesome_log`.
+3. Sets up the reporter named `myHTTPReporter` to listen for error events and POSTs them to `http://prod.logs:3000` with additional settings to passed into `Wreck`
+
+See the [Reporter Interface section of the API documentation](https://github.com/hapijs/good/blob/master/API.md#reporter-interface) on how to configure reporters.
 
 **NOTE**: Ensure calling `server.connection` prior to registering `Good`. `request` and `response` event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
 
