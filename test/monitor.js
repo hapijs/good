@@ -28,6 +28,21 @@ const internals = {
             reporters: {},
             ops: false
         };
+
+        if (server.hasListeners === undefined) {
+            const hasListeners = function (event) {
+
+                return this.listeners(event).length > 0;
+            };
+
+            server.decorate('server', 'hasListeners', hasListeners);
+        }
+
+        if (server.event !== undefined) {
+            server.event('internalError');
+            server.event('super-secret');
+        }
+
         return new Monitor(server, Object.assign({}, defaults, options));
     }
 };
@@ -158,9 +173,9 @@ describe('Monitor', () => {
                 expect(error).to.not.exist();
 
                 expect(monitor._ops.listeners('ops')).to.have.length(1);
-                expect(monitor._server.listeners('request-error')).to.have.length(1);
-                expect(monitor._server.listeners('log')).to.have.length(1);
-                expect(monitor._server.listeners('tail')).to.have.length(1);
+                expect(monitor._server.hasListeners('request-error')).to.be.true();
+                expect(monitor._server.hasListeners('log')).to.be.true();
+                expect(monitor._server.hasListeners('tail')).to.be.true();
                 monitor.stop(done);
             });
         });
@@ -179,7 +194,7 @@ describe('Monitor', () => {
             expect(() => {
 
                 const monitor = internals.monitorFactory(new Hapi.Server(), options);
-                monitor.start(() => {});
+                monitor.start(() => { });
             }).to.throw(Error, 'Error in foo. ../test/fixtures/reporters must be a constructor function.');
 
             expect(() => {
@@ -189,7 +204,7 @@ describe('Monitor', () => {
                     name: 'NotStream'
                 }];
                 const monitor = internals.monitorFactory(new Hapi.Server(), options);
-                monitor.start(() => {});
+                monitor.start(() => { });
             }).to.throw(Error, 'Error in foo. ../test/fixtures/reporters must create a stream that has a pipe function.');
 
             done();
@@ -217,7 +232,6 @@ describe('Monitor', () => {
                 for (let i = 0; i <= 10; ++i) {
                     monitor.push(() => ({ number: i }));
                 }
-                monitor.push(() => null);
 
                 const res1 = out1.data;
                 const res2 = out2.data;
@@ -288,11 +302,11 @@ describe('Monitor', () => {
                         expect(two._finalized).to.be.true();
                         expect(three._finalized).to.be.true();
                         expect([false, null]).to.contain(monitor._ops._interval._repeat);
-                        expect(monitor._server.listeners('log')).to.have.length(0);
+                        expect(monitor._server.hasListeners('log')).to.be.false();
                         expect(monitor._ops.listeners('ops')).to.have.length(0);
-                        expect(monitor._server.listeners('internalError')).to.have.length(0);
-                        expect(monitor._server.listeners('tail')).to.have.length(0);
-                        expect(monitor._server.listeners('stop')).to.have.length(0);
+                        expect(monitor._server.hasListeners('internalError')).to.be.false();
+                        expect(monitor._server.hasListeners('tail')).to.be.false();
+                        expect(monitor._server.hasListeners('stop')).to.be.false();
 
                         callback();
                     });
@@ -328,7 +342,7 @@ describe('Monitor', () => {
             const out1 = new GoodReporter.Writer(true);
             const out2 = new GoodReporter.Writer(true);
             // remove these keys so deep.equal works. they change call to call and machine to machine
-            const filters = ['timestamp','pid', 'id', 'log', 'responseTime', 'source'];
+            const filters = ['timestamp', 'pid', 'id', 'log', 'responseTime', 'source'];
             const monitor = internals.monitorFactory(server, {
                 reporters: {
                     foo: [
@@ -356,69 +370,72 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(500);
-                        const res1 = out1.data;
-                        const res2 = out2.data;
+                        setTimeout(() => {
 
-                        expect(res1).to.have.length(4);
-                        expect(res1).to.contain([{
-                            event: 'request',
-                            tags: ['test-tag'],
-                            data: 'log request data',
-                            method: 'get',
-                            path: '/',
-                            config: { foo: 'bar' },
-                            name: 'foo'
-                        }, {
-                            event: 'log',
-                            tags: ['test'],
-                            data: 'test data',
-                            name: 'foo'
-                        }, {
-                            event: 'response',
-                            instance: server.info.uri,
-                            labels: [],
-                            method: 'get',
-                            path: '/',
-                            query: { q: 'test' },
-                            statusCode: 500,
-                            config: { foo: 'bar' },
-                            name: 'foo'
-                        }]);
+                            const res1 = out1.data;
+                            const res2 = out2.data;
 
-                        const err1 = JSON.parse(JSON.stringify(res1[2]));
-                        expect(err1.event).to.equal('error');
-                        expect(err1.error.error).to.equal('Uncaught error: mock error');
-                        expect(err1.error.stack.split('\n')[0]).to.equal('Error: Uncaught error: mock error');
+                            expect(res1).to.have.length(4);
+                            expect(res1).to.contain([{
+                                event: 'request',
+                                tags: ['test-tag'],
+                                data: 'log request data',
+                                method: 'get',
+                                path: '/',
+                                config: { foo: 'bar' },
+                                name: 'foo'
+                            }, {
+                                event: 'log',
+                                tags: ['test'],
+                                data: 'test data',
+                                name: 'foo'
+                            }, {
+                                event: 'response',
+                                instance: server.info.uri,
+                                labels: [],
+                                method: 'get',
+                                path: '/',
+                                query: { q: 'test' },
+                                statusCode: 500,
+                                config: { foo: 'bar' },
+                                name: 'foo'
+                            }]);
 
-                        expect(res2).to.have.length(4);
-                        expect(res2).to.contain([{
-                            event: 'request',
-                            tags: ['test-tag'],
-                            data: 'log request data',
-                            method: 'get',
-                            path: '/',
-                            config: { foo: 'bar' }
-                        }, {
-                            event: 'log',
-                            tags: ['test'],
-                            data: 'test data'
-                        }, {
-                            event: 'response',
-                            instance: server.info.uri,
-                            labels: [],
-                            method: 'get',
-                            path: '/',
-                            query: { q: 'test' },
-                            statusCode: 500,
-                            config: { foo: 'bar' }
-                        }]);
+                            const err1 = JSON.parse(JSON.stringify(res1[2]));
+                            expect(err1.event).to.equal('error');
+                            expect(err1.error.error).to.equal('Uncaught error: mock error');
+                            expect(err1.error.stack.split('\n')[0]).to.equal('Error: Uncaught error: mock error');
 
-                        const err2 = JSON.parse(JSON.stringify(res1[2]));
-                        expect(err2.event).to.equal('error');
-                        expect(err2.error.error).to.equal('Uncaught error: mock error');
-                        expect(err2.error.stack.split('\n')[0]).to.equal('Error: Uncaught error: mock error');
+                            expect(res2).to.have.length(4);
+                            expect(res2).to.contain([{
+                                event: 'request',
+                                tags: ['test-tag'],
+                                data: 'log request data',
+                                method: 'get',
+                                path: '/',
+                                config: { foo: 'bar' }
+                            }, {
+                                event: 'log',
+                                tags: ['test'],
+                                data: 'test data'
+                            }, {
+                                event: 'response',
+                                instance: server.info.uri,
+                                labels: [],
+                                method: 'get',
+                                path: '/',
+                                query: { q: 'test' },
+                                statusCode: 500,
+                                config: { foo: 'bar' }
+                            }]);
 
-                        callback();
+                            const err2 = JSON.parse(JSON.stringify(res1[2]));
+                            expect(err2.event).to.equal('error');
+                            expect(err2.error.error).to.equal('Uncaught error: mock error');
+                            expect(err2.error.stack.split('\n')[0]).to.equal('Error: Uncaught error: mock error');
+
+                            callback();
+                        }, 50);
                     });
                     req.end();
                 }
@@ -465,21 +482,24 @@ describe('Monitor', () => {
                         }
                     }, (res) => {
 
-                        const messages = out.data;
-                        const response = messages[1];
-
                         expect(res.statusCode).to.equal(200);
-                        expect(messages).to.have.length(2);
+                        setTimeout(() => {
 
-                        expect(response.event).to.equal('response');
-                        expect(response.log).to.be.an.array();
-                        expect(response.headers).to.exist();
-                        expect(response.requestPayload).to.equal({
-                            data: 'example payload'
-                        });
-                        expect(response.responsePayload).to.equal('done');
-                        expect(response.route).to.equal('/');
-                        server.stop(callback);
+                            const messages = out.data;
+                            const response = messages[1];
+
+                            expect(messages).to.have.length(2);
+
+                            expect(response.event).to.equal('response');
+                            expect(response.log).to.be.an.array();
+                            expect(response.headers).to.exist();
+                            expect(response.requestPayload).to.equal({
+                                data: 'example payload'
+                            });
+                            expect(response.responsePayload).to.equal('done');
+                            expect(response.route).to.equal('/');
+                            server.stop(callback);
+                        }, 50);
                     });
 
                     req.write(JSON.stringify({
@@ -543,7 +563,7 @@ describe('Monitor', () => {
             });
 
             const out = new GoodReporter.Writer(true);
-            const monitor = internals.monitorFactory(server, { reporters: { foo : [out] } });
+            const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             Async.series([
                 server.start.bind(server),
@@ -555,11 +575,14 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(201);
-                        expect(out.data).to.have.length(1);
+                        setTimeout(() => {
 
-                        const event = out.data[0];
-                        expect(event).to.be.an.instanceof(Utils.RequestSent);
-                        server.stop(callback);
+                            expect(out.data).to.have.length(1);
+
+                            const event = out.data[0];
+                            expect(event).to.be.an.instanceof(Utils.RequestSent);
+                            server.stop(callback);
+                        }, 50);
                     });
                 }
             ], done);
@@ -592,17 +615,20 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(500);
-                        expect(out.data).to.have.length(2);
+                        setTimeout(() => {
 
-                        const event = out.data[0];
-                        expect(event).to.be.an.instanceof(Utils.RequestError);
-                        server.stop(callback);
+                            expect(out.data).to.have.length(2);
+
+                            const event = out.data[0];
+                            expect(event).to.be.an.instanceof(Utils.RequestError);
+                            server.stop(callback);
+                        }, 50);
                     });
                 }
             ], done);
         });
 
-        it('has a standard "log" data object', { plan: 3 },  (done) => {
+        it('has a standard "log" data object', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -630,12 +656,15 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(200);
-                        expect(out.data).to.have.length(2);
+                        setTimeout(() => {
 
-                        const event = out.data[0];
+                            expect(out.data).to.have.length(2);
 
-                        expect(event).to.be.an.instanceof(Utils.ServerLog);
-                        server.stop(callback);
+                            const event = out.data[0];
+
+                            expect(event).to.be.an.instanceof(Utils.ServerLog);
+                            server.stop(callback);
+                        }, 50);
                     });
                 }
             ], done);
@@ -669,12 +698,15 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(200);
-                        expect(out.data).to.have.length(2);
+                        setTimeout(() => {
 
-                        const event = out.data[0];
+                            expect(out.data).to.have.length(2);
 
-                        expect(event).to.be.an.instanceof(Utils.RequestLog);
-                        server.stop(callback);
+                            const event = out.data[0];
+
+                            expect(event).to.be.an.instanceof(Utils.RequestLog);
+                            server.stop(callback);
+                        }, 50);
                     });
                 }
             ], done);
@@ -696,7 +728,7 @@ describe('Monitor', () => {
                         foo: 'bar'
                     });
 
-                    server._events.emit('super-secret', null, null, null);
+                    server._events.emit('super-secret', null);
 
                     reply();
                 }
@@ -723,15 +755,15 @@ describe('Monitor', () => {
                     });
                 },
                 server.stop.bind(server),
+                (callback) => setTimeout(callback, 100),
                 (callback) => {
 
                     expect(out.data).to.have.length(8);
 
-                    expect(out.data[0]).to.equal({
-                        event: 'start',
-                        payload: []
-                    });
-                    const internalEvents = [1, 4, 5];
+
+                    const hapi15 = (server.event !== undefined);
+                    expect(out.data[0].event).to.equal('start');
+                    const internalEvents = [1, (hapi15 ? 3 : 4), 5];
 
                     for (let i = 0; i < internalEvents.length; ++i) {
                         const index = internalEvents[i];
@@ -750,15 +782,12 @@ describe('Monitor', () => {
                         }]
                     });
 
-                    expect(out.data[3]).to.equal({
+                    expect(out.data[hapi15 ? 4 : 3]).to.equal({
                         event: 'super-secret',
-                        payload: [null, null, null]
+                        payload: [null]
                     });
 
-                    expect(out.data[7]).to.equal({
-                        event: 'stop',
-                        payload:[]
-                    });
+                    expect(out.data[hapi15 ? 6 : 7].event).to.equal('stop');
                     callback();
                 }
             ], done);
@@ -802,17 +831,20 @@ describe('Monitor', () => {
                     }, (res) => {
 
                         expect(res.statusCode).to.equal(200);
-                        expect(out.data[0].config).to.equal({
-                            foo: 'baz',
-                            filter: true,
-                            zip: 'zap'
-                        });
-                        expect(out.data[1].config).to.equal({
-                            foo: 'baz',
-                            filter: true,
-                            zip: 'zap'
-                        });
-                        callback();
+                        setTimeout(() => {
+
+                            expect(out.data[0].config).to.equal({
+                                foo: 'baz',
+                                filter: true,
+                                zip: 'zap'
+                            });
+                            expect(out.data[1].config).to.equal({
+                                foo: 'baz',
+                                filter: true,
+                                zip: 'zap'
+                            });
+                            callback();
+                        }, 50);
                     });
                 }
             ], done);
@@ -877,7 +909,7 @@ describe('Monitor', () => {
 
                     callback();
                 }
-            ],done);
+            ], done);
         });
     });
 });
