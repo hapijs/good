@@ -28,6 +28,21 @@ const internals = {
             reporters: {},
             ops: false
         };
+
+        if (server.hasListeners === undefined) {
+            const hasListeners = function (event) {
+
+                return this.listeners(event).length > 0;
+            };
+
+            server.decorate('server', 'hasListeners', hasListeners);
+        }
+
+        if (server.event !== undefined) {
+            server.event('internalError');
+            server.event('super-secret');
+        }
+
         return new Monitor(server, Object.assign({}, defaults, options));
     }
 };
@@ -158,9 +173,9 @@ describe('Monitor', () => {
                 expect(error).to.not.exist();
 
                 expect(monitor._ops.listeners('ops')).to.have.length(1);
-                expect(monitor._server.listeners('request-error')).to.have.length(1);
-                expect(monitor._server.listeners('log')).to.have.length(1);
-                expect(monitor._server.listeners('tail')).to.have.length(1);
+                expect(monitor._server.hasListeners('request-error')).to.be.true();
+                expect(monitor._server.hasListeners('log')).to.be.true();
+                expect(monitor._server.hasListeners('tail')).to.be.true();
                 monitor.stop(done);
             });
         });
@@ -288,11 +303,11 @@ describe('Monitor', () => {
                         expect(two._finalized).to.be.true();
                         expect(three._finalized).to.be.true();
                         expect([false, null]).to.contain(monitor._ops._interval._repeat);
-                        expect(monitor._server.listeners('log')).to.have.length(0);
+                        expect(monitor._server.hasListeners('log')).to.be.false();
                         expect(monitor._ops.listeners('ops')).to.have.length(0);
-                        expect(monitor._server.listeners('internalError')).to.have.length(0);
-                        expect(monitor._server.listeners('tail')).to.have.length(0);
-                        expect(monitor._server.listeners('stop')).to.have.length(0);
+                        expect(monitor._server.hasListeners('internalError')).to.be.false();
+                        expect(monitor._server.hasListeners('tail')).to.be.false();
+                        expect(monitor._server.hasListeners('stop')).to.be.false();
 
                         callback();
                     });
@@ -696,7 +711,7 @@ describe('Monitor', () => {
                         foo: 'bar'
                     });
 
-                    server._events.emit('super-secret', null, null, null);
+                    server._events.emit('super-secret', null);
 
                     reply();
                 }
@@ -727,10 +742,7 @@ describe('Monitor', () => {
 
                     expect(out.data).to.have.length(8);
 
-                    expect(out.data[0]).to.equal({
-                        event: 'start',
-                        payload: []
-                    });
+                    expect(out.data[0].event).to.equal('start');
                     const internalEvents = [1, 4, 5];
 
                     for (let i = 0; i < internalEvents.length; ++i) {
@@ -752,13 +764,10 @@ describe('Monitor', () => {
 
                     expect(out.data[3]).to.equal({
                         event: 'super-secret',
-                        payload: [null, null, null]
+                        payload: [null]
                     });
 
-                    expect(out.data[7]).to.equal({
-                        event: 'stop',
-                        payload:[]
-                    });
+                    expect(out.data[7].event).to.equal('stop');
                     callback();
                 }
             ], done);
