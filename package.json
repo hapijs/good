@@ -27,7 +27,7 @@
   "devDependencies": {
     "async": "1.5.x",
     "code": "3.x.x",
-    "hapi": "14.x.x",
+    "hapi": "15.x.x",
     "lab": "10.x.x"
   },
   "scripts": {
