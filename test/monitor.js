@@ -2,12 +2,11 @@
 
 // Load modules
 
-const Http = require('http');
-
 const AsyncSeries = require('async/series');
 const Code = require('code');
 const Hapi = require('hapi');
 const Lab = require('lab');
+const Wreck = require('wreck');
 
 const GoodReporter = require('./fixtures/reporters');
 const Stringify = require('./fixtures/reporter');
@@ -288,7 +287,6 @@ describe('Monitor', () => {
                 for (let i = 0; i <= 10; ++i) {
                     monitor.push(() => ({ number: i }));
                 }
-                monitor.push(() => null);
 
                 const res1 = out1.data;
                 const res2 = out2.data;
@@ -325,11 +323,35 @@ describe('Monitor', () => {
             });
 
         });
+
+        it('does not push data through if the monitor has been stopped', { plan: 2 }, (done) => {
+
+            const out1 = new GoodReporter.Writer(true);
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [new GoodReporter.Incrementer(5), out1]
+                }
+            });
+
+            monitor.start((error) => {
+
+                expect(error).to.not.exist();
+                monitor.stop(() => {
+
+                    for (let i = 0; i <= 10; ++i) {
+                        monitor.push(() => ({ number: i }));
+                    }
+                    expect(out1.data).to.equal([]);
+                    done();
+                });
+            });
+        });
     });
 
     describe('stop()', () => {
 
-        it('cleans up open timeouts, removes event handlers, and pushes null to the read stream', { plan: 9 }, (done) => {
+        it('cleans up open timeouts, stops reporting events and pushes null to the read stream', { plan: 6 }, (done) => {
 
             const one = new GoodReporter.Incrementer(1);
             const two = new GoodReporter.Stringify();
@@ -353,18 +375,14 @@ describe('Monitor', () => {
                 },
                 (callback) => {
 
+                    expect(monitor._state.report).to.be.true();
                     monitor.stop(() => {
 
                         expect(one._finalized).to.be.true();
                         expect(two._finalized).to.be.true();
                         expect(three._finalized).to.be.true();
+                        expect(monitor._state.report).to.be.false();
                         expect([false, null]).to.contain(monitor._ops._interval._repeat);
-                        expect(monitor._server.hasListeners('log')).to.be.false();
-                        expect(monitor._ops.listeners('ops')).to.have.length(0);
-                        expect(monitor._server.hasListeners('internalError')).to.be.false();
-                        expect(monitor._server.hasListeners('tail')).to.be.false();
-                        expect(monitor._server.hasListeners('stop')).to.be.false();
-
                         callback();
                     });
                 }
@@ -374,7 +392,8 @@ describe('Monitor', () => {
 
     describe('monitoring', () => {
 
-        it('sends events to all reporters when they occur', {  }, (done) => {
+
+        it('sends events to all reporters when they occur', { plan: 12 }, (done) => {
 
             const server = new Hapi.Server({ debug: false });
             server.connection();
@@ -419,13 +438,9 @@ describe('Monitor', () => {
                 monitor.start.bind(monitor),
                 (callback) => {
 
-                    const req = Http.request({
-                        hostname: server.info.host,
-                        port: server.info.port,
-                        method: 'GET',
-                        path: '/?q=test'
-                    }, (res) => {
+                    Wreck.get(server.info.uri + '/?q=test', (err, res) => {
 
+                        expect(err).to.not.exist();
                         expect(res.statusCode).to.equal(500);
                         setTimeout(() => {
 
@@ -494,12 +509,11 @@ describe('Monitor', () => {
                             callback();
                         }, 50);
                     });
-                    req.end();
                 }
             ], done);
         });
 
-        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', { plan: 8 }, (done) => {
+        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', { plan: 9 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -529,16 +543,16 @@ describe('Monitor', () => {
                 monitor.start.bind(monitor),
                 (callback) => {
 
-                    const req = Http.request({
-                        hostname: server.info.host,
-                        port: server.info.port,
-                        method: 'POST',
-                        path: '/?q=test',
+                    Wreck.post(server.info.uri + '/?q=test', {
                         headers: {
                             'Content-Type': 'application/json'
-                        }
-                    }, (res) => {
+                        },
+                        payload: JSON.stringify({
+                            data: 'example payload'
+                        })
+                    }, (err, res) => {
 
+                        expect(err).to.not.exist();
                         expect(res.statusCode).to.equal(200);
                         setTimeout(() => {
 
@@ -558,11 +572,6 @@ describe('Monitor', () => {
                             server.stop(callback);
                         }, 50);
                     });
-
-                    req.write(JSON.stringify({
-                        data: 'example payload'
-                    }));
-                    req.end();
                 }
             ], done);
         });
@@ -965,6 +974,61 @@ describe('Monitor', () => {
                     expect(errData[0].name).to.equal('bar');
 
                     callback();
+                }
+            ], done);
+        });
+
+        it('has a standard "wreck" event schema', { plan: 3 }, (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: (request, reply) => {
+
+                    Wreck.get(server.info.uri + '/test', (err, res) => {
+
+                        reply(err, res);
+                    });
+                }
+            });
+
+            server.route({
+                method: 'GET',
+                path: '/test',
+                handler: (request, reply) => {
+
+                    reply();
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                reporters: { foo: [out] },
+                wreck: true
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    server.inject({
+                        url: '/'
+                    }, (res) => {
+
+                        expect(res.statusCode).to.equal(200);
+                        // account for hapi15 differences
+                        expect(out.data.length).to.be.greaterThan(0);
+                        const result = out.data.find((event) => {
+
+                            return event.event === 'wreck';
+                        });
+                        expect(result).to.be.an.instanceof(Utils.WreckResponse);
+                        server.stop(callback);
+                    });
                 }
             ], done);
         });
