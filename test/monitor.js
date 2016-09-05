@@ -761,8 +761,10 @@ describe('Monitor', () => {
 
                     expect(out.data).to.have.length(8);
 
+                    const hapi15 = (server.event !== undefined);
+
                     expect(out.data[0].event).to.equal('start');
-                    const internalEvents = [1, 3, 5];
+                    const internalEvents = [1, (hapi15 ? 3 : 4), 5];
 
                     for (let i = 0; i < internalEvents.length; ++i) {
                         const index = internalEvents[i];
@@ -781,12 +783,12 @@ describe('Monitor', () => {
                         }]
                     });
 
-                    expect(out.data[4]).to.equal({
+                    expect(out.data[hapi15 ? 4 : 3]).to.equal({
                         event: 'super-secret',
                         payload: [null]
                     });
 
-                    expect(out.data[6].event).to.equal('stop');
+                    expect(out.data[hapi15 ? 6 : 7].event).to.equal('stop');
                     callback();
                 }
             ], done);
