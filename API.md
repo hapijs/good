@@ -191,6 +191,7 @@ Event object associated with the `responseEvent` event option into Good. `reques
     - `referer` - the referer headed of the incoming request.
 - `route` - route path used by request. Maps to `request.route.path`.
 - `log` - maps to `request.getLog()` of the hapi request object.
+- `tags` - array of strings representing any tags from route config. Maps to `request.route.settings.tags`.
 - `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
 
 ### `Ops`
