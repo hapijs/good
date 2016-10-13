@@ -160,6 +160,42 @@ describe('Monitor', () => {
             });
         });
 
+        it('accepts a function as module', { plan: 2 }, (done) => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.start((error) => {
+
+                expect(error).to.not.exist();
+                expect(monitor._reporters).to.have.length(1);
+                monitor.stop(done);
+            });
+        });
+
+        it('accepts an unnamed function as module', { plan: 2 }, (done) => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/unnamed-reporter')
+                    }]
+                }
+            });
+
+            monitor.start((error) => {
+
+                expect(error).to.not.exist();
+                expect(monitor._reporters).to.have.length(1);
+                monitor.stop(done);
+            });
+        });
+
         it('attaches events for "ops", "tail", "log", and "request-error"', { plan: 5 }, (done) => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {

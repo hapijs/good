@@ -31,7 +31,9 @@ as general events are a process-wide facility and will result in duplicated log 
 - `[extensions]` - an array of [hapi event names](https://github.com/hapijs/hapi/blob/master/API.md#server-events) to listen for and report via the good reporting mechanism. Can not be any of ['log', 'request-error', 'ops', 'request', 'response', 'tail']. **Disclaimer** This option should be used with caution. This option will allow users to listen to internal events that are not meant for public consumption. The list of available events can change with any changes to the hapi event system. Also, *none* of the official hapijs reporters have been tested against these custom events. The schema for these events can not be guaranteed because they vary from version to version of hapi.
 - `[reporters]` - Defaults to `{}`. `reporters` is a `key`, `value` pair where the `key` is a reporter name and the `value` is an array of mixed value types. Valid values for the array items are:
     - streams specifications object with the following keys
-        - `module` - a string that will be used to import a module from node_modules or a local file. Should export a single constructor function that can be invoked with `new`.
+        - `module` - can be :
+            - a string that will be used to import a module from node_modules or a local file. Should export a single constructor function that can be invoked with `new`.
+            - a function that is the constructor of your stream. It's a safer alternative to the string version when you risk having module conflicts. 
         - `[name]` - if the imported module exports more than one constructor function, use `name` to specify which one to use.
         - `[args]` - an array of arguments to pass to the constructor when this stream object is created via `new`.
     - instantiated stream objects
