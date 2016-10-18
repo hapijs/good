@@ -2,15 +2,21 @@
 
 const Stream = require('stream');
 
-class Stringify extends Stream.Transform {
-    constructor() {
+class Writer extends Stream.Writable {
+    constructor(objectMode) {
 
-        super({ objectMode: true });
+        super({ objectMode });
+        this.data = [];
+        this.once('finish', () => {
+
+            this._finalized = true;
+        });
     }
-    _transform(value, enc, callback) {
+    _write(chunk, end, callback) {
 
-        callback(null, JSON.stringify(value));
+        this.data.push(chunk);
+        callback(null);
     }
 }
 
-module.exports = Stringify;
+module.exports = Writer;
