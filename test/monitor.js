@@ -297,22 +297,14 @@ describe('Monitor', () => {
             done();
         });
 
-        it('validate the pipeline and throws if readable stream is present in the pipeline', { plan: 2 }, (done) => {
+        it('validate the pipeline and throws if readable stream is present in the pipeline', { plan: 1 }, (done) => {
 
             const options = {
                 strictPipeline: true,
                 reporters: {
-                    foo: ['stdin', 'stdout']
+                    foo: [new Stream.Readable(), 'stdout']
                 }
             };
-
-            expect( () => {
-
-                const monitor = internals.monitorFactory(new Hapi.Server(), options);
-                monitor.start(() => { });
-            }).to.throw(Error, 'Error in foo. stdin is a readable stream and should not be present in the pipeline.');
-
-            options.reporters.foo = [new Stream.Readable(), 'stdout'];
 
             expect( () => {
 
