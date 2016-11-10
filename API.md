@@ -33,7 +33,7 @@ as general events are a process-wide facility and will result in duplicated log 
     - streams specifications object with the following keys
         - `module` - can be :
             - a string that will be used to import a module from node_modules or a local file. Should export a single constructor function that can be invoked with `new`.
-            - a function that is the constructor of your stream. It's a safer alternative to the string version when you risk having module conflicts. 
+            - a function that is the constructor of your stream. It's a safer alternative to the string version when you risk having module conflicts.
         - `[name]` - if the imported module exports more than one constructor function, use `name` to specify which one to use.
         - `[args]` - an array of arguments to pass to the constructor when this stream object is created via `new`.
     - instantiated stream objects
@@ -183,7 +183,8 @@ Event object associated with the `responseEvent` event option into Good. `reques
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
 - `query` - query object used by request. Maps to `request.query`.
-- `responseTime` - calculated value of `Date.now() - request.info.received`.
+- `responseTime` - calculated value of `Date.now() - request.info.received`. Includes tail time when `responseEvent='tail'`.
+- `responseSentTime` - calculated value of `request.info.responded - request.info.received`.
 - `statusCode` - the status code of the response.
 - `pid` - the current process id.
 - `httpVersion` - the http protocol information from the request.
