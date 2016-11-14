@@ -3,6 +3,7 @@
 // Load modules
 
 const Http = require('http');
+const Stream = require('stream');
 
 const Async = require('async');
 const Code = require('code');
@@ -10,7 +11,7 @@ const Hapi = require('hapi');
 const Lab = require('lab');
 
 const GoodReporter = require('./fixtures/reporters');
-const Stringify = require('./fixtures/reporter');
+const Writer = require('./fixtures/reporter');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
 
@@ -135,9 +136,9 @@ describe('Monitor', () => {
 
             require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = function (options) {
 
-                require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = Stringify;
+                require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = Writer;
                 expect(options).to.be.undefined();
-                return new Stringify(options);
+                return new Writer(options);
             };
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
@@ -200,7 +201,7 @@ describe('Monitor', () => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [new GoodReporter.Incrementer(1), new GoodReporter.Stringify()]
+                    foo: [new GoodReporter.Incrementer(1), new GoodReporter.Writer()]
                 },
                 ops: 15000
             });
@@ -244,6 +245,147 @@ describe('Monitor', () => {
             }).to.throw(Error, 'Error in foo. ../test/fixtures/reporters must create a stream that has a pipe function.');
 
             done();
+        });
+
+        it('validate the pipeline and throws if last incoming stream is a transform stream', { plan: 1 }, (done) => {
+
+            const options = {
+                strictPipeline: true,
+                reporters: {
+                    foo: [new Stream.Transform()]
+                }
+            };
+
+            expect( () => {
+
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
+                monitor.start(() => { });
+            }).to.throw(Error, 'Error in foo. The stream at position 0 is a transform stream and should not be the last stream in the pipeline.');
+            done();
+        });
+
+        it('validate the pipeline and throws if writable are present in the middle of the pipeline', { plan: 3 }, (done) => {
+
+            const options = {
+                strictPipeline: true,
+                reporters: {
+                    foo: ['stderr', 'stdout']
+                }
+            };
+
+            expect( () => {
+
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
+                monitor.start(() => { });
+            }).to.throw(Error, 'Error in foo. stderr is a writable stream and should only be the last stream in the pipeline.');
+
+            options.reporters.foo = ['stdout', 'stderr'];
+
+            expect( () => {
+
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
+                monitor.start(() => { });
+            }).to.throw(Error, 'Error in foo. stdout is a writable stream and should only be the last stream in the pipeline.');
+
+            options.reporters.foo = [new Stream.Writable(), 'stderr'];
+
+            expect( () => {
+
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
+                monitor.start(() => { });
+            }).to.throw(Error, 'Error in foo. The stream at position 0 is a writable stream and should only be the last stream in the pipeline.');
+            done();
+        });
+
+        it('validate the pipeline and throws if readable stream is present in the pipeline', { plan: 1 }, (done) => {
+
+            const options = {
+                strictPipeline: true,
+                reporters: {
+                    foo: [new Stream.Readable(), 'stdout']
+                }
+            };
+
+            expect( () => {
+
+                const monitor = internals.monitorFactory(new Hapi.Server(), options);
+                monitor.start(() => { });
+            }).to.throw(Error, 'Error in foo. The stream at position 0 is a readable stream and should not be present in the pipeline.');
+
+            done();
+        });
+
+        it('validate the pipeline and pass if pipeline is valid', { plan: 1 }, (done) => {
+
+            const options = {
+                strictPipeline: true,
+                reporters: {
+                    foo: [new Stream.Transform(), 'stdout'],
+                    bar: [new Stream.Transform(), new Stream.Writable()]
+                }
+            };
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), options);
+            expect( () => {
+
+                monitor.start(() => {
+
+                    done();
+                });
+            }).to.not.throw();
+        });
+
+
+        it('validate the pipeline and pass if streams does not fit an explicit type', { plan: 1 }, (done) => {
+
+            const fakeStreamKey = 'fakeStreamKey';
+            const options = {
+                strictPipeline: true,
+                reporters: {
+                    bar: [fakeStreamKey],
+                    foo: [new Stream.Duplex({ read: () => { } }), fakeStreamKey],
+                    bar: [{ pipe: () => { }, on: () => { }, once: () => { }, emit: () => { } }]
+                }
+            };
+
+            process[fakeStreamKey] = new Stream.Writable();
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), options);
+            expect( () => {
+
+                monitor.start(() => {
+
+                    done();
+                });
+            }).to.not.throw();
+        });
+
+        it('validate the pipelines and warns if pipeline is invalid and strictPipeline is not true', { plan: 2 }, (done) => {
+
+            let errorMsg;
+
+            const options = {
+                strictPipeline: false,
+                reporters: {
+                    foo: [Stream.Transform()]
+                }
+            };
+
+            const err = console.error;
+            console.error = (message) => {
+
+                console.error = err;
+                errorMsg = message;
+            };
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), options);
+            monitor.start((error) => {
+
+                console.error = err;
+                expect(error).to.not.exist();
+                expect(errorMsg).to.equal('Error in foo. The stream at position 0 is a transform stream and should not be the last stream in the pipeline.');
+                done();
+            });
         });
     });
 
@@ -922,7 +1064,6 @@ describe('Monitor', () => {
                     bar: [new GoodReporter.Namer('bar'), new GoodReporter.Stringify(), 'stderr']
                 }
             });
-
             Async.series([
                 monitor.start.bind(monitor),
                 (callback) => {

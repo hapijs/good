@@ -2,13 +2,19 @@
 
 const Stream = require('stream');
 
-module.exports = class extends Stream.Transform {
-    constructor() {
+module.exports = class extends Stream.Writable {
+    constructor(objectMode) {
 
-        super({ objectMode: true });
+        super({ objectMode });
+        this.data = [];
+        this.once('finish', () => {
+
+            this._finalized = true;
+        });
     }
-    _transform(value, enc, callback) {
+    _write(chunk, end, callback) {
 
-        callback(null, JSON.stringify(value));
+        this.data.push(chunk);
+        callback(null);
     }
 };
