@@ -74,6 +74,30 @@ These changes address the two most common requests; "how do I filter on `X`?" an
 
 **This change also allows user to leverage *any* existing transform or write stream in the node ecosystem to be used with good.**
 
+### Reporter Type
+Since there are multiple interfaces for `streams` in node, each good reporter is implicitly defined as one of two types -
+
+1. `Transform` reporters
+    _implements the `Stream.Transform` interface_
+    `Transform` reporters are intended to pipe modified log data to another reporter they can either filter the data or change its format.
+    [good-squeeze](https://github.com/hapijs/good-squeeze) and [good-console](https://github.com/hapijs/good-console) are example of such reporters
+2. `Log` reporters
+    _implements the `Stream.Writable` interface_
+    `Log` reporters are terminal reporters and do not pass events to other reporters after logging the received data.
+    [good-file](https://github.com/hapijs/good-file), [good-http](https://github.com/hapijs/good-http) and `stdout` are examples of such reporters
+
+Each reporters pipeline may have multiple `Transform` reporters processing data before it is passed to the `Log` reporter.
+Each reporters pipeline must have a single and terminal `Log` reporter.
+
+**NOTE**: While it might look like a `Transform` reporter is able to act as a `Log`, a `Trandform` reporter will quickly overflow and will silently stop processing events if data is not read out of it, so it can't be the last stream in a piped chain.
+
+Because of high mistake potential and silent failures when chaining reporters from wrong types it is highly recommended to -
+- Make the reporter type clear in the Documentation
+- Name the reporter with the postfix '-log' for `Log` reporters and either `-filter` or `-formatter` postfix for `Transform` reporter.
+- Not to mix `Transform` and `Log` functionality in a single reporter
+
+It is up to the developer to use the right type of stream and document how the reporter is supposed to be used.
+
 ### Filtering Using Plugin Configs
 
 Plugin configs set at the route and request level can be used to drive additional filtering. In this example a reporter allows setting a `suppressResponseLog` property.
