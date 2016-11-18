@@ -245,6 +245,24 @@ describe('Monitor', () => {
 
             done();
         });
+
+        it('does not create a reporter if it has no streams', { plan: 2 }, (done) => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: []
+                }
+            });
+
+            monitor.start((error) => {
+
+                expect(error).to.not.exist();
+
+                expect(monitor._reporters).to.have.length(0);
+
+                done();
+            });
+        });
     });
 
     describe('push()', () => {
