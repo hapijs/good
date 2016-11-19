@@ -2,7 +2,7 @@
 
 - [Options](#options)
 - [Reporter Interface](#reporter-interface)
-  * [Filtering Using Plugin Configs](#filtering-using-plugin-configs)
+  * [Stream Transforms Using Plugin Configs](#stream-transforms-using-plugin-configs)
   * [Reporter Lifecycle](#reporter-lifecycle)
 - [Event Types](#event-types)
 - [Event Payloads](#event-payloads)
@@ -74,11 +74,11 @@ These changes address the two most common requests; "how do I filter on `X`?" an
 
 **This change also allows user to leverage *any* existing transform or write stream in the node ecosystem to be used with good.**
 
-### Filtering Using Plugin Configs
+### Stream Transforms Using Plugin Configs
 
-Plugin configs set at the route and request level can be used to drive additional filtering. In this example a reporter allows setting a `suppressResponseLog` property.
+To drive route or request level behavior in your stream transform one option is to use the plugin config feature of hapi. Here is an example where a plugin config is used to drive a stream transform that will suppress "response" events when `suppressResponseEvent === true`.
 
-Setting plugin config at route level:
+Setting plugin config at the route level:
 ```js
 var routeConfig = {
     plugins: {
@@ -91,7 +91,7 @@ var routeConfig = {
 server.route({ method: 'GET', path: '/user', config: routeConfig });
 ```
 
-Setting config in a handler:
+Setting plugin config at the request level:
 ```js
 const handler = function (request, reply) {
 
@@ -103,11 +103,11 @@ const handler = function (request, reply) {
 }
 ```
 
-In the `_transform` method implemented by the reporter:
+Consuming the plugin config in the stream transform:
 ```js
 _transform(data, enc, next) {
 
-    if (data.eventName === 'response' && data.config.suppressResponseLog) {
+    if (data.eventName === 'response' && data.config.suppressResponseEvent === true) {
         return next();
     }
 
@@ -120,7 +120,7 @@ _transform(data, enc, next) {
 **Startup**
 
 1. When "onPreStart" is emitted from the hapi server, the monitoring operation starts.
-2. All of the streams are created via `new` (if needed) and collected into an temporary internal array.
+2. All of the streams are created via `new` (if needed) and collected into a temporary internal array.
 3. All of the streams in the temporary array are piped together. This will cause any standard [Node stream](https://nodejs.org/api/stream.html) events to occur that instances can listen for.
 
 At this point, data will start flowing to each of the reporters through the pipe interface. Data can be accessed in individual instances though any of the standard stream methods and events.
@@ -128,7 +128,7 @@ At this point, data will start flowing to each of the reporters through the pipe
 **Shutdown**
 
 1. When "onPostStop" is emitted from the hapi server, the shutdown sequence starts.
-2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick Node tick.
+2. `null` is pushed through each reporter pipeline. Any synchronous teardown can happen on stream instances in "end" or "finish" events. See [Node stream](https://nodejs.org/api/stream.html) for more information about end-of-stream events. The callback signaling to hapi that our logic is done executing will happen on the next tick.
 
 ## Event Types
 
