@@ -246,11 +246,12 @@ describe('Monitor', () => {
             done();
         });
 
-        it('does not create a reporter if it has no streams', { plan: 2 }, (done) => {
+        it('does not create a reporter if the reporter has no streams', { plan: 3 }, (done) => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: []
+                    foo: [],
+                    bar: [new GoodReporter.Incrementer(1)]
                 }
             });
 
@@ -258,7 +259,8 @@ describe('Monitor', () => {
 
                 expect(error).to.not.exist();
 
-                expect(monitor._reporters).to.have.length(0);
+                expect(monitor._reporters).to.have.length(1);
+                expect(monitor._reporters.bar).to.exist();
 
                 done();
             });
