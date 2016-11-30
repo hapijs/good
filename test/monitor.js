@@ -142,13 +142,10 @@ describe('Monitor', () => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [{
-                        module: '../test/fixtures/reporters',
-                        name: 'Incrementer',
-                        args: [10, 5]
-                    }, {
-                        module: '../test/fixtures/reporter'
-                    }]
+                    foo: [
+                        new GoodReporter.Incrementer(10, 5),
+                        { module: require('./fixtures/reporter') }
+                    ]
                 }
             });
 

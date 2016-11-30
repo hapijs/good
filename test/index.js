@@ -12,17 +12,11 @@ const GoodReporter = require('./fixtures/reporters');
 const Monitor = require('../lib/monitor');
 
 const reporters = {
-    foo: [{
-        module: '../test/fixtures/reporters',
-        name: 'Incrementer',
-        args: [10, 5]
-    }, {
-        module: '../test/fixtures/reporters',
-        name: 'Stringify'
-    }, {
-        module: '../test/fixtures/reporters',
-        name: 'Writer'
-    }]
+    foo: [
+        new GoodReporter.Incrementer(10, 5),
+        new GoodReporter.Stringify(),
+        new GoodReporter.Writer()
+    ]
 };
 
 
