@@ -374,7 +374,7 @@ describe('Monitor', () => {
 
     describe('monitoring', () => {
 
-        it('sends events to all reporters when they occur', { plan: 11 }, (done) => {
+        it('sends events to all reporters when they occur', {  }, (done) => {
 
             const server = new Hapi.Server({ debug: false });
             server.connection();
@@ -433,7 +433,7 @@ describe('Monitor', () => {
                             const res2 = out2.data;
 
                             expect(res1).to.have.length(4);
-                            expect(res1).to.contain([{
+                            expect(res1).to.part.contain([{
                                 event: 'request',
                                 tags: ['test-tag'],
                                 data: 'log request data',
@@ -464,7 +464,7 @@ describe('Monitor', () => {
                             expect(err1.error.stack.split('\n')[0]).to.equal('Error: Uncaught error: mock error');
 
                             expect(res2).to.have.length(4);
-                            expect(res2).to.contain([{
+                            expect(res2).to.part.contain([{
                                 event: 'request',
                                 tags: ['test-tag'],
                                 data: 'log request data',
