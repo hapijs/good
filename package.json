@@ -28,11 +28,11 @@
     "async": "2.1.x",
     "code": "4.x.x",
     "hapi": "16.x.x",
-    "lab": "11.x.x"
+    "lab": "11.x.x",
+    "wreck": "10.x.x"
   },
   "scripts": {
-    "test": "lab -m 5000 -t 100 -v -La code",
-    "test-cov-html": "lab -m 5000 -r html -o coverage.html -La code"
+    "test": "lab -m 5000 -t 100 -v -La code"
   },
   "license": "BSD-3-Clause"
 }

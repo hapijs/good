@@ -117,4 +117,34 @@ describe('utils', () => {
             done();
         });
     });
+
+    describe('WreckResponse()', () => {
+
+        const keysUndefined = (obj) => {
+
+            const keys = Object.keys(obj);
+            for (let i = 0; i < keys.length; ++i) {
+                const key = keys[i];
+                expect(obj[key]).to.be.undefined();
+            }
+        };
+
+        it('creates a default response and uri values in case they are missing', (done) => {
+
+            const wreckValue = new Utils.WreckResponse(null, {}, null, Date.now());
+            keysUndefined(wreckValue.request);
+            keysUndefined(wreckValue.response);
+            expect(wreckValue.event).to.equal('wreck');
+            expect(wreckValue.timeSpent).to.be.a.number();
+            done();
+        });
+
+        it('attaches an error object in the event of a wreck error', (done) => {
+
+            const wreckValue = new Utils.WreckResponse(new Error('test error'), {}, null, Date.now());
+            expect(wreckValue.error.stack).to.be.a.string();
+            expect(wreckValue.error.message).to.equal('test error');
+            done();
+        });
+    });
 });
