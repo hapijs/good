@@ -221,7 +221,7 @@ Event object associated with the 'ops' event emitted from Oppsy.
         - `rss` - 'resident set size' which is the amount of the process held in memory.
         - `heapTotal` - V8 heap total
         - `heapUsed` - V8 heap used
-    - `delay` - the calculated Node event loop delay.
+    - `delay` - the calculated Node event loop delay in milliseconds.
 - `load` - object with the following values:
     - `requests` - object containing information about all the requests passing through the server.
     - `concurrents` - object containing information about the number of concurrent connections associated with each `listener` object associated with the hapi server.
