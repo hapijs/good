@@ -437,8 +437,17 @@ describe('Monitor', () => {
 
                     Wreck.get(server.info.uri + '/?q=test', (err, res) => {
 
-                        expect(err).to.not.exist();
-                        expect(res.statusCode).to.equal(500);
+                        // Wreck v11+ report 4xx & 5xx as errors
+                        const isWreckVersion11OrHigher = (err && err.isBoom);
+                        if (isWreckVersion11OrHigher) {
+                            expect(err).to.exist();
+                            expect(err.output.payload.statusCode).to.equal(500);
+                        }
+                        else {
+                            expect(err).to.not.exist();
+                            expect(res.statusCode).to.equal(500);
+                        }
+
                         setTimeout(() => {
 
                             const res1 = out1.data;
@@ -975,7 +984,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('has a standard "wreck" event schema', { plan: 3 }, (done) => {
+        it('has a standard "wreck" event schema for version 10 and below', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -1026,6 +1035,38 @@ describe('Monitor', () => {
                         expect(result).to.be.an.instanceof(Utils.WreckResponse);
                         server.stop(callback);
                     });
+                }
+            ], done);
+        });
+
+        it('has a standard "wreck" event schema for version 11 and above', { plan: 2 }, (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                reporters: { foo: [out] },
+                wreck: true
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    // Manually emit Wreck 11+ style event to prevent complexity of duplicate wreck versions in a test suite.
+                    const wreck = Symbol.for('wreck');
+                    process[wreck].emit('response', null, { req: {}, res: {}, start: 0, uri: {} });
+                    
+                    expect(out.data.length).to.be.greaterThan(0);
+                    const result = out.data.find((event) => {
+
+                        return event.event === 'wreck';
+                    });
+                    expect(result).to.be.an.instanceof(Utils.WreckResponse);
+
+                    server.stop(callback);
                 }
             ], done);
         });
