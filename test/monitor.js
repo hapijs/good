@@ -1058,7 +1058,7 @@ describe('Monitor', () => {
                     // Manually emit Wreck 11+ style event to prevent complexity of duplicate wreck versions in a test suite.
                     const wreck = Symbol.for('wreck');
                     process[wreck].emit('response', null, { req: {}, res: {}, start: 0, uri: {} });
-                    
+
                     expect(out.data.length).to.be.greaterThan(0);
                     const result = out.data.find((event) => {
 
