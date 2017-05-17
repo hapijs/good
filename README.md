@@ -56,7 +56,7 @@ const options = {
 
 server.register({
     register: require('good'),
-    options,
+    options: options,
 }, (err) => {
 
     if (err) {
