@@ -519,7 +519,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('provides additional information about "response" events using "requestHeaders","requestPayload", "responsePayload", and "requestAuth"', { plan: 9 }, (done) => {
+        it('provides additional information about "response" events using "requestHeaders","requestPayload", "responsePayload", and "requestAuth"', { plan: 10 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
