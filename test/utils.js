@@ -101,7 +101,7 @@ describe('utils', () => {
 
         it('can be stringifyed', { plan: 2 }, (done) => {
 
-            const err = new Utils.RequestError({
+            const err = new Utils.RequestError({}, {
                 id: 15,
                 url: 'http://localhost:9001',
                 method: 'PUT',

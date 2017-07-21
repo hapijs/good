@@ -169,6 +169,7 @@ Event object associated with 'error' events.
 - `pid` - the current process id.
 - `error` - the raw error object.
 - `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
+- `headers` - the request headers if `includes.request` includes "headers"
 
 The `toJSON` method of `GreatError` has been overwritten because `Error` objects can not be stringified directly. A stringified `GreatError` will have `error.message` and `error.stack` in place of the raw `Error` object.
 
@@ -243,6 +244,7 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
 - `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
+- `headers` - the request headers if `includes.request` includes "headers"
 
 ### `WreckResponse`
 

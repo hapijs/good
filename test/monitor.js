@@ -700,6 +700,55 @@ describe('Monitor', () => {
             ], done);
         });
 
+        it('includes headers in the "error" data object if configured to do so', { plan: 3 }, (done) => {
+
+            const server = new Hapi.Server({ debug: false });
+            server.connection();
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: (request, reply) => {
+
+                    throw new Error('mock error');
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                includes: {
+                    request: ['headers'],
+                    response: []
+                },
+                reporters: { foo: [out] }
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    server.inject({
+                        url: '/',
+                        headers: {
+                            'X-Magic-Value': 'rabbits out of hats'
+                        }
+                    }, (res) => {
+
+                        expect(res.statusCode).to.equal(500);
+                        setTimeout(() => {
+
+                            expect(out.data).to.have.length(2);
+
+                            const event = out.data[1];
+                            expect(event.headers['x-magic-value']).to.equal('rabbits out of hats');
+                            server.stop(callback);
+                        }, 50);
+                    });
+                }
+            ], done);
+        });
+
         it('has a standard "log" data object', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
@@ -777,6 +826,57 @@ describe('Monitor', () => {
                             const event = out.data[0];
 
                             expect(event).to.be.an.instanceof(Utils.RequestLog);
+                            server.stop(callback);
+                        }, 50);
+                    });
+                }
+            ], done);
+        });
+
+        it('includes headers in data object if configuration tells it to', { plan: 3 }, (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: (request, reply) => {
+
+                    request.log(['user', 'test'], 'you called the / route');
+                    reply();
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                includes: {
+                    request: ['headers'],
+                    response: []
+                },
+                reporters: { foo: [out] }
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    server.inject({
+                        url: '/',
+                        headers: {
+                            'X-TraceID': 'ABCD12345'
+                        }
+                    }, (res) => {
+
+                        expect(res.statusCode).to.equal(200);
+                        setTimeout(() => {
+
+                            expect(out.data).to.have.length(2);
+
+                            const event = out.data[1];
+
+                            expect(event.headers['x-traceid']).to.equal('ABCD12345');
                             server.stop(callback);
                         }, 50);
                     });
