@@ -522,7 +522,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', { plan: 9 }, (done) => {
+        it('provides additional information about "response" events using "requestHeaders","requestPayload", "responsePayload", and "requestAuth"', { plan: 10 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -542,7 +542,7 @@ describe('Monitor', () => {
                     foo: [out]
                 },
                 includes: {
-                    request: ['headers', 'payload'],
+                    request: ['headers', 'payload', 'auth'],
                     response: ['payload']
                 }
             });
@@ -577,6 +577,7 @@ describe('Monitor', () => {
                                 data: 'example payload'
                             });
                             expect(response.responsePayload).to.equal('done');
+                            expect(response.auth).to.exist();
                             expect(response.route).to.equal('/');
                             server.stop(callback);
                         }, 50);

@@ -64,7 +64,8 @@ describe('utils', () => {
 
             const reqOpts = {
                 headers: true,
-                payload: true
+                payload: true,
+                auth: true
             };
 
             const resOpts = {
