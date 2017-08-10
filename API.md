@@ -71,7 +71,7 @@ Finally, the developer must make sure the reporting pipeline makes sense. In the
 
 Each reporter pipeline receives it's own copy of the message from good. That means the payload can be freely modified without worrying about impacting other reporters. Just add more and more transform streams into the pipeline to fine-tune any reporting needs. Need a different filtering mechanism? Write a new transform stream to filter based on IP, request route, payload type... Want to add extra data about events? Just add a transform stream into the mix to add the current date, something specific to your company, filter out sensitive information before logging it... the sky is the limit.
 
-These changes address the two most common requests; "how do I filter on `X`?" and "how do I add `Y` to the message payload?". Now developers are empowered to customize the reporting pipeline to suite their needs. While there is far less hand-holding with this interface, developers have much more control of reporting coming out of good.
+These changes address the two most common requests; "how do I filter on `X`?" and "how do I add `Y` to the message payload?". Now developers are empowered to customize the reporting pipeline to suit their needs. While there is far less hand-holding with this interface, developers have much more control of reporting coming out of good.
 
 **This change also allows user to leverage *any* existing transform or write stream in the node ecosystem to be used with good.**
 
