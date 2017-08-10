@@ -25,11 +25,11 @@
     "hapi": ">=10.x.x"
   },
   "devDependencies": {
-    "async": "2.1.x",
+    "async": "2.5.x",
     "code": "4.x.x",
     "hapi": "16.x.x",
-    "lab": "11.x.x",
-    "wreck": "10.x.x"
+    "lab": "14.x.x",
+    "wreck": "12.x.x"
   },
   "scripts": {
     "test": "lab -m 5000 -t 100 -v -La code"
