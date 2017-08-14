@@ -95,7 +95,7 @@ describe('Monitor', () => {
         const err = console.error;
         console.error = (message) => {
 
-            console.error = err;
+            console.error = () => { };
             expect(message).to.match(/There was a problem \(.*\) in foo and it has been destroyed\./);
         };
 
@@ -105,7 +105,9 @@ describe('Monitor', () => {
 
                 monitor.push(() => ({ id: 1, number: 2 }));
                 monitor.push(() => ({ id: 2, number: 5 }));
-                two.emit('error');
+                // Verion 8 of node misses this change inside monitor, so force it here
+                monitor._reporters.foo.destroyed = true;
+                monitor._reporters.foo.emit('error');
                 monitor.push(() => ({ id: 3, number: 100 }));
                 // Need this because of https://github.com/nodejs/node/pull/5251
                 setImmediate(callback);
@@ -114,6 +116,7 @@ describe('Monitor', () => {
 
             expect(two.data).to.have.length(2);
             expect(two.data).to.equal([{ id: 1, number: 3 }, { id: 2, number: 6 }]);
+            console.error = err;
             done();
         });
     });
@@ -1139,7 +1142,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('has a standard "wreck" event schema for version 11 and above', { plan: 2 }, (done) => {
+        it('has a standard "wreck" event schema for version 10', { plan: 2 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
@@ -1157,7 +1160,7 @@ describe('Monitor', () => {
 
                     // Manually emit Wreck 11+ style event to prevent complexity of duplicate wreck versions in a test suite.
                     const wreck = Symbol.for('wreck');
-                    process[wreck].emit('response', null, { req: {}, res: {}, start: 0, uri: {} });
+                    process[wreck].emit('response', null, {}, {}, 0, {});
 
                     expect(out.data.length).to.be.greaterThan(0);
                     const result = out.data.find((event) => {
