@@ -703,7 +703,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('includes headers in the "error" data object if configured to do so', { plan: 3 }, (done) => {
+        it('includes headers in the "error" data object if so configured', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server({ debug: false });
             server.connection();
@@ -836,7 +836,7 @@ describe('Monitor', () => {
             ], done);
         });
 
-        it('includes headers in data object if configuration tells it to', { plan: 3 }, (done) => {
+        it('includes headers in data object if so configured', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
             server.connection();
