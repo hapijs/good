@@ -585,6 +585,76 @@ describe('Monitor', () => {
             ], done);
         });
 
+        it('provides additional information about "response" events using "requestExtensionData"', { plan: 10 }, (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: (request, reply) => {
+
+                    server.log(['test'], 'test data');
+                    reply('done');
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                reporters: {
+                    foo: [out]
+                },
+                includes: {
+                    request: [
+                        'headers',
+                        (request) => {
+
+                            return {
+                                referrer: request.info.referrer
+                            };
+                        }
+                    ],
+                    response: []
+                }
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    Wreck.get(server.info.uri + '/?q=test', {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Referer': 'http://example.com'
+                        }
+                    }, (err, res) => {
+
+                        expect(err).to.not.exist();
+                        expect(res.statusCode).to.equal(200);
+                        setTimeout(() => {
+
+                            const messages = out.data;
+                            const response = messages[1];
+
+                            expect(messages).to.have.length(2);
+
+                            expect(response.event).to.equal('response');
+                            expect(response.extensionData).to.exist();
+                            expect(response.extensionData).to.be.equal({
+                                referrer: 'http://example.com'
+                            });
+                            expect(response.log).to.be.an.array();
+                            expect(response.headers).to.exist();
+                            expect(response.requestPayload).to.not.exist();
+                            expect(response.route).to.equal('/');
+                            server.stop(callback);
+                        }, 50);
+                    });
+                }
+            ], done);
+        });
+
         it('has a standard "ops" data object', { plan: 2 }, (done) => {
 
             const server = new Hapi.Server();
@@ -752,6 +822,62 @@ describe('Monitor', () => {
             ], done);
         });
 
+        it('includes extensionData in the "error" data object if so configured', { plan: 4 }, (done) => {
+
+            const server = new Hapi.Server({ debug: false });
+            server.connection();
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: (request, reply) => {
+
+                    throw new Error('mock error');
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                includes: {
+                    request: [
+                        (request) => {
+
+                            return {
+                                path: request.path
+                            };
+                        }
+                    ],
+                    response: []
+                },
+                reporters: { foo: [out] }
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    server.inject({
+                        url: '/'
+                    }, (res) => {
+
+                        expect(res.statusCode).to.equal(500);
+                        setTimeout(() => {
+
+                            expect(out.data).to.have.length(2);
+
+                            const event = out.data[1];
+                            expect(event.extensionData).to.exist();
+                            expect(event.extensionData).to.be.equal({
+                                path: '/'
+                            });
+                            server.stop(callback);
+                        }, 50);
+                    });
+                }
+            ], done);
+        });
+
         it('has a standard "log" data object', { plan: 3 }, (done) => {
 
             const server = new Hapi.Server();
@@ -880,6 +1006,66 @@ describe('Monitor', () => {
                             const event = out.data[1];
 
                             expect(event.headers['x-traceid']).to.equal('ABCD12345');
+                            server.stop(callback);
+                        }, 50);
+                    });
+                }
+            ], done);
+        });
+
+
+        it('includes extensionData in data object if so configured', { plan: 4 }, (done) => {
+
+            const server = new Hapi.Server();
+            server.connection();
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                handler: (request, reply) => {
+
+                    request.log(['user', 'test'], 'you called the / route');
+                    reply();
+                }
+            });
+
+            const out = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                includes: {
+                    request: [
+                        (request) => {
+
+                            return {
+                                traceId: request.headers['x-traceid']
+                            };
+                        }
+                    ],
+                    response: []
+                },
+                reporters: { foo: [out] }
+            });
+
+            AsyncSeries([
+                server.start.bind(server),
+                monitor.start.bind(monitor),
+                (callback) => {
+
+                    server.inject({
+                        url: '/',
+                        headers: {
+                            'X-TraceID': 'ABCD12345'
+                        }
+                    }, (res) => {
+
+                        expect(res.statusCode).to.equal(200);
+                        setTimeout(() => {
+
+                            expect(out.data).to.have.length(2);
+
+                            const event = out.data[1];
+
+                            expect(event.extensionData).to.exist();
+                            expect(event.extensionData.traceId).to.equal('ABCD12345');
                             server.stop(callback);
                         }, 50);
                     });

@@ -20,7 +20,20 @@ as general events are a process-wide facility and will result in duplicated log 
 
 ## Options
 - `[includes]` - optional configuration object
-    - `[request]` - array of extra hapi request object fields to supply to reporters on "request", "response", and "error" events. Valid values ['headers', 'payload']. Defaults to `[]`.
+    - `[request]` - array of extra hapi request object fields to supply to reporters on "request", "response", and "error" events. Valid values ['headers', 'payload']. Defaults to `[]`.  In addition to request object fields, a function may be provided - the result of this function will populate the extensionData field on the object supplied to reporters. Example:
+
+            request: [
+                'headers',
+                'payload', 
+                (request) => {
+                    const user = (request.auth && request.auth.credentials && request.auth.isAuthenticated) ?
+                        request.auth.credentials.username : 'anonymous';
+                    return {
+                        username: user,
+                    }; 
+                }
+            ]
+
     - `[response]` - array of extra hapi response object fields to supply to reporters on "response" events. Valid values ['payload']. Defaults to `[]`.
 - `[ops]` - options for controlling the ops reporting from good. Set to `false` to disable ops monitoring completely.
     - `config` - options passed directly into the [`Oppsy`](https://github.com/hapijs/oppsy) constructor as the `config` value. Defaults to `{}`
