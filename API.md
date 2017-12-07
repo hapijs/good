@@ -25,11 +25,7 @@ as general events are a process-wide facility and will result in duplicated log 
 - `[ops]` - options for controlling the ops reporting from good. Set to `false` to disable ops monitoring completely.
     - `config` - options passed directly into the [`Oppsy`](https://github.com/hapijs/oppsy) constructor as the `config` value. Defaults to `{}`
     - `interval` - interval used when calling `Oppsy.start()`. Defaults to `15000`.
-- `[responseEvent]` - the event type used to capture completed requests. Defaults to 'tail'. Options are:
-    - 'response' - the response was sent but request tails may still be pending.
-    - 'tail' - the response was sent and all request tails completed.
-- `[extensions]` - an array of [hapi event names](https://github.com/hapijs/hapi/blob/master/API.md#server-events) to listen for and report via the good reporting mechanism. Can not be any of ['log', 'request-error', 'ops', 'request', 'response', 'tail']. **Disclaimer** This option should be used with caution. This option will allow users to listen to internal events that are not meant for public consumption. The list of available events can change with any changes to the hapi event system. Also, *none* of the official hapijs reporters have been tested against these custom events. The schema for these events can not be guaranteed because they vary from version to version of hapi.
-- `[wreck]` - a boolean controlling wreck response logging. Defaults to `false`. 
+- `[extensions]` - an array of [hapi event names](https://github.com/hapijs/hapi/blob/master/API.md#server-events) to listen for and report via the good reporting mechanism. Can not be any of ['log', 'ops', 'request', 'response', 'tail']. **Disclaimer** This option should be used with caution. This option will allow users to listen to internal events that are not meant for public consumption. The list of available events can change with any changes to the hapi event system. Also, *none* of the official hapijs reporters have been tested against these custom events. The schema for these events can not be guaranteed because they vary from version to version of hapi.
 - `[reporters]` - Defaults to `{}`. `reporters` is a `key`, `value` pair where the `key` is a reporter name and the `value` is an array of mixed value types. Valid values for the array items are:
     - streams specifications object with the following keys
         - `module` - can be :
@@ -136,7 +132,7 @@ At this point, data will start flowing to each of the reporters through the pipe
 - `ops` - System and process performance - CPU, memory, disk, and other metrics.
 - `response` - Information about incoming requests and the response. This maps to either the "response" or "tail" event emitted from hapi servers.
 - `log` - logging information not bound to a specific request such as system errors, background processing, configuration errors, etc. Maps to the "log" event emitted from hapi servers.
-- `error` - request responses that have a status code of 500. This maps to the "request-error" hapi event.
+- `error` - request responses that have a status code of 500. This maps to the "request" hapi event on the "error" channel.
 - `request` - Request logging information. This maps to the hapi 'request' event that is emitted via `request.log()`.
 
 ## Event Payloads
@@ -175,17 +171,17 @@ The `toJSON` method of `GreatError` has been overwritten because `Error` objects
 
 ### `RequestSent`
 
-Event object associated with the `responseEvent` event option into Good.
+Event object associated with the response event option into Good.
 
 - `event` - 'response'
 - `timestamp` - JavaScript timestamp that maps to `request.info.received`.
 - `id` - id of the request, maps to `request.id`.
-- `instance` - maps to `request.connection.info.uri`.
-- `labels` - maps to `request.connection.settings.labels`
+- `instance` - maps to `server.info.uri`.
+- `labels` - maps to `server.settings.labels`
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
 - `query` - query object used by request. Maps to `request.query`.
-- `responseTime` - calculated value of `Date.now() - request.info.received`. Includes tail time when `responseEvent='tail'`.
+- `responseTime` - calculated value of `Date.now() - request.info.received`.
 - `responseSentTime` - calculated value of `request.info.responded - request.info.received`.
 - `statusCode` - the status code of the response.
 - `pid` - the current process id.
@@ -195,7 +191,7 @@ Event object associated with the `responseEvent` event option into Good.
     - `userAgent` - the user agent of the incoming request.
     - `referer` - the referer headed of the incoming request.
 - `route` - route path used by request. Maps to `request.route.path`.
-- `log` - maps to `request.getLog()` of the hapi request object.
+- `log` - maps to `request.logs` of the hapi request object.
 - `tags` - array of strings representing any tags from route config. Maps to `request.route.settings.tags`.
 - `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
 - `headers` - the request headers if `includes.request` includes "headers"
@@ -245,29 +241,6 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `path` - incoming path requested. Maps to `request.path`.
 - `config` - plugin-specific config object combining `request.route.settings.plugins.good` and `request.plugins.good`. Request-level overrides route-level. Reporters could use `config` for additional filtering logic.
 - `headers` - the request headers if `includes.request` includes "headers"
-
-### `WreckResponse`
-
-Event object emitted whenever Wreck finishes making a request to a remote server.
-
-- `event` - 'wreck'
-- `timestamp` - timestamp of the incoming `event` object
-- `timeSpent` - how many ms it took to make the request
-- `pid` - the current process id
-- `request` - information about the outgoing request
-    - `method` - `GET`, `POST`, etc
-    - `path` - the path requested
-    - `url` - the full URL to the remote resource
-    - `protocol` - e.g. `http:`
-    - `host` - the remote server host
-    - `headers` - object containing all outgoing request headers
-- `response` - information about the incoming request
-    - `statusCode` - the http status code of the response e.g. 200
-    - `statusMessage` - e.g. `OK`
-    - `headers` - object containing all incoming response headers
-- `error` - if the response errored, this field will be populated
-    - `message` - the error message
-    - `stack` - the stack trace of the error
 
 ### Extension Payloads
 
