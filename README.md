@@ -6,6 +6,7 @@
 
 Lead Maintainer: [Adam Bretz](https://github.com/arb)
 
+*good 8 only supports hapi 17+ for hapi 16 please use good 7*
 
 **good** is a hapi plugin to monitor and report on a variety of hapi server events as well as ops information from the host machine. It listens for events emitted by hapi server instances and pushes standardized events to a collection of streams.
 
@@ -14,7 +15,6 @@ Lead Maintainer: [Adam Bretz](https://github.com/arb)
 ```javascript
 const Hapi = require('hapi');
 const server = new Hapi.Server();
-server.connection();
 
 const options = {
     ops: {
@@ -54,19 +54,14 @@ const options = {
     }
 };
 
-server.register({
-    register: require('good'),
+await server.register({
+    plugin: require('good'),
     options,
-}, (err) => {
-
-    if (err) {
-        return console.error(err);
-    }
-    server.start(() => {
-        console.info(`Server started at ${ server.info.uri }`);
-    });
-
 });
+
+await server.start();
+
+console.info(`Server started at ${ server.info.uri }`);
 
 ```
 

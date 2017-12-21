@@ -46,17 +46,15 @@ describe('utils', () => {
             },
             query: {},
             responseTime: 123,
-            connection: {
-                settings: {
-                    labels: []
-                },
-                info: {
-                    uri: 'http://localhost:3000'
-                }
-            },
-            getLog: () => {
+            logs: {}
+        };
 
-                return {};
+        const _server = {
+            settings: {
+                labels: []
+            },
+            info: {
+                uri: 'http://localhost:3000'
             }
         };
 
@@ -77,10 +75,10 @@ describe('utils', () => {
                 source: responsePayload
             };
 
-            return new Utils.RequestSent(reqOpts, resOpts, request);
+            return new Utils.RequestSent(reqOpts, resOpts, request, _server);
         };
 
-        it('handles response payloads with a toString() function', { plan: 2 }, (done) => {
+        it('handles response payloads with a toString() function', { plan: 2 }, () => {
 
             const samplePayload = {
                 message: 'test',
@@ -93,13 +91,12 @@ describe('utils', () => {
             expect(req.requestPayload).to.equal(samplePayload);
             const res = generateRequestSent('', samplePayload);
             expect(res.responsePayload).to.equal(samplePayload);
-            done();
         });
     });
 
     describe('RequestError()', () => {
 
-        it('can be stringifyed', { plan: 2 }, (done) => {
+        it('can be stringifyed', { plan: 1 }, () => {
 
             const err = new Utils.RequestError({}, {
                 id: 15,
@@ -109,42 +106,25 @@ describe('utils', () => {
                 info: {
                     received: Date.now()
                 }
-            }, new Error('mock error'));
+            }, {
+                'error': {
+                    isBoom: true,
+                    isServer: true,
+                    data: null,
+                    output: {
+                        statusCode: 500,
+                        payload: {
+                            statusCode: 500,
+                            error: 'Internal Server Error',
+                            message: 'An internal server error occurred'
+                        },
+                        headers: {}
+                    }
+                }
+            });
 
             const parse = JSON.parse(JSON.stringify(err));
-            expect(parse.error).to.be.an.object();
-            expect(parse.error.stack).to.be.a.string();
-            done();
-        });
-    });
-
-    describe('WreckResponse()', () => {
-
-        const keysUndefined = (obj) => {
-
-            const keys = Object.keys(obj);
-            for (let i = 0; i < keys.length; ++i) {
-                const key = keys[i];
-                expect(obj[key]).to.be.undefined();
-            }
-        };
-
-        it('creates a default response and uri values in case they are missing', (done) => {
-
-            const wreckValue = new Utils.WreckResponse(null, {}, null, Date.now());
-            keysUndefined(wreckValue.request);
-            keysUndefined(wreckValue.response);
-            expect(wreckValue.event).to.equal('wreck');
-            expect(wreckValue.timeSpent).to.be.a.number();
-            done();
-        });
-
-        it('attaches an error object in the event of a wreck error', (done) => {
-
-            const wreckValue = new Utils.WreckResponse(new Error('test error'), {}, null, Date.now());
-            expect(wreckValue.error.stack).to.be.a.string();
-            expect(wreckValue.error.message).to.equal('test error');
-            done();
+            expect(parse.error).to.equal('An internal server error occurred');
         });
     });
 });

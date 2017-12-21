@@ -1,21 +1,13 @@
 language: node_js
 
 node_js:
-    - "4"
-    - "6"
     - "8"
     - "node"
 
 sudo: false
 
 env:
-    - HAPI_VERSION="10"
-    - HAPI_VERSION="11"
-    - HAPI_VERSION="12"
-    - HAPI_VERSION="13"
-    - HAPI_VERSION="14"
-    - HAPI_VERSION="15"
-    - HAPI_VERSION="16"
+    - HAPI_VERSION="17"
 
 install:
     - npm install -g json
