@@ -181,8 +181,7 @@ Event object associated with the response event option into Good.
 - `method` - method used by the request. Maps to `request.method`.
 - `path` - incoming path requested. Maps to `request.path`.
 - `query` - query object used by request. Maps to `request.query`.
-- `responseTime` - calculated value of `Date.now() - request.info.received`.
-- `responseSentTime` - calculated value of `request.info.responded - request.info.received`.
+- `responseTime` - calculated value of `request.info.responded - request.info.received`.
 - `statusCode` - the status code of the response.
 - `pid` - the current process id.
 - `httpVersion` - the http protocol information from the request.
