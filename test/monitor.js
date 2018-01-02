@@ -107,8 +107,9 @@ describe('Monitor', () => {
         monitor.push(() => ({ id: 1, number: 2 }));
         monitor.push(() => ({ id: 2, number: 5 }));
         // Verion 8 of node misses this change inside monitor, so force it here
-        monitor._reporters.foo.destroyed = true;
-        monitor._reporters.foo.emit('error');
+        const foo = monitor._reporters.get('foo');
+        foo.destroyed = true;
+        foo.emit('error');
         monitor.push(() => ({ id: 3, number: 100 }));
 
         expect(two.data).to.have.length(2);
@@ -148,7 +149,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            expect(monitor._reporters).to.have.length(1);
+            expect(monitor._reporters.size).to.equal(1);
 
             await monitor.stop();
         });
@@ -165,7 +166,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            expect(monitor._reporters).to.have.length(1);
+            expect(monitor._reporters.size).to.equal(1);
 
             await monitor.stop();
         });
@@ -182,7 +183,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            expect(monitor._reporters).to.have.length(1);
+            expect(monitor._reporters.size).to.equal(1);
 
             monitor.stop();
         });
@@ -251,8 +252,8 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            expect(monitor._reporters).to.have.length(1);
-            expect(monitor._reporters.bar).to.exist();
+            expect(monitor._reporters.size).to.equal(1);
+            expect(monitor._reporters.get('bar')).to.exist();
         });
     });
 
