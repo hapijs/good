@@ -1,7 +1,7 @@
 {
   "name": "good",
   "description": "Server and process monitoring plugin",
-  "version": "8.0.0-rc1",
+  "version": "8.0.0",
   "repository": "git://github.com/hapijs/good",
   "main": "lib/index.js",
   "keywords": [
