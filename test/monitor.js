@@ -568,7 +568,7 @@ describe('Monitor', () => {
             await server.stop();
         });
 
-        it('has a standard "response" data object', { plan: 3 }, async () => {
+        it('has a standard "response" data object', { plan: 4 }, async () => {
 
             const server = new Hapi.Server();
 
@@ -599,7 +599,9 @@ describe('Monitor', () => {
             expect(out.data).to.have.length(1);
 
             const event = out.data[0];
+
             expect(event).to.be.an.instanceof(Utils.RequestSent);
+            expect(event.id).to.be.a.string();
 
             await server.stop();
         });
@@ -685,7 +687,7 @@ describe('Monitor', () => {
             await server.stop();
         });
 
-        it('has a standard "log" data object', { plan: 3 }, async () => {
+        it('has a standard "log" data object', { plan: 4 }, async () => {
 
             const server = new Hapi.Server();
 
@@ -718,13 +720,15 @@ describe('Monitor', () => {
             expect(out.data).to.have.length(2);
 
             const event = out.data[0];
+            const request = out.data[1];
 
             expect(event).to.be.an.instanceof(Utils.ServerLog);
+            expect(request.id).to.be.a.string();
 
             await server.stop();
         });
 
-        it('has a standard "request" event schema', { plan: 3 }, async () => {
+        it('has a standard "request" event schema', { plan: 4 }, async () => {
 
             const server = new Hapi.Server();
 
@@ -759,6 +763,8 @@ describe('Monitor', () => {
             const event = out.data[0];
 
             expect(event).to.be.an.instanceof(Utils.RequestLog);
+
+            expect(event.id).to.be.a.string();
 
             await server.stop();
         });
