@@ -21,7 +21,7 @@ as general events are a process-wide facility and will result in duplicated log 
 ## Options
 - `[includes]` - optional configuration object
     - `[request]` - array of extra hapi request object fields to supply to reporters on "request", "response", and "error" events. Valid values ['headers', 'payload']. Defaults to `[]`.
-    - `[response]` - array of extra hapi response object fields to supply to reporters on "response" events. Valid values ['payload']. Defaults to `[]`.
+    - `[response]` - array of extra hapi response object fields to supply to reporters on "response" events. Valid values ['headers', 'payload']. Defaults to `[]`.
 - `[ops]` - options for controlling the ops reporting from good. Set to `false` to disable ops monitoring completely.
     - `config` - options passed directly into the [`Oppsy`](https://github.com/hapijs/oppsy) constructor as the `config` value. Defaults to `{}`
     - `interval` - interval used when calling `Oppsy.start()`. Defaults to `15000`.

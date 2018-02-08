@@ -476,7 +476,7 @@ describe('Monitor', () => {
             }
         });
 
-        it('provides additional information about "response" events using "requestHeaders","requestPayload", and "responsePayload"', { plan: 8 }, async () => {
+        it('provides additional information about "response" events using "requestHeaders","requestPayload", "responseHeaders" and "responsePayload"', { plan: 9 }, async () => {
 
             const server = new Hapi.Server();
 
@@ -498,7 +498,7 @@ describe('Monitor', () => {
                 },
                 includes: {
                     request: ['headers', 'payload'],
-                    response: ['payload']
+                    response: ['headers', 'payload']
                 }
             });
 
@@ -527,6 +527,7 @@ describe('Monitor', () => {
             expect(response.event).to.equal('response');
             expect(response.log).to.be.an.array();
             expect(response.headers).to.exist();
+            expect(response.responseHeaders).to.exist();
             expect(response.requestPayload).to.equal({
                 data: 'example payload'
             });
