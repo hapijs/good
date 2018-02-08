@@ -234,6 +234,7 @@ Event object associated with the "request" event. This is the hapi event emitter
 - `timestamp` - timestamp of the incoming `event` object.
 - `tags` - array of strings representing any tags associated with the 'log' event.
 - `data` - the string or object mapped to `event.data`.
+- `error` - the error instance mapped to `event.error`.
 - `pid` - the current process id.
 - `id` - id of the request, maps to `request.id`.
 - `method` - method used by the request. Maps to `request.method`.

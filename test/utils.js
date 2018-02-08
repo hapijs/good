@@ -94,6 +94,56 @@ describe('utils', () => {
         });
     });
 
+    describe('RequestLog()', () => {
+
+        it('accepts error on the event object when data is not present', { plan: 2 }, () => {
+
+            const errorInstance = new Error('This is a test');
+
+            const err = new Utils.RequestLog({}, {
+                info: {
+                    id: 32
+                },
+                method: 'post',
+                path: '/graph',
+                config: {}
+            }, {
+                event: 'request',
+                timestamp: 1517592924723,
+                tags: ['error', 'authentication'],
+                error: errorInstance
+            });
+
+            expect(err.error).to.equal(errorInstance);
+            expect(err.data).to.be.undefined();
+
+        });
+
+        it('accepts data on the event object when error is not present', { plan: 2 }, () => {
+
+            const sampleData = { foo: 'bar' };
+
+            const err = new Utils.RequestLog({}, {
+                info: {
+                    id: 32
+                },
+                method: 'post',
+                path: '/graph',
+                config: {}
+            }, {
+                event: 'request',
+                timestamp: 1517592924723,
+                tags: ['error', 'authentication'],
+                data: sampleData
+            });
+
+            expect(err.data).to.equal(sampleData);
+            expect(err.error).to.be.undefined();
+
+        });
+
+    });
+
     describe('RequestError()', () => {
 
         it('can be stringifyed', { plan: 1 }, () => {
