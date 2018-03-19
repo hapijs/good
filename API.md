@@ -104,7 +104,7 @@ Consuming the plugin config in the stream transform:
 ```js
 _transform(data, enc, next) {
 
-    if (data.eventName === 'response' && data.config.suppressResponseEvent === true) {
+    if (data.event === 'response' && data.config.suppressResponseEvent === true) {
         return next();
     }
 
