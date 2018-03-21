@@ -177,4 +177,23 @@ describe('utils', () => {
             expect(parse.error).to.equal('An internal server error occurred');
         });
     });
+
+
+    describe('ServerLog()', () => {
+
+        it('accepts error on the event object when data is not present', { plan: 2 }, () => {
+
+            const errorInstance = new Error('This is a test');
+
+            const err = new Utils.ServerLog({
+                event: 'log',
+                timestamp: 1517592924723,
+                tags: ['log', 'error'],
+                error: errorInstance
+            });
+
+            expect(err.error).to.equal(errorInstance);
+            expect(err.data).to.be.undefined();
+        });
+    });
 });
