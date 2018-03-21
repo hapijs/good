@@ -151,6 +151,7 @@ Event object associated with 'log' events.
 - `timestamp` - JavaScript timestamp indicating when the 'log' event occurred.
 - `tags` - array of strings representing any tags associated with the 'log' event.
 - `data` - string or object passed via `server.log()` calls.
+- `error` - error object, replacing `data` if only an error object is passed to `server.log()`
 - `pid` - the current process id.
 
 ### `RequestError`
