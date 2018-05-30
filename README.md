@@ -73,7 +73,7 @@ This example does the following:
 
 See the [Reporter Interface section of the API documentation](https://github.com/hapijs/good/blob/master/API.md#reporter-interface) on how to configure reporters.
 
-**NOTE**: Ensure calling `server.connection` prior to registering `Good`. `request` and `response` event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
+**NOTE**: Event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
 
 Looking for more examples? Check out the [examples folder](https://github.com/hapijs/good/tree/master/examples).
 
