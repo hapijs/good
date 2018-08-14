@@ -150,4 +150,32 @@ describe('good', () => {
             expect(err).to.be.an.error('Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
         }
     });
+
+    describe('reconfigure()', () => {
+
+        it('exposes reconfigure on server.plugins.good', async () => {
+
+            const server = new Hapi.Server();
+            await server.register(Good);
+            expect(server.plugins.good.reconfigure).to.be.a.function();
+        });
+
+        it('reconfigures and restarts the monitor', async () => {
+
+            const server = new Hapi.Server();
+            await server.register(Good);
+            server.plugins.good.reconfigure({
+                reporters: {
+                    foo: [
+                        new GoodReporter.Incrementer(2),
+                        new GoodReporter.Incrementer(4), {
+                            module: '../test/fixtures/reporters',
+                            name: 'Writer',
+                            args: [{ objectMode: true }]
+                        }
+                    ]
+                }
+            });
+        });
+    });
 });

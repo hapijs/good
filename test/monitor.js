@@ -14,7 +14,7 @@ const Utils = require('../lib/utils');
 
 // Declare internals
 const internals = {
-    monitorFactory(server, options) {
+    monitorOptions(options) {
 
         const defaults = {
             includes: {
@@ -25,6 +25,10 @@ const internals = {
             reporters: {},
             ops: false
         };
+
+        return Object.assign({}, defaults, options);
+    },
+    monitorFactory(server, options) {
 
         if (server.events.hasListeners === undefined) {
             const hasListeners = function (event) {
@@ -40,7 +44,7 @@ const internals = {
             server.event('super-secret');
         }
 
-        return new Monitor(server, Object.assign({}, defaults, options));
+        return new Monitor(server, internals.monitorOptions(options));
     }
 };
 // Test shortcuts
@@ -80,7 +84,7 @@ describe('Monitor', () => {
 
         monitor.start();
 
-        monitor.startOps(100);
+        monitor.startOps();
         expect(monitor._ops).to.be.false();
 
         monitor.stop();
@@ -115,6 +119,49 @@ describe('Monitor', () => {
         expect(two.data).to.have.length(2);
         expect(two.data).to.equal([{ id: 1, number: 3 }, { id: 2, number: 6 }]);
         console.error = err;
+    });
+
+    describe('configure()', () => {
+
+        it('prevents reconfiguring before stopping', () => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.start();
+
+            expect(() => monitor.configure()).to.throw(Error, 'Good must be stopped before restarting');
+        });
+
+        it('allows adding new reporters', () => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.configure(internals.monitorOptions({
+                reporters: {
+                    foo1: [{
+                        module: require('./fixtures/reporter')
+                    }],
+                    foo2: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            }));
+
+            monitor.start();
+            expect(monitor._reporters.size).to.equal(2);
+        });
     });
 
     describe('start()', () => {
@@ -348,7 +395,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            monitor.startOps(1500);
+            monitor.startOps();
 
             expect(monitor._state.report).to.be.true();
 
@@ -361,6 +408,26 @@ describe('Monitor', () => {
             expect(three._finalized).to.be.true();
             expect(monitor._state.report).to.be.false();
             expect([false, null]).to.contain(monitor._ops._interval._repeat);
+        });
+
+        it('removes listeners from server', () => {
+
+            const server = new Hapi.Server();
+            const monitor = internals.monitorFactory(server, {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                },
+                extensions: ['route']
+            });
+
+            monitor.start();
+            monitor.stop();
+
+            expect(server.events.hasListeners('log')).to.be.false();
+            expect(server.events.hasListeners('response')).to.be.false();
+            expect(server.events.hasListeners('route')).to.be.false();
         });
     });
 
@@ -556,7 +623,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            monitor.startOps(100);
+            monitor.startOps();
 
             // Give the reporters time to report
             await Utils.timeout(150);
@@ -963,7 +1030,7 @@ describe('Monitor', () => {
             const server = new Hapi.Server();
             const monitor = internals.monitorFactory(server, {
                 ops: {
-                    internal: 100
+                    interval: 100
                 },
                 reporters: {
                     foo: [new GoodReporter.Namer('foo'), new GoodReporter.Stringify(), 'stdout'],
@@ -973,7 +1040,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            monitor.startOps(100);
+            monitor.startOps();
 
             await Utils.timeout(250);
 
