@@ -407,7 +407,7 @@ describe('Monitor', () => {
             expect(two._finalized).to.be.true();
             expect(three._finalized).to.be.true();
             expect(monitor._state.report).to.be.false();
-            expect([false, null]).to.contain(monitor._ops._interval._repeat);
+            expect(monitor._ops._interval._idleTimeout).to.equal(-1);
         });
 
         it('removes listeners from server', () => {
