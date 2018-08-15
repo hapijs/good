@@ -36,6 +36,12 @@ as general events are a process-wide facility and will result in duplicated log 
     - instantiated stream objects
     - string name of a built in `process` stream. Valid values are `'stdout'` and `'stderr'`.
 
+## Plugin Interface
+
+After registering the plugin with your server instance, the following methods will be available on `server.plugins.good`.
+
+- `reconfigure(options)` - reconfigure good on the fly. This will force good to stop monitoring, close all reporter streams (including files and network connections), reload the new configuration, open new streams based on the new configuration, and start monitoring again. The `options` argument schema is identical to the one passed in on plugin registration, documented above. This is a useful way to honor 'SIGHUP' signals for supporting Linux's logrotate program to reopen files or changing logging options without restarting your server.
+
 ## Reporter Interface
 
 The reporter interface uses the standard stream-and-pipe interface found commonly in the node ecosystem. Each item in the array of streams will be piped together in the array order. Any stream described using a stream specification object will be constructed with `new` to prevent any cross contamination from one reporter to another. For example, when passing the following specification for an "ops-console" reporter:
