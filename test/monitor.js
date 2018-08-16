@@ -121,49 +121,6 @@ describe('Monitor', () => {
         console.error = err;
     });
 
-    describe('configure()', () => {
-
-        it('prevents reconfiguring before stopping', () => {
-
-            const monitor = internals.monitorFactory(new Hapi.Server(), {
-                reporters: {
-                    foo: [{
-                        module: require('./fixtures/reporter')
-                    }]
-                }
-            });
-
-            monitor.start();
-
-            expect(() => monitor.configure()).to.throw(Error, 'Good must be stopped before restarting');
-        });
-
-        it('allows adding new reporters', () => {
-
-            const monitor = internals.monitorFactory(new Hapi.Server(), {
-                reporters: {
-                    foo: [{
-                        module: require('./fixtures/reporter')
-                    }]
-                }
-            });
-
-            monitor.configure(internals.monitorOptions({
-                reporters: {
-                    foo1: [{
-                        module: require('./fixtures/reporter')
-                    }],
-                    foo2: [{
-                        module: require('./fixtures/reporter')
-                    }]
-                }
-            }));
-
-            monitor.start();
-            expect(monitor._reporters.size).to.equal(2);
-        });
-    });
-
     describe('start()', () => {
 
         it('correctly passes dynamic arguments to stream constructors', { plan: 4 }, async () => {
@@ -410,7 +367,7 @@ describe('Monitor', () => {
             expect(monitor._ops._interval._idleTimeout).to.equal(-1);
         });
 
-        it('removes listeners from server', () => {
+        it('removes extension listeners from server', () => {
 
             const server = new Hapi.Server();
             const monitor = internals.monitorFactory(server, {
@@ -425,8 +382,6 @@ describe('Monitor', () => {
             monitor.start();
             monitor.stop();
 
-            expect(server.events.hasListeners('log')).to.be.false();
-            expect(server.events.hasListeners('response')).to.be.false();
             expect(server.events.hasListeners('route')).to.be.false();
         });
     });
@@ -1057,6 +1012,124 @@ describe('Monitor', () => {
             expect(errData[0]).to.include(['event', 'timestamp', 'host', 'pid', 'os', 'proc', 'load']);
             expect(errData[0].name).to.equal('bar');
 
+        });
+    });
+
+    describe('configure()', () => {
+
+        it('prevents reconfiguring before stopping', () => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.start();
+
+            expect(() => monitor.configure()).to.throw(Error, 'Good must be stopped before restarting');
+        });
+
+        it('allows adding new reporters', () => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.configure(internals.monitorOptions({
+                reporters: {
+                    foo1: [{
+                        module: require('./fixtures/reporter')
+                    }],
+                    foo2: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            }));
+
+            monitor.start();
+            expect(monitor._reporters.size).to.equal(2);
+        });
+
+        it('does not cause duplicate events', async () => {
+
+            const server = new Hapi.Server({ debug: false });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                config: {
+                    plugins: {
+                        good: { foo: 'bar' }
+                    },
+                    handler: (request, h) => {
+
+                        request.log('test-tag', 'log request data');
+                        server.log(['test'], 'test data');
+
+                        throw new Error('mock error');
+                    }
+                }
+            });
+
+            let out1 = new GoodReporter.Writer(true);
+            let out2 = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                reporters: {
+                    foo: [
+                        new GoodReporter.Namer('foo'),
+                        out1
+                    ],
+                    bar: [
+                        out2
+                    ]
+                }
+            });
+
+            await server.start();
+
+            monitor.start();
+            monitor.stop();
+
+            // Reconfigure with new outputs (orignal ones would have been closed).
+            out1 = new GoodReporter.Writer(true);
+            out2 = new GoodReporter.Writer(true);
+            monitor.configure(internals.monitorOptions({
+                reporters: {
+                    foo: [
+                        new GoodReporter.Namer('foo'),
+                        out1
+                    ],
+                    bar: [
+                        out2
+                    ]
+                }
+            }));
+            monitor.start();
+
+            try {
+                await Wreck.get(server.info.uri + '/?q=test');
+            }
+            catch (err) {
+                expect(err).to.exist();
+                expect(err.output.payload.statusCode).to.equal(500);
+
+                await Utils.timeout(50);
+
+                const res1 = out1.data;
+                const res2 = out2.data;
+
+                // If the event listeners were registered twice, this would be 6.
+                // Make sure it's only 4
+                expect(res1).to.have.length(4);
+                expect(res2).to.have.length(4);
+            }
         });
     });
 });
