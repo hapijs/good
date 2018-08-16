@@ -14,7 +14,7 @@ const Utils = require('../lib/utils');
 
 // Declare internals
 const internals = {
-    monitorFactory(server, options) {
+    monitorOptions(options) {
 
         const defaults = {
             includes: {
@@ -25,6 +25,10 @@ const internals = {
             reporters: {},
             ops: false
         };
+
+        return Object.assign({}, defaults, options);
+    },
+    monitorFactory(server, options) {
 
         if (server.events.hasListeners === undefined) {
             const hasListeners = function (event) {
@@ -40,7 +44,7 @@ const internals = {
             server.event('super-secret');
         }
 
-        return new Monitor(server, Object.assign({}, defaults, options));
+        return new Monitor(server, internals.monitorOptions(options));
     }
 };
 // Test shortcuts
@@ -80,7 +84,7 @@ describe('Monitor', () => {
 
         monitor.start();
 
-        monitor.startOps(100);
+        monitor.startOps();
         expect(monitor._ops).to.be.false();
 
         monitor.stop();
@@ -348,7 +352,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            monitor.startOps(1500);
+            monitor.startOps();
 
             expect(monitor._state.report).to.be.true();
 
@@ -360,7 +364,25 @@ describe('Monitor', () => {
             expect(two._finalized).to.be.true();
             expect(three._finalized).to.be.true();
             expect(monitor._state.report).to.be.false();
-            expect([false, null]).to.contain(monitor._ops._interval._repeat);
+            expect(monitor._ops._interval._idleTimeout).to.equal(-1);
+        });
+
+        it('removes extension listeners from server', () => {
+
+            const server = new Hapi.Server();
+            const monitor = internals.monitorFactory(server, {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                },
+                extensions: ['route']
+            });
+
+            monitor.start();
+            monitor.stop();
+
+            expect(server.events.hasListeners('route')).to.be.false();
         });
     });
 
@@ -556,7 +578,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            monitor.startOps(100);
+            monitor.startOps();
 
             // Give the reporters time to report
             await Utils.timeout(150);
@@ -963,7 +985,7 @@ describe('Monitor', () => {
             const server = new Hapi.Server();
             const monitor = internals.monitorFactory(server, {
                 ops: {
-                    internal: 100
+                    interval: 100
                 },
                 reporters: {
                     foo: [new GoodReporter.Namer('foo'), new GoodReporter.Stringify(), 'stdout'],
@@ -973,7 +995,7 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            monitor.startOps(100);
+            monitor.startOps();
 
             await Utils.timeout(250);
 
@@ -990,6 +1012,124 @@ describe('Monitor', () => {
             expect(errData[0]).to.include(['event', 'timestamp', 'host', 'pid', 'os', 'proc', 'load']);
             expect(errData[0].name).to.equal('bar');
 
+        });
+    });
+
+    describe('configure()', () => {
+
+        it('prevents reconfiguring before stopping', () => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.start();
+
+            expect(() => monitor.configure()).to.throw(Error, 'Good must be stopped before restarting');
+        });
+
+        it('allows adding new reporters', () => {
+
+            const monitor = internals.monitorFactory(new Hapi.Server(), {
+                reporters: {
+                    foo: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            });
+
+            monitor.configure(internals.monitorOptions({
+                reporters: {
+                    foo1: [{
+                        module: require('./fixtures/reporter')
+                    }],
+                    foo2: [{
+                        module: require('./fixtures/reporter')
+                    }]
+                }
+            }));
+
+            monitor.start();
+            expect(monitor._reporters.size).to.equal(2);
+        });
+
+        it('does not cause duplicate events', async () => {
+
+            const server = new Hapi.Server({ debug: false });
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                config: {
+                    plugins: {
+                        good: { foo: 'bar' }
+                    },
+                    handler: (request, h) => {
+
+                        request.log('test-tag', 'log request data');
+                        server.log(['test'], 'test data');
+
+                        throw new Error('mock error');
+                    }
+                }
+            });
+
+            let out1 = new GoodReporter.Writer(true);
+            let out2 = new GoodReporter.Writer(true);
+            const monitor = internals.monitorFactory(server, {
+                reporters: {
+                    foo: [
+                        new GoodReporter.Namer('foo'),
+                        out1
+                    ],
+                    bar: [
+                        out2
+                    ]
+                }
+            });
+
+            await server.start();
+
+            monitor.start();
+            monitor.stop();
+
+            // Reconfigure with new outputs (orignal ones would have been closed).
+            out1 = new GoodReporter.Writer(true);
+            out2 = new GoodReporter.Writer(true);
+            monitor.configure(internals.monitorOptions({
+                reporters: {
+                    foo: [
+                        new GoodReporter.Namer('foo'),
+                        out1
+                    ],
+                    bar: [
+                        out2
+                    ]
+                }
+            }));
+            monitor.start();
+
+            try {
+                await Wreck.get(server.info.uri + '/?q=test');
+            }
+            catch (err) {
+                expect(err).to.exist();
+                expect(err.output.payload.statusCode).to.equal(500);
+
+                await Utils.timeout(50);
+
+                const res1 = out1.data;
+                const res2 = out2.data;
+
+                // If the event listeners were registered twice, this would be 6.
+                // Make sure it's only 4
+                expect(res1).to.have.length(4);
+                expect(res2).to.have.length(4);
+            }
         });
     });
 });
