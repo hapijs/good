@@ -56,7 +56,7 @@ const options = {
 
 await server.register({
     plugin: require('good'),
-    options,
+    options: options,
 });
 
 await server.start();
