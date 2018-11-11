@@ -4,7 +4,7 @@
 
 [![Build Status](https://secure.travis-ci.org/hapijs/good.svg)](http://travis-ci.org/hapijs/good)[![Current Version](https://img.shields.io/npm/v/good.svg)](https://www.npmjs.com/package/good)
 
-Lead Maintainer: [Adam Bretz](https://github.com/arb)
+Lead Maintainer: [Open position](https://github.com/hapijs/good/issues/589)
 
 *good 8 only supports hapi 17+ for hapi 16 please use good 7*
 
