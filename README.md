@@ -11,6 +11,7 @@ Lead Maintainer: [Open position](https://github.com/hapijs/good/issues/589)
 ## Version compatibility
 
 hapi v16 - good v7
+
 hapi v17 - good v8
 
 ## Example Usage
