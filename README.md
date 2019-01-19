@@ -6,15 +6,18 @@
 
 Lead Maintainer: [Open position](https://github.com/hapijs/good/issues/589)
 
-*good 8 only supports hapi 17+ for hapi 16 please use good 7*
-
 **good** is a hapi plugin to monitor and report on a variety of hapi server events as well as ops information from the host machine. It listens for events emitted by hapi server instances and pushes standardized events to a collection of streams.
+
+## Version compatibility
+
+hapi v16 - good v7
+hapi v17 - good v8
 
 ## Example Usage
 
 ```javascript
 const Hapi = require('hapi');
-const server = new Hapi.Server();
+const server = Hapi.server();
 
 const options = {
     ops: {
@@ -35,21 +38,11 @@ const options = {
         }, {
             module: 'good-squeeze',
             name: 'SafeJson'
-        }, {
-            module: 'good-file',
-            args: ['./test/fixtures/awesome_log']
         }],
         myHTTPReporter: [{
             module: 'good-squeeze',
             name: 'Squeeze',
             args: [{ error: '*' }]
-        }, {
-            module: 'good-http',
-            args: ['http://prod.logs:3000', {
-                wreck: {
-                    headers: { 'x-api-key': 12345 }
-                }
-            }]
         }]
     }
 };
