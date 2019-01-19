@@ -1,7 +1,5 @@
 'use strict';
 
-// Load modules
-
 const Code = require('code');
 const Hapi = require('hapi');
 const Lab = require('lab');
@@ -11,21 +9,21 @@ const Good = require('../lib');
 const GoodReporter = require('./fixtures/reporters');
 const Monitor = require('../lib/monitor');
 
-const reporters = {
+
+const internals = {};
+
+
+const { describe, it } = exports.lab = Lab.script();
+const { expect } = Code;
+
+
+internals.reporters = {
     foo: [
         new GoodReporter.Incrementer(10, 5),
         new GoodReporter.Stringify(),
         new GoodReporter.Writer()
     ]
 };
-
-
-// Test shortcuts
-
-const lab = exports.lab = Lab.script();
-const expect = Code.expect;
-const describe = lab.describe;
-const it = lab.it;
 
 
 describe('good', () => {
@@ -35,7 +33,7 @@ describe('good', () => {
         const plugin = {
             plugin: Good,
             options: {
-                reporters
+                reporters: internals.reporters
             }
         };
         const server = new Hapi.Server();
@@ -58,7 +56,7 @@ describe('good', () => {
         const plugin = {
             plugin: Good,
             options: {
-                reporters,
+                reporters: internals.reporters,
                 ops: {
                     interval: 2000
                 }
@@ -83,7 +81,7 @@ describe('good', () => {
         const plugin = {
             plugin: Good,
             options: {
-                reporters
+                reporters: internals.reporters
             }
         };
         const server = new Hapi.Server();
@@ -141,13 +139,8 @@ describe('good', () => {
                 extensions: ['response']
             }
         };
-        const server = new Hapi.Server();
 
-        try {
-            await server.register(plugin);
-        }
-        catch (err) {
-            expect(err).to.be.an.error('Invalid monitorOptions options child "extensions" fails because ["extensions" at position 0 fails because ["0" contains an invalid value]]');
-        }
+        const server = new Hapi.Server();
+        await expect(server.register(plugin)).to.reject(/contains an invalid value/);
     });
 });
