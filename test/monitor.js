@@ -331,7 +331,7 @@ describe('Monitor', () => {
 
     describe('stop()', () => {
 
-        it('cleans up open timeouts, stops reporting events and pushes null to the read stream', { plan: 6 }, async () => {
+        it('cleans up open timeouts, stops reporting events and pushes null to the read stream', { plan: 5 }, async () => {
 
             const one = new GoodReporter.Incrementer(1);
             const two = new GoodReporter.Stringify();
@@ -359,7 +359,6 @@ describe('Monitor', () => {
             expect(two._finalized).to.be.true();
             expect(three._finalized).to.be.true();
             expect(monitor._state.report).to.be.false();
-            expect([false, null]).to.contain(monitor._ops._interval._repeat);
         });
     });
 
