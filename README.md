@@ -25,26 +25,17 @@ const options = {
         interval: 1000
     },
     reporters: {
-        myConsoleReporter: [{
-            module: 'good-squeeze',
-            name: 'Squeeze',
-            args: [{ log: '*', response: '*' }]
-        }, {
-            module: 'good-console'
-        }, 'stdout'],
-        myFileReporter: [{
-            module: 'good-squeeze',
-            name: 'Squeeze',
-            args: [{ ops: '*' }]
-        }, {
-            module: 'good-squeeze',
-            name: 'SafeJson'
-        }],
-        myHTTPReporter: [{
-            module: 'good-squeeze',
-            name: 'Squeeze',
-            args: [{ error: '*' }]
-        }]
+        myConsoleReporter: [
+            {
+                module: 'good-squeeze',
+                name: 'Squeeze',
+                args: [{ log: '*', response: '*' }]
+            },
+            {
+                module: 'good-console'
+            },
+            'stdout'
+        ]
     }
 };
 
@@ -59,15 +50,7 @@ console.info(`Server started at ${ server.info.uri }`);
 
 ```
 
-This example does the following:
-
-1. Sets up the reporter named `myConsoleReporter` listening for 'response' and 'log' events and writes them to `process.stdout`.
-2. Sets up the reporter named `myFileReporter` to listen for 'ops' events and logs them to `./test/fixtures/awesome_log`.
-3. Sets up the reporter named `myHTTPReporter` to listen for error events and POSTs them to `http://prod.logs:3000` with additional settings to passed into `Wreck`
-
 See the [Reporter Interface section of the API documentation](https://github.com/hapijs/good/blob/master/API.md#reporter-interface) on how to configure reporters.
-
-**NOTE**: Ensure calling `server.connection` prior to registering `Good`. `request` and `response` event listeners are only registered on connections that exist on `server` at the time `Good` is registered.
 
 Looking for more examples? Check out the [examples folder](https://github.com/hapijs/good/tree/master/examples).
 
@@ -76,8 +59,6 @@ Looking for more examples? Check out the [examples folder](https://github.com/ha
 The following streams are maintained by the hapi community and are known to work with good. Any transform or write stream can work with good, these are just a few inside the hapijs organization.
 
 - [good-squeeze](https://github.com/hapijs/good-squeeze)
-- [good-file](https://github.com/hapijs/good-file)
-- [good-http](https://github.com/hapijs/good-http)
 - [good-console](https://github.com/hapijs/good-console)
 
 ## API
