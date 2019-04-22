@@ -1,12 +1,12 @@
 'use strict';
 
-const Code = require('code');
-const Hapi = require('hapi');
-const Hoek = require('hoek');
-const Lab = require('lab');
-const Wreck = require('wreck');
+const Code = require('@hapi/code');
+const Hapi = require('@hapi/hapi');
+const Hoek = require('@hapi/hoek');
+const Lab = require('@hapi/lab');
+const Wreck = require('@hapi/wreck');
 
-const GoodReporter = require('./fixtures/reporters');
+const Reporters = require('./fixtures/reporters');
 const Stringify = require('./fixtures/reporter');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
@@ -87,8 +87,8 @@ describe('Monitor', () => {
 
     it('logs and destroys a reporter in the event of a stream error', { plan: 3 }, () => {
 
-        const one = new GoodReporter.Incrementer(1);
-        const two = new GoodReporter.Writer(true);
+        const one = new Reporters.Incrementer(1);
+        const two = new Reporters.Writer(true);
         const monitor = internals.monitorFactory(new Hapi.Server(), {
             reporters: {
                 foo: [one, two]
@@ -120,10 +120,10 @@ describe('Monitor', () => {
 
         it('correctly passes dynamic arguments to stream constructors', { plan: 4 }, async () => {
 
-            const Inc = GoodReporter.Incrementer;
-            GoodReporter.Incrementer = function (starting, multiple) {
+            const Inc = Reporters.Incrementer;
+            Reporters.Incrementer = function (starting, multiple) {
 
-                GoodReporter.Incrementer = Inc;
+                Reporters.Incrementer = Inc;
                 expect(starting).to.equal(10);
                 expect(multiple).to.equal(5);
 
@@ -140,7 +140,7 @@ describe('Monitor', () => {
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
                     foo: [
-                        new GoodReporter.Incrementer(10, 5),
+                        new Reporters.Incrementer(10, 5),
                         { module: require('./fixtures/reporter') }
                     ]
                 }
@@ -191,7 +191,7 @@ describe('Monitor', () => {
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [new GoodReporter.Incrementer(1), new GoodReporter.Stringify()]
+                    foo: [new Reporters.Incrementer(1), new Reporters.Stringify()]
                 },
                 ops: 15000
             });
@@ -245,7 +245,7 @@ describe('Monitor', () => {
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
                     foo: [],
-                    bar: [new GoodReporter.Incrementer(1)]
+                    bar: [new Reporters.Incrementer(1)]
                 }
             });
 
@@ -260,13 +260,13 @@ describe('Monitor', () => {
 
         it('passes data through each step in the pipeline', { plan: 2 }, () => {
 
-            const out1 = new GoodReporter.Writer(true);
-            const out2 = new GoodReporter.Writer(true);
+            const out1 = new Reporters.Writer(true);
+            const out2 = new Reporters.Writer(true);
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [new GoodReporter.Incrementer(5), out1],
-                    bar: [new GoodReporter.Incrementer(99), out2]
+                    foo: [new Reporters.Incrementer(5), out1],
+                    bar: [new Reporters.Incrementer(99), out2]
                 }
             });
 
@@ -310,11 +310,11 @@ describe('Monitor', () => {
 
         it('does not push data through if the monitor has been stopped', { plan: 1 }, () => {
 
-            const out1 = new GoodReporter.Writer(true);
+            const out1 = new Reporters.Writer(true);
 
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
-                    foo: [new GoodReporter.Incrementer(5), out1]
+                    foo: [new Reporters.Incrementer(5), out1]
                 }
             });
 
@@ -333,9 +333,9 @@ describe('Monitor', () => {
 
         it('cleans up open timeouts, stops reporting events and pushes null to the read stream', { plan: 5 }, async () => {
 
-            const one = new GoodReporter.Incrementer(1);
-            const two = new GoodReporter.Stringify();
-            const three = new GoodReporter.Writer(true);
+            const one = new Reporters.Incrementer(1);
+            const two = new Reporters.Stringify();
+            const three = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(new Hapi.Server(), {
                 reporters: {
                     foo: [one, two, three]
@@ -385,12 +385,12 @@ describe('Monitor', () => {
                 }
             });
 
-            const out1 = new GoodReporter.Writer(true);
-            const out2 = new GoodReporter.Writer(true);
+            const out1 = new Reporters.Writer(true);
+            const out2 = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
                     foo: [
-                        new GoodReporter.Namer('foo'),
+                        new Reporters.Namer('foo'),
                         out1
                     ],
                     bar: [
@@ -489,7 +489,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
                     foo: [out]
@@ -539,10 +539,10 @@ describe('Monitor', () => {
 
             const server = new Hapi.Server();
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
-                    foo: [new GoodReporter.Namer('ops'), out]
+                    foo: [new Reporters.Namer('ops'), out]
                 },
                 ops: {
                     interval: 100
@@ -580,7 +580,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             await server.start();
@@ -618,7 +618,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             await server.start();
@@ -654,7 +654,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 includes: {
                     request: ['headers'],
@@ -701,7 +701,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             await server.start();
@@ -742,7 +742,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             await server.start();
@@ -783,7 +783,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 includes: {
                     request: ['headers'],
@@ -837,10 +837,10 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, {
                 reporters: {
-                    foo: [new GoodReporter.Cleaner('timestamp'), out]
+                    foo: [new Reporters.Cleaner('timestamp'), out]
                 },
                 extensions: ['start', 'stop', { name: 'request', channels: ['internal'] }, 'super-secret']
             });
@@ -908,7 +908,7 @@ describe('Monitor', () => {
                 }
             });
 
-            const out = new GoodReporter.Writer(true);
+            const out = new Reporters.Writer(true);
             const monitor = internals.monitorFactory(server, { reporters: { foo: [out] } });
 
             monitor.start();
@@ -964,8 +964,8 @@ describe('Monitor', () => {
                     internal: 100
                 },
                 reporters: {
-                    foo: [new GoodReporter.Namer('foo'), new GoodReporter.Stringify(), 'stdout'],
-                    bar: [new GoodReporter.Namer('bar'), new GoodReporter.Stringify(), 'stderr']
+                    foo: [new Reporters.Namer('foo'), new Reporters.Stringify(), 'stdout'],
+                    bar: [new Reporters.Namer('bar'), new Reporters.Stringify(), 'stderr']
                 }
             });
 

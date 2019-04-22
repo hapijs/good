@@ -3,6 +3,9 @@
 const Stream = require('stream');
 
 
+const internals = {};
+
+
 exports.NotConstructor = {};
 
 

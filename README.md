@@ -1,23 +1,18 @@
-![good Logo](images/good.png)
+<a href="http://hapijs.com"><img src="https://github.com/hapijs/assets/blob/master/images/family.svg" width="180px" align="right" /></a>
+
+# good
 
 [**hapi**](https://github.com/hapijs/hapi) process monitoring
 
-[![Build Status](https://secure.travis-ci.org/hapijs/good.svg)](http://travis-ci.org/hapijs/good)[![Current Version](https://img.shields.io/npm/v/good.svg)](https://www.npmjs.com/package/good)
-
-Lead Maintainer: [Open position](https://github.com/hapijs/good/issues/589)
+[![Build Status](https://secure.travis-ci.org/hapijs/good.svg?branch=master)](http://travis-ci.org/hapijs/good)
 
 **good** is a hapi plugin to monitor and report on a variety of hapi server events as well as ops information from the host machine. It listens for events emitted by hapi server instances and pushes standardized events to a collection of streams.
-
-## Version compatibility
-
-hapi v16 - good v7
-
-hapi v17 - good v8
 
 ## Example Usage
 
 ```javascript
-const Hapi = require('hapi');
+const Hapi = require('@hapi/hapi');
+
 const server = Hapi.server();
 
 const options = {

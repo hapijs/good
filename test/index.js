@@ -1,12 +1,12 @@
 'use strict';
 
-const Code = require('code');
-const Hapi = require('hapi');
-const Lab = require('lab');
-const Oppsy = require('oppsy');
+const Code = require('@hapi/code');
+const Good = require('..');
+const Hapi = require('@hapi/hapi');
+const Lab = require('@hapi/lab');
+const Oppsy = require('@hapi/oppsy');
 
-const Good = require('../lib');
-const GoodReporter = require('./fixtures/reporters');
+const Reporters = require('./fixtures/reporters');
 const Monitor = require('../lib/monitor');
 
 
@@ -19,9 +19,9 @@ const { expect } = Code;
 
 internals.reporters = {
     foo: [
-        new GoodReporter.Incrementer(10, 5),
-        new GoodReporter.Stringify(),
-        new GoodReporter.Writer()
+        new Reporters.Incrementer(10, 5),
+        new Reporters.Stringify(),
+        new Reporters.Writer()
     ]
 };
 
@@ -108,8 +108,8 @@ describe('good', () => {
             options: {
                 reporters: {
                     foo: [
-                        new GoodReporter.Incrementer(2),
-                        new GoodReporter.Incrementer(4), {
+                        new Reporters.Incrementer(2),
+                        new Reporters.Incrementer(4), {
                             module: '../test/fixtures/reporters',
                             name: 'Writer',
                             args: [{ objectMode: true }]

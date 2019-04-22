@@ -3,6 +3,9 @@
 const Stream = require('stream');
 
 
+const internals = {};
+
+
 module.exports = class extends Stream.Transform {
 
     constructor() {
