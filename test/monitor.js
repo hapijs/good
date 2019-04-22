@@ -1,9 +1,8 @@
 'use strict';
 
-// Load modules
-
 const Code = require('code');
 const Hapi = require('hapi');
+const Hoek = require('hoek');
 const Lab = require('lab');
 const Wreck = require('wreck');
 
@@ -12,43 +11,43 @@ const Stringify = require('./fixtures/reporter');
 const Monitor = require('../lib/monitor');
 const Utils = require('../lib/utils');
 
-// Declare internals
-const internals = {
-    monitorFactory(server, options) {
 
-        const defaults = {
-            includes: {
-                request: [],
-                response: []
-            },
-            extensions: [],
-            reporters: {},
-            ops: false
+const internals = {};
+
+
+const { describe, it } = exports.lab = Lab.script();
+const { expect } = Code;
+
+
+internals.monitorFactory = function (server, options) {
+
+    const defaults = {
+        includes: {
+            request: [],
+            response: []
+        },
+        extensions: [],
+        reporters: {},
+        ops: false
+    };
+
+    if (server.events.hasListeners === undefined) {
+        const hasListeners = function (event) {
+
+            return this.listeners(event).length > 0;
         };
 
-        if (server.events.hasListeners === undefined) {
-            const hasListeners = function (event) {
-
-                return this.listeners(event).length > 0;
-            };
-
-            server.decorate('server', 'hasListeners', hasListeners);
-        }
-
-        if (server.event !== undefined) {
-            server.event('internalError');
-            server.event('super-secret');
-        }
-
-        return new Monitor(server, Object.assign({}, defaults, options));
+        server.decorate('server', 'hasListeners', hasListeners);
     }
-};
-// Test shortcuts
 
-const lab = exports.lab = Lab.script();
-const expect = Code.expect;
-const describe = lab.describe;
-const it = lab.it;
+    if (server.event !== undefined) {
+        server.event('internalError');
+        server.event('super-secret');
+    }
+
+    return new Monitor(server, Object.assign({}, defaults, options));
+};
+
 
 describe('Monitor', () => {
 
@@ -307,7 +306,6 @@ describe('Monitor', () => {
                 { number: 108 },
                 { number: 109 }
             ]);
-
         });
 
         it('does not push data through if the monitor has been stopped', { plan: 1 }, () => {
@@ -326,13 +324,14 @@ describe('Monitor', () => {
             for (let i = 0; i <= 10; ++i) {
                 monitor.push(() => ({ number: i }));
             }
+
             expect(out1.data).to.equal([]);
         });
     });
 
     describe('stop()', () => {
 
-        it('cleans up open timeouts, stops reporting events and pushes null to the read stream', { plan: 6 }, async () => {
+        it('cleans up open timeouts, stops reporting events and pushes null to the read stream', { plan: 5 }, async () => {
 
             const one = new GoodReporter.Incrementer(1);
             const two = new GoodReporter.Stringify();
@@ -354,13 +353,12 @@ describe('Monitor', () => {
 
             monitor.stop();
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(one._finalized).to.be.true();
             expect(two._finalized).to.be.true();
             expect(three._finalized).to.be.true();
             expect(monitor._state.report).to.be.false();
-            expect([false, null]).to.contain(monitor._ops._interval._repeat);
         });
     });
 
@@ -412,7 +410,7 @@ describe('Monitor', () => {
                 expect(err).to.exist();
                 expect(err.output.payload.statusCode).to.equal(500);
 
-                await Utils.timeout(50);
+                await Hoek.wait(50);
 
                 const res1 = out1.data;
                 const res2 = out2.data;
@@ -517,7 +515,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(200);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             const messages = out.data;
             const response = messages[1];
@@ -559,7 +557,7 @@ describe('Monitor', () => {
             monitor.startOps(100);
 
             // Give the reporters time to report
-            await Utils.timeout(150);
+            await Hoek.wait(150);
 
             expect(out.data).to.have.length(1);
 
@@ -595,7 +593,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(201);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data).to.have.length(1);
 
@@ -633,7 +631,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(500);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data).to.have.length(2);
 
@@ -678,7 +676,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(500);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data).to.have.length(2);
 
@@ -716,7 +714,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(200);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data).to.have.length(2);
 
@@ -757,7 +755,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(200);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data).to.have.length(2);
 
@@ -807,7 +805,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(200);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data).to.have.length(2);
 
@@ -857,7 +855,7 @@ describe('Monitor', () => {
 
             await server.stop();
 
-            await Utils.timeout(100);
+            await Hoek.wait(100);
 
             expect(out.data).to.have.length(5);
 
@@ -921,7 +919,7 @@ describe('Monitor', () => {
 
             expect(res.statusCode).to.equal(200);
 
-            await Utils.timeout(50);
+            await Hoek.wait(50);
 
             expect(out.data[0].config).to.equal({
                 foo: 'baz',
@@ -975,7 +973,7 @@ describe('Monitor', () => {
 
             monitor.startOps(100);
 
-            await Utils.timeout(250);
+            await Hoek.wait(250);
 
             monitor.stop();
 

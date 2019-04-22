@@ -1,19 +1,14 @@
 'use strict';
 
-// Load modules
-
 const Code = require('code');
 const Lab = require('lab');
 const Hoek = require('hoek');
+
 const Utils = require('../lib/utils');
 
 
-// Test shortcuts
-
-const lab = exports.lab = Lab.script();
-const expect = Code.expect;
-const describe = lab.describe;
-const it = lab.it;
+const { describe, it } = exports.lab = Lab.script();
+const { expect } = Code;
 
 
 describe('utils', () => {
@@ -42,7 +37,11 @@ describe('utils', () => {
                 method: 'POST',
                 path: '/',
                 realm: {},
-                settings: {}
+                settings: {
+                    log: {
+                        collect: true
+                    }
+                }
             },
             query: {},
             responseTime: 123,
@@ -71,9 +70,7 @@ describe('utils', () => {
 
             const request = Hoek.clone(_request);
             request.payload = requestPayload;
-            request.response = nullResponse ? null : {
-                source: responsePayload
-            };
+            request.response = nullResponse ? null : { source: responsePayload };
 
             return new Utils.RequestSent(reqOpts, resOpts, request, _server);
         };
@@ -82,13 +79,12 @@ describe('utils', () => {
 
             const samplePayload = {
                 message: 'test',
-                toString: () => {
-
-                }
+                toString: () => { }
             };
 
-            const req = generateRequestSent(samplePayload, '');
+            const req = generateRequestSent(samplePayload, '', true);
             expect(req.requestPayload).to.equal(samplePayload);
+
             const res = generateRequestSent('', samplePayload);
             expect(res.responsePayload).to.equal(samplePayload);
         });
@@ -100,55 +96,59 @@ describe('utils', () => {
 
             const errorInstance = new Error('This is a test');
 
-            const err = new Utils.RequestLog({}, {
+            const request = {
                 info: {
                     id: 32
                 },
                 method: 'post',
                 path: '/graph',
                 config: {}
-            }, {
+            };
+
+            const event = {
                 event: 'request',
                 timestamp: 1517592924723,
                 tags: ['error', 'authentication'],
                 error: errorInstance
-            });
+            };
+
+            const err = new Utils.RequestLog({}, request, event);
 
             expect(err.error).to.equal(errorInstance);
             expect(err.data).to.be.undefined();
-
         });
 
         it('accepts data on the event object when error is not present', { plan: 2 }, () => {
 
             const sampleData = { foo: 'bar' };
-
-            const err = new Utils.RequestLog({}, {
+            const request = {
                 info: {
                     id: 32
                 },
                 method: 'post',
                 path: '/graph',
                 config: {}
-            }, {
+            };
+
+            const event = {
                 event: 'request',
                 timestamp: 1517592924723,
                 tags: ['error', 'authentication'],
                 data: sampleData
-            });
+            };
+
+            const err = new Utils.RequestLog({}, request, event);
 
             expect(err.data).to.equal(sampleData);
             expect(err.error).to.be.undefined();
-
         });
-
     });
 
     describe('RequestError()', () => {
 
         it('can be stringifyed', { plan: 1 }, () => {
 
-            const err = new Utils.RequestError({}, {
+            const request = {
                 id: 15,
                 url: 'http://localhost:9001',
                 method: 'PUT',
@@ -156,7 +156,9 @@ describe('utils', () => {
                 info: {
                     received: Date.now()
                 }
-            }, {
+            };
+
+            const event = {
                 'error': {
                     isBoom: true,
                     isServer: true,
@@ -171,13 +173,14 @@ describe('utils', () => {
                         headers: {}
                     }
                 }
-            });
+            };
+
+            const err = new Utils.RequestError({}, request, event);
 
             const parse = JSON.parse(JSON.stringify(err));
             expect(parse.error).to.equal('An internal server error occurred');
         });
     });
-
 
     describe('ServerLog()', () => {
 
