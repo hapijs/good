@@ -1,10 +1,17 @@
 {
   "name": "@hapi/good",
   "description": "Server and process monitoring plugin",
-  "version": "8.1.2",
+  "version": "8.2.0",
   "repository": "git://github.com/hapijs/good",
   "main": "lib/index.js",
-  "keywords": ["process", "monitor", "log", "report", "hapi", "plugin"],
+  "keywords": [
+    "process",
+    "monitor",
+    "log",
+    "report",
+    "hapi",
+    "plugin"
+  ],
   "dependencies": {
     "@hapi/hoek": "6.x.x",
     "@hapi/joi": "15.x.x",
