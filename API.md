@@ -45,11 +45,11 @@ The reporter interface uses the standard stream-and-pipe interface found commonl
 ```js
 {
     'ops-console': [{
-        module: 'good-squeeze',
+        module: '@hapi/good-squeeze',
         name: 'Squeeze',
         args: [{ ops: '*' }]
     }, {
-        module: 'good-squeeze',
+        module: '@hapi/good-squeeze',
         name: 'SafeJson'
     }, 'stdout']
 }

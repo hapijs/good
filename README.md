@@ -22,12 +22,12 @@ const options = {
     reporters: {
         myConsoleReporter: [
             {
-                module: 'good-squeeze',
+                module: '@hapi/good-squeeze',
                 name: 'Squeeze',
                 args: [{ log: '*', response: '*' }]
             },
             {
-                module: 'good-console'
+                module: '@hapi/good-console'
             },
             'stdout'
         ]
@@ -35,7 +35,7 @@ const options = {
 };
 
 await server.register({
-    plugin: require('good'),
+    plugin: require('@hapi/good'),
     options,
 });
 
