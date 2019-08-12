@@ -29,6 +29,7 @@ describe('utils', () => {
             },
             info: {
                 received: 1429974169154,
+                completed: 1429974169154,
                 remoteAddress: '127.0.0.1'
             },
             method: 'POST',
@@ -87,16 +88,6 @@ describe('utils', () => {
 
             const res = generateRequestSent('', samplePayload);
             expect(res.responsePayload).to.equal(samplePayload);
-        });
-
-        it('records null responseTime when info.received is 0', { plan: 1 }, () => {
-
-            const request = Hoek.clone(_request);
-            request.info.received = 0;
-
-            const res = new Utils.RequestSent({}, {}, request, _server);
-
-            expect(res.responseTime).to.be.null();
         });
     });
 
