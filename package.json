@@ -13,15 +13,15 @@
     "plugin"
   ],
   "dependencies": {
-    "@hapi/hoek": "6.x.x",
+    "@hapi/hoek": "8.x.x",
     "@hapi/joi": "15.x.x",
     "@hapi/oppsy": "2.x.x",
     "pumpify": "1.x.x"
   },
   "devDependencies": {
-    "@hapi/code": "5.x.x",
+    "@hapi/code": "6.x.x",
     "@hapi/hapi": "18.x.x",
-    "@hapi/lab": "18.x.x",
+    "@hapi/lab": "20.x.x",
     "@hapi/wreck": "15.x.x"
   },
   "scripts": {
