@@ -29,6 +29,7 @@ describe('utils', () => {
             },
             info: {
                 received: 1429974169154,
+                completed: 1429974169154,
                 remoteAddress: '127.0.0.1'
             },
             method: 'POST',
