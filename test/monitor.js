@@ -217,13 +217,7 @@ describe('Monitor', () => {
             };
 
             let monitor = internals.monitorFactory(new Hapi.Server(), options);
-
-            try {
-                monitor.start();
-            }
-            catch (err) {
-                expect(err).to.be.an.error('Error in foo. ../test/fixtures/reporters must be a constructor function.');
-            }
+            expect(() => monitor.start()).to.throw('Error in foo. ../test/fixtures/reporters must be a constructor function.');
 
             options.reporters.foo = [{
                 module: '../test/fixtures/reporters',
@@ -232,12 +226,7 @@ describe('Monitor', () => {
 
             monitor = internals.monitorFactory(new Hapi.Server(), options);
 
-            try {
-                monitor.start();
-            }
-            catch (err) {
-                expect(err).to.be.an.error('Error in foo. ../test/fixtures/reporters must create a stream that has a pipe function.');
-            }
+            expect(() => monitor.start()).to.throw('Error in foo. ../test/fixtures/reporters must create a stream that has a pipe function.');
         });
 
         it('does not create a reporter if the reporter has no streams', { plan: 2 }, () => {
@@ -403,75 +392,70 @@ describe('Monitor', () => {
 
             monitor.start();
 
-            try {
-                await Wreck.get(server.info.uri + '/?q=test');
-            }
-            catch (err) {
-                expect(err).to.exist();
-                expect(err.output.payload.statusCode).to.equal(500);
+            const err = await expect(Wreck.get(server.info.uri + '/?q=test')).to.reject();
+            expect(err.output.payload.statusCode).to.equal(500);
 
-                await Hoek.wait(50);
+            await Hoek.wait(50);
 
-                const res1 = out1.data;
-                const res2 = out2.data;
+            const res1 = out1.data;
+            const res2 = out2.data;
 
-                expect(res1).to.have.length(4);
-                expect(res1).to.part.contain([{
-                    event: 'request',
-                    tags: ['test-tag'],
-                    data: 'log request data',
-                    method: 'get',
-                    path: '/',
-                    config: { foo: 'bar' },
-                    name: 'foo'
-                }, {
-                    event: 'log',
-                    tags: ['test'],
-                    data: 'test data',
-                    name: 'foo'
-                }, {
-                    event: 'response',
-                    instance: server.info.uri,
-                    labels: [],
-                    method: 'get',
-                    path: '/',
-                    query: { q: 'test' },
-                    statusCode: 500,
-                    config: { foo: 'bar' },
-                    name: 'foo'
-                }]);
+            expect(res1).to.have.length(4);
+            expect(res1).to.part.contain([{
+                event: 'request',
+                tags: ['test-tag'],
+                data: 'log request data',
+                method: 'get',
+                path: '/',
+                config: { foo: 'bar' },
+                name: 'foo'
+            }, {
+                event: 'log',
+                tags: ['test'],
+                data: 'test data',
+                name: 'foo'
+            }, {
+                event: 'response',
+                instance: server.info.uri,
+                labels: [],
+                method: 'get',
+                path: '/',
+                query: { q: 'test' },
+                statusCode: 500,
+                config: { foo: 'bar' },
+                name: 'foo'
+            }]);
 
-                const err1 = JSON.parse(JSON.stringify(res1[2]));
-                expect(err1.event).to.equal('error');
-                expect(err1.error).to.equal('An internal server error occurred');
+            const err1 = JSON.parse(JSON.stringify(res1[2]));
+            expect(err1.event).to.equal('error');
+            expect(err1.error).to.equal('An internal server error occurred');
 
-                expect(res2).to.have.length(4);
-                expect(res2).to.part.contain([{
-                    event: 'request',
-                    tags: ['test-tag'],
-                    data: 'log request data',
-                    method: 'get',
-                    path: '/',
-                    config: { foo: 'bar' }
-                }, {
-                    event: 'log',
-                    tags: ['test'],
-                    data: 'test data'
-                }, {
-                    event: 'response',
-                    instance: server.info.uri,
-                    labels: [],
-                    method: 'get',
-                    path: '/',
-                    query: { q: 'test' },
-                    statusCode: 500,
-                    config: { foo: 'bar' }
-                }]);
+            expect(res2).to.have.length(4);
+            expect(res2).to.part.contain([{
+                event: 'request',
+                tags: ['test-tag'],
+                data: 'log request data',
+                method: 'get',
+                path: '/',
+                config: { foo: 'bar' }
+            }, {
+                event: 'log',
+                tags: ['test'],
+                data: 'test data'
+            }, {
+                event: 'response',
+                instance: server.info.uri,
+                labels: [],
+                method: 'get',
+                path: '/',
+                query: { q: 'test' },
+                statusCode: 500,
+                config: { foo: 'bar' }
+            }]);
 
-                const err2 = JSON.parse(JSON.stringify(res1[2]));
-                expect(err2.event).to.equal('error');
-                expect(err1.error).to.equal('An internal server error occurred');
-            }
+            const err2 = JSON.parse(JSON.stringify(res1[2]));
+            expect(err2.event).to.equal('error');
+            expect(err1.error).to.equal('An internal server error occurred');
         });
 
         it('provides additional information about "response" events using "requestHeaders","requestPayload", "responseHeaders" and "responsePayload"', { plan: 9 }, async () => {
