@@ -1,19 +1,5 @@
 
-
 ## good
-
-- [Options](#options)
-- [Reporter Interface](#reporter-interface)
-  * [Stream Transforms Using Plugin Configs](#stream-transforms-using-plugin-configs)
-  * [Reporter Lifecycle](#reporter-lifecycle)
-- [Event Types](#event-types)
-- [Event Payloads](#event-payloads)
-  * [`ServerLog`](#serverlog)
-  * [`RequestError`](#requesterror)
-  * [`RequestSent`](#requestsent)
-  * [`Ops`](#ops)
-  * [`RequestLog`](#requestlog)
-  * [Extension Payloads](#extension-payloads)
 
 **good** is a process monitor that listens for one or more of the below 'event types'. All of these events, _except_ 'ops' map to a hapi event documented [here](https://github.com/hapijs/hapi/blob/master/API.md#server-events).
 
