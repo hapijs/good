@@ -14,8 +14,3 @@ install:
 
 env:
   - HAPI_VERSION="18"
-
-os:
-  - "linux"
-  - "osx"
-  - "windows"

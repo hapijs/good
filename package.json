@@ -1,7 +1,7 @@
 {
   "name": "@hapi/good",
   "description": "Server and process monitoring plugin",
-  "version": "8.2.2",
+  "version": "8.2.3",
   "repository": "git://github.com/hapijs/good",
   "main": "lib/index.js",
   "keywords": [
