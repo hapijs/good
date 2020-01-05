@@ -12,6 +12,7 @@
 
 - [Documentation and API](https://hapi.dev/family/good/)
 - [Version status](https://hapi.dev/resources/status/#good) (builds, dependencies, node versions, licenses, eol)
+- [Changelog](https://hapi.dev/family/good/changelog/)
 - [Project policies](https://hapi.dev/policies/)
 - [Free and commercial support options](https://hapi.dev/support/)
 
