@@ -16,4 +16,4 @@
 - [Project policies](https://hapi.dev/policies/)
 - [Free and commercial support options](https://hapi.dev/support/)
 
-## Note: this module is being deprecated on December 1st, 2019 due to lack to available support resources. Please consider using [another logging plugin](https://hapi.dev/plugins/#logging).
+## Note: this module is being deprecated on December 31st, 2020 due to lack to available support resources. Please consider using [another logging plugin](https://hapi.dev/plugins/#logging).
