@@ -6,7 +6,9 @@ const Stream = require('stream');
 const internals = {};
 
 
-module.exports = class extends Stream.Transform {
+module.exports = internals.Reporter = class extends Stream.Transform {
+
+    static name = 'test';
 
     constructor() {
 

@@ -4,6 +4,9 @@
   "version": "8.2.4",
   "repository": "git://github.com/hapijs/good",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "keywords": [
     "process",
     "monitor",
@@ -13,19 +16,20 @@
     "plugin"
   ],
   "dependencies": {
-    "@hapi/hoek": "8.x.x",
-    "@hapi/joi": "16.x.x",
-    "@hapi/oppsy": "2.x.x",
+    "@hapi/hoek": "9.x.x",
+    "@hapi/joi": "17.x.x",
+    "@hapi/oppsy": "3.x.x",
     "pumpify": "1.x.x"
   },
   "devDependencies": {
-    "@hapi/code": "6.x.x",
-    "@hapi/hapi": "18.x.x",
-    "@hapi/lab": "20.x.x",
-    "@hapi/wreck": "15.x.x"
+    "@hapi/code": "8.x.x",
+    "@hapi/hapi": "19.x.x",
+    "@hapi/lab": "22.x.x",
+    "@hapi/wreck": "17.x.x"
   },
   "scripts": {
-    "test": "lab -m 5000 -t 100 -L -a @hapi/code"
+    "test": "lab -m 5000 -t 100 -L -a @hapi/code",
+    "test-cov-html": "lab -a @hapi/code -r html -o coverage.html"
   },
   "license": "BSD-3-Clause"
 }
