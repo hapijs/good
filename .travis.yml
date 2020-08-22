@@ -1,15 +1,8 @@
-language: node_js
+version: ~> 1.0
 
-node_js:
-  - "12"
-  - "node"
 
-sudo: false
-
-install:
-  - "npm install"
-  - "npm install @hapi/hapi@$HAPI_VERSION"
-
-env:
-  - HAPI_VERSION="18"
-  - HAPI_VERSION="19"
+import:
+  - hapijs/ci-config-travis:node_js.yml@main
+  - hapijs/ci-config-travis:install_plugin.yml@main
+  - hapijs/ci-config-travis:os.yml@main
+  - hapijs/ci-config-travis:env.yml@main
