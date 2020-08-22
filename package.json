@@ -19,12 +19,12 @@
     "@hapi/hoek": "9.x.x",
     "@hapi/joi": "17.x.x",
     "@hapi/oppsy": "3.x.x",
-    "pumpify": "1.x.x"
+    "pumpify": "2.x.x"
   },
   "devDependencies": {
     "@hapi/code": "8.x.x",
-    "@hapi/hapi": "19.x.x",
-    "@hapi/lab": "22.x.x",
+    "@hapi/hapi": "20.x.x",
+    "@hapi/lab": "23.x.x",
     "@hapi/wreck": "17.x.x"
   },
   "scripts": {
