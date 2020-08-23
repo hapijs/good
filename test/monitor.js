@@ -1,5 +1,7 @@
 'use strict';
 
+const Path = require('path');
+
 const Code = require('@hapi/code');
 const Hapi = require('@hapi/hapi');
 const Hoek = require('@hapi/hoek');
@@ -121,6 +123,7 @@ describe('Monitor', () => {
         it('correctly passes dynamic arguments to stream constructors', { plan: 4 }, async () => {
 
             const Inc = Reporters.Incrementer;
+            const fixturePath = Path.join(process.cwd(), 'test', 'fixtures', 'reporter.js');
             Reporters.Incrementer = function (starting, multiple) {
 
                 Reporters.Incrementer = Inc;
@@ -130,9 +133,9 @@ describe('Monitor', () => {
                 return new Inc(starting, multiple);
             };
 
-            require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = function (options) {
+            require.cache[fixturePath].exports = function (options) {
 
-                require.cache[process.cwd() + '/test/fixtures/reporter.js'].exports = Stringify;
+                require.cache[fixturePath].exports = Stringify;
                 expect(options).to.be.undefined();
                 return new Stringify(options);
             };
@@ -141,7 +144,7 @@ describe('Monitor', () => {
                 reporters: {
                     foo: [
                         new Reporters.Incrementer(10, 5),
-                        { module: require('./fixtures/reporter') }
+                        { module: require(fixturePath) }
                     ]
                 }
             });
