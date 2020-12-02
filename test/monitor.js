@@ -939,11 +939,11 @@ describe('Monitor', () => {
 
             const write = process.stdout.write;
             const writeData = [];
-            process.stdout.write = replace(write, writeData);
+            process.stdout.write = replace(write.bind(process.stdout), writeData);
 
             const err = process.stderr.write;
             const errData = [];
-            process.stderr.write = replace(err, errData);
+            process.stderr.write = replace(err.bind(process.stderr), errData);
 
             const server = new Hapi.Server();
             const monitor = internals.monitorFactory(server, {
